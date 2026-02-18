@@ -195,6 +195,7 @@ document.addEventListener("DOMContentLoaded", function() {
         respostaDiv.innerHTML = "Consultando...";
         pergunta = pergunta.replace(/[?.,]/g, "");
 
+        // Detectar campo específico
         let campo = "completo";
         if (pergunta.includes("chefe")) campo = "chefe";
         else if (pergunta.includes("empresa")) campo = "empresa";
@@ -202,6 +203,7 @@ document.addEventListener("DOMContentLoaded", function() {
         else if (pergunta.includes("cargo")) campo = "cargo";
         else if (pergunta.includes("status")) campo = "status";
 
+        // Extrair nome
         let nome = "";
         if (pergunta.includes(" de ")) nome = pergunta.split(" de ")[1].trim();
         else if (pergunta.includes(" do ")) nome = pergunta.split(" do ")[1].trim();
@@ -209,7 +211,8 @@ document.addEventListener("DOMContentLoaded", function() {
         else nome = pergunta;
 
         try {
-            const response = await fetch(WEBHOOK_URL + "?nome=");
+            // Envia o nome direto pro webhook
+            const response = await fetch(WEBHOOK_URL + "?nome=" + encodeURIComponent(nome));
             const data = await response.json();
 
             if (!data || data.length === 0) {
@@ -217,16 +220,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 return;
             }
 
-            let resultados = data;
-            if (nome) resultados = data.filter(f => f.nome.toLowerCase().includes(nome));
-
-            if (resultados.length === 0) {
-                respostaDiv.innerHTML = "Nenhum registro encontrado.";
-                return;
-            }
-
             let html = "";
-            resultados.forEach(func => {
+            data.forEach(func => {
                 if (campo !== "completo") {
                     html += `O ${campo} de <strong>${func.nome}</strong> é <strong>${func[campo]}</strong>.<br><br>`;
                 } else {
@@ -241,9 +236,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             });
 
-            respostaDiv.innerHTML = `🔎 Encontrei ${resultados.length} resultado(s):<br><br>` + html;
+            respostaDiv.innerHTML = `🔎 Encontrei ${data.length} resultado(s):<br><br>` + html;
 
         } catch (error) {
+            console.error(error);
             respostaDiv.innerHTML = "Erro ao consultar sistema.";
         }
     }
@@ -259,4 +255,3 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
-
