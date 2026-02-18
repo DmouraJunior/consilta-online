@@ -164,7 +164,7 @@ button:hover {
     <div id="sistemaArea" class="hidden">
         <h2>Assistente de Consulta</h2>
 
-        <input type="text" id="pergunta" placeholder="Digite nome ou consulta funcional...">
+        <input type="text" id="pergunta" placeholder="Ex: Quem é o chefe de Edson?">
         <button onclick="consultar()">Consultar</button>
         <button class="secondary" onclick="limpar()">Nova Consulta</button>
         <button class="logout" onclick="logout()">Encerrar Sessão</button>
@@ -248,17 +248,33 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        const pergunta = perguntaInput.value.trim();
+        let pergunta = perguntaInput.value.trim().toLowerCase();
 
         if (!pergunta) {
-            respostaDiv.innerHTML = "Digite um nome ou consulta.";
+            respostaDiv.innerHTML = "Digite uma pergunta.";
             return;
         }
 
         respostaDiv.innerHTML = "Consultando...";
 
+        // Remove pontuação
+        pergunta = pergunta.replace(/[?.,]/g, "");
+
+        // Detecta campo
+        let campo = "completo";
+
+        if (pergunta.includes("chefe")) campo = "chefe";
+        else if (pergunta.includes("empresa")) campo = "empresa";
+        else if (pergunta.includes("setor")) campo = "setor";
+        else if (pergunta.includes("cargo")) campo = "cargo";
+        else if (pergunta.includes("status")) campo = "status";
+
+        // Extrai nome (última palavra)
+        const palavras = pergunta.split(" ");
+        const nome = palavras[palavras.length - 1];
+
         try {
-            const response = await fetch(WEBHOOK_URL + "?nome=" + encodeURIComponent(pergunta));
+            const response = await fetch(WEBHOOK_URL + "?nome=" + encodeURIComponent(nome));
             const data = await response.json();
 
             if (!data || data.length === 0) {
@@ -266,21 +282,23 @@ document.addEventListener("DOMContentLoaded", function() {
                 return;
             }
 
-            let resultadoHTML = "";
+            const func = data[0];
 
-            data.forEach(func => {
-                resultadoHTML += `
+            if (campo !== "completo") {
+                respostaDiv.innerHTML = `
+                    <strong>👤 ${func.nome}</strong><br>
+                    ${campo.toUpperCase()}: ${func[campo]}
+                `;
+            } else {
+                respostaDiv.innerHTML = `
                     <strong>👤 ${func.nome}</strong><br>
                     🏢 Setor: ${func.setor}<br>
                     💼 Cargo: ${func.cargo}<br>
                     👨‍💼 Chefe: ${func.chefe}<br>
                     🏬 Empresa: ${func.empresa}<br>
                     📊 Status: ${func.status}
-                    <hr>
                 `;
-            });
-
-            respostaDiv.innerHTML = resultadoHTML;
+            }
 
         } catch (error) {
             respostaDiv.innerHTML = "Erro ao consultar sistema.";
@@ -298,3 +316,4 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
