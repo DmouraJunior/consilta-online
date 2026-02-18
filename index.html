@@ -167,129 +167,105 @@ button:hover {
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
 
-    const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxpXRSc5LcL7yW_2St6q28CQzMj5nR4YI4pHEWQKHZ2Fgym1EWvbTW1ME5Qu0cKp9Mc/exec";
-    const TEMPO_EXPIRACAO = 30 * 60 * 1000;
+const API_URL = "https://script.google.com/macros/s/AKfycbxpXRSc5LcL7yW_2St6q28CQzMj5nR4YI4pHEWQKHZ2Fgym1EWvbTW1ME5Qu0cKp9Mc/exec";
 
-    const usuarios = [
-        { usuario: "admin", senha: "1234" },
-        { usuario: "rh", senha: "rh123" }
-    ];
+async function consultar() {
 
-    const loginArea = document.getElementById("loginArea");
-    const sistemaArea = document.getElementById("sistemaArea");
-    const usuarioInput = document.getElementById("usuario");
-    const senhaInput = document.getElementById("senha");
-    const perguntaInput = document.getElementById("pergunta");
-    const respostaDiv = document.getElementById("resposta");
+    const campo = document.getElementById("nome");
+    const resultado = document.getElementById("resultado");
 
-    function verificarSessao() {
-        const tempoLogin = localStorage.getItem("tempoLogin");
-        if (!tempoLogin) return false;
+    const perguntaOriginal = campo.value.trim();
 
-        const agora = Date.now();
-        const diferenca = agora - parseInt(tempoLogin);
-
-        if (diferenca > TEMPO_EXPIRACAO) {
-            localStorage.removeItem("logado");
-            localStorage.removeItem("tempoLogin");
-            return false;
-        }
-        return true;
+    if (!perguntaOriginal) {
+        resultado.innerHTML = "Digite algo para consultar.";
+        return;
     }
 
-    if (localStorage.getItem("logado") === "true" && verificarSessao()) {
-        loginArea.classList.add("hidden");
-        sistemaArea.classList.remove("hidden");
+    const pergunta = perguntaOriginal.toLowerCase();
+
+    let nome = perguntaOriginal;
+    let tipo = "todos";
+
+    if (pergunta.includes("chefe")) {
+        tipo = "chefe";
+        nome = pergunta.split("de")[1]?.trim();
+    }
+    else if (pergunta.includes("empresa")) {
+        tipo = "empresa";
+        nome = pergunta.split("de")[1]?.trim();
+    }
+    else if (pergunta.includes("setor")) {
+        tipo = "setor";
+        nome = pergunta.split("de")[1]?.trim();
+    }
+    else if (pergunta.includes("cargo")) {
+        tipo = "cargo";
+        nome = pergunta.split("de")[1]?.trim();
     }
 
-    window.login = function() {
-        const user = usuarioInput.value.trim();
-        const pass = senhaInput.value.trim();
+    try {
 
-        const autorizado = usuarios.find(u => u.usuario === user && u.senha === pass);
+        const response = await fetch(API_URL + "?nome=" + encodeURIComponent(nome));
+        const dados = await response.json();
 
-        if (autorizado) {
-            localStorage.setItem("logado", "true");
-            localStorage.setItem("tempoLogin", Date.now());
-            loginArea.classList.add("hidden");
-            sistemaArea.classList.remove("hidden");
-            perguntaInput.focus();
-        } else {
-            alert("Usuário ou senha inválidos.");
-        }
-    }
-
-    window.logout = function() {
-        localStorage.removeItem("logado");
-        localStorage.removeItem("tempoLogin");
-        location.reload();
-    }
-
-    window.consultar = async function() {
-
-        if (!verificarSessao()) {
-            alert("Sessão expirada.");
-            logout();
+        if (dados.erro) {
+            resultado.innerHTML = dados.erro;
             return;
         }
 
-        const pergunta = perguntaInput.value.trim();
-
-        if (!pergunta) {
-            respostaDiv.innerHTML = "Digite um nome ou consulta.";
+        if (!Array.isArray(dados)) {
+            resultado.innerHTML = "Formato inesperado.";
             return;
         }
 
-        respostaDiv.innerHTML = "Consultando...";
+        let html = "";
 
-        try {
-            const response = await fetch(WEBHOOK_URL + "?nome=" + encodeURIComponent(pergunta));
-            const data = await response.json();
+        dados.forEach(func => {
 
-            if (!data || data.length === 0) {
-                respostaDiv.innerHTML = "Registro não encontrado.";
-                return;
+            const nomeResp   = func.Nome   || func.nome   || "";
+            const cargoResp  = func.Cargo  || func.cargo  || "";
+            const setorResp  = func.Setor  || func.setor  || "";
+            const chefeResp  = func.Chefe  || func.chefe  || "";
+            const empresaResp= func.Empresa|| func.empresa|| "";
+
+            if (tipo === "chefe") {
+                html += `<p><strong>${nomeResp}</strong> → Chefe: ${chefeResp}</p>`;
+            }
+            else if (tipo === "empresa") {
+                html += `<p><strong>${nomeResp}</strong> → Empresa: ${empresaResp}</p>`;
+            }
+            else if (tipo === "setor") {
+                html += `<p><strong>${nomeResp}</strong> → Setor: ${setorResp}</p>`;
+            }
+            else if (tipo === "cargo") {
+                html += `<p><strong>${nomeResp}</strong> → Cargo: ${cargoResp}</p>`;
+            }
+            else {
+                html += `
+                    <div style="margin-bottom:15px;">
+                        <strong>Nome:</strong> ${nomeResp}<br>
+                        <strong>Cargo:</strong> ${cargoResp}<br>
+                        <strong>Setor:</strong> ${setorResp}<br>
+                        <strong>Chefe:</strong> ${chefeResp}<br>
+                        <strong>Empresa:</strong> ${empresaResp}
+                    </div>
+                `;
             }
 
-            let resultadoHTML = "";
+        });
 
-            data.forEach(func => {
-                resultadoHTML += `
-                    <strong>👤 ${func.nome}</strong><br>
-                    🏢 Setor: ${func.setor}<br>
-                    💼 Cargo: ${func.cargo}<br>
-                    👨‍💼 Chefe: ${func.chefe}<br>
-                    🏬 Empresa: ${func.empresa}<br>
-                    📊 Status: ${func.status}
-                    <hr>
-                `;
-            });
+        resultado.innerHTML = html;
 
-            respostaDiv.innerHTML = resultadoHTML;
-
-        } catch (error) {
-            respostaDiv.innerHTML = "Erro ao consultar sistema.";
-        }
+    } catch (erro) {
+        resultado.innerHTML = "Erro ao consultar sistema.";
+        console.error(erro);
     }
 
-    window.limpar = function() {
-        perguntaInput.value = "";
-        respostaDiv.innerHTML = "";
-        perguntaInput.focus();
-    }
+}
 
-    senhaInput.addEventListener("keydown", function(event) {
-        if (event.key === "Enter") login();
-    });
-
-    perguntaInput.addEventListener("keydown", function(event) {
-        if (event.key === "Enter") consultar();
-    });
-
-});
 </script>
+
 
 </body>
 </html>
