@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", function() {
         else nome = pergunta;
 
         try {
-            // Envia o nome direto pro webhook
+            // Passa o nome direto pro webhook
             const response = await fetch(WEBHOOK_URL + "?nome=" + encodeURIComponent(nome));
             const data = await response.json();
 
@@ -255,3 +255,4 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
