@@ -69,7 +69,6 @@ h2 {
     font-size: 18px;
 }
 
-/* ===== CAMPOS ===== */
 input {
     width: 100%;
     padding: 12px;
@@ -79,7 +78,6 @@ input {
     font-size: 14px;
 }
 
-/* ===== BOTÕES ===== */
 button {
     width: 100%;
     padding: 12px;
@@ -93,25 +91,13 @@ button {
     transition: 0.2s;
 }
 
-button:hover {
-    background: #002244;
-}
+button:hover { background: #002244; }
 
-.secondary {
-    background: #5c6f82;
-}
+.secondary { background: #5c6f82; }
+.secondary:hover { background: #4b5c6b; }
 
-.secondary:hover {
-    background: #4b5c6b;
-}
-
-.logout {
-    background: #8b0000;
-}
-
-.logout:hover {
-    background: #6e0000;
-}
+.logout { background: #8b0000; }
+.logout:hover { background: #6e0000; }
 
 .hidden { display: none; }
 
@@ -149,7 +135,6 @@ button:hover {
 
     <!-- LOGIN -->
     <div id="loginArea">
-        
         <div class="titulo-area">
             <img src="brasao-dgf.png" alt="Brasão DGF" class="logo-titulo">
             <h2>Sistema Integrado de Consulta de Servidores - DGF</h2>
@@ -160,11 +145,11 @@ button:hover {
         <button onclick="login()">Entrar no Sistema</button>
     </div>
 
-    <!-- SISTEMA INTERNO -->
+    <!-- SISTEMA -->
     <div id="sistemaArea" class="hidden">
         <h2>Assistente de Consulta</h2>
 
-        <input type="text" id="pergunta" placeholder="Ex: Quem é o chefe de Edson?">
+        <input type="text" id="pergunta" placeholder="Ex: Quem é o chefe de Edson Moura Junior?">
         <button onclick="consultar()">Consultar</button>
         <button class="secondary" onclick="limpar()">Nova Consulta</button>
         <button class="logout" onclick="logout()">Encerrar Sessão</button>
@@ -248,7 +233,8 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        let pergunta = perguntaInput.value.trim().toLowerCase();
+        let perguntaOriginal = perguntaInput.value.trim();
+        let pergunta = perguntaOriginal.toLowerCase();
 
         if (!pergunta) {
             respostaDiv.innerHTML = "Digite uma pergunta.";
@@ -257,10 +243,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
         respostaDiv.innerHTML = "Consultando...";
 
-        // Remove pontuação
         pergunta = pergunta.replace(/[?.,]/g, "");
 
-        // Detecta campo
         let campo = "completo";
 
         if (pergunta.includes("chefe")) campo = "chefe";
@@ -269,36 +253,56 @@ document.addEventListener("DOMContentLoaded", function() {
         else if (pergunta.includes("cargo")) campo = "cargo";
         else if (pergunta.includes("status")) campo = "status";
 
-        // Extrai nome (última palavra)
-        const palavras = pergunta.split(" ");
-        const nome = palavras[palavras.length - 1];
+        const palavrasRemover = [
+            "quem", "é", "o", "a", "do", "da", "de",
+            "qual", "os", "as", "me", "diga"
+        ];
+
+        let palavras = pergunta.split(" ");
+        let nomeArray = palavras.filter(p => !palavrasRemover.includes(p));
+        let nome = nomeArray.join(" ");
 
         try {
+
             const response = await fetch(WEBHOOK_URL + "?nome=" + encodeURIComponent(nome));
             const data = await response.json();
 
             if (!data || data.length === 0) {
-                respostaDiv.innerHTML = "Registro não encontrado.";
+                respostaDiv.innerHTML = "Nenhum registro encontrado.";
                 return;
             }
 
-            const func = data[0];
+            let resultadoHTML = "";
 
-            if (campo !== "completo") {
-                respostaDiv.innerHTML = `
-                    <strong>👤 ${func.nome}</strong><br>
-                    ${campo.toUpperCase()}: ${func[campo]}
-                `;
-            } else {
-                respostaDiv.innerHTML = `
-                    <strong>👤 ${func.nome}</strong><br>
-                    🏢 Setor: ${func.setor}<br>
-                    💼 Cargo: ${func.cargo}<br>
-                    👨‍💼 Chefe: ${func.chefe}<br>
-                    🏬 Empresa: ${func.empresa}<br>
-                    📊 Status: ${func.status}
-                `;
-            }
+            data.forEach(func => {
+
+                if (campo !== "completo") {
+
+                    resultadoHTML += `
+                        <strong>👤 ${func.nome}</strong><br>
+                        ${campo.toUpperCase()}: ${func[campo]}<br>
+                        <hr>
+                    `;
+
+                } else {
+
+                    resultadoHTML += `
+                        <strong>👤 ${func.nome}</strong><br>
+                        🏢 Setor: ${func.setor}<br>
+                        💼 Cargo: ${func.cargo}<br>
+                        👨‍💼 Chefe: ${func.chefe}<br>
+                        🏬 Empresa: ${func.empresa}<br>
+                        📊 Status: ${func.status}
+                        <hr>
+                    `;
+                }
+
+            });
+
+            respostaDiv.innerHTML = `
+                🔎 Encontrei ${data.length} resultado(s):<br><br>
+                ${resultadoHTML}
+            `;
 
         } catch (error) {
             respostaDiv.innerHTML = "Erro ao consultar sistema.";
@@ -316,4 +320,5 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
 
