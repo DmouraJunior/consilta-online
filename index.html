@@ -131,7 +131,7 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div id="sistemaArea" class="hidden">
 <h2>Assistente de Consulta</h2>
 
-<input type="text" id="pergunta" placeholder="Ex: Quem é o chefe de Edson?">
+<input type="text" id="pergunta" placeholder="Ex: quem é da equipe de Lourdes?">
 <button onclick="consultar()">Consultar</button>
 <button class="secondary" onclick="limpar()">Nova Consulta</button>
 <button class="logout" onclick="logout()">Encerrar Sessão</button>
@@ -164,26 +164,14 @@ const senhaInput = document.getElementById("senha");
 const perguntaInput = document.getElementById("pergunta");
 const respostaDiv = document.getElementById("resposta");
 
-/* ENTER login */
 usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
-
-/* ENTER consulta */
 perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
 
 function verificarSessao() {
 const tempoLogin = localStorage.getItem("tempoLogin");
 if (!tempoLogin) return false;
-
-const agora = Date.now();
-const diferenca = agora - parseInt(tempoLogin);
-
-if (diferenca > TEMPO_EXPIRACAO) {
-localStorage.removeItem("logado");
-localStorage.removeItem("tempoLogin");
-return false;
-}
-return true;
+return (Date.now() - parseInt(tempoLogin)) <= TEMPO_EXPIRACAO;
 }
 
 if (localStorage.getItem("logado") === "true" && verificarSessao()) {
@@ -192,10 +180,10 @@ sistemaArea.classList.remove("hidden");
 }
 
 window.login = function() {
-const user = usuarioInput.value.trim();
-const pass = senhaInput.value.trim();
-
-const autorizado = usuarios.find(u => u.usuario === user && u.senha === pass);
+const autorizado = usuarios.find(u =>
+u.usuario === usuarioInput.value.trim() &&
+u.senha === senhaInput.value.trim()
+);
 
 if (autorizado) {
 localStorage.setItem("logado", "true");
@@ -203,89 +191,123 @@ localStorage.setItem("tempoLogin", Date.now());
 loginArea.classList.add("hidden");
 sistemaArea.classList.remove("hidden");
 perguntaInput.focus();
-} else {
-alert("Usuário ou senha inválidos.");
-}
+} else alert("Usuário ou senha inválidos.");
 }
 
 window.logout = function() {
-localStorage.removeItem("logado");
-localStorage.removeItem("tempoLogin");
+localStorage.clear();
 location.reload();
+}
+
+function extrairTermo(frase, chaves) {
+for (let c of chaves) {
+if (frase.includes(c)) return frase.split(c)[1]?.trim();
+}
+return null;
 }
 
 window.consultar = async function() {
 
-if (!verificarSessao()) {
-alert("Sessão expirada.");
-logout();
-return;
-}
+if (!verificarSessao()) { logout(); return; }
 
 let pergunta = perguntaInput.value.trim().toLowerCase();
-
-if (!pergunta) {
-respostaDiv.innerHTML = "Digite uma pergunta.";
-return;
-}
+if (!pergunta) return respostaDiv.innerHTML = "Digite uma pergunta.";
 
 respostaDiv.innerHTML = "Consultando...";
 pergunta = pergunta.replace(/[?.,]/g, "");
 
-let campo = "completo";
+let tipo = "nome";
+let termo = extrairTermo(pergunta, ["equipe de","time de","chefiados por"]);
 
-if (pergunta.includes("chefe")) campo = "chefe";
-else if (pergunta.includes("empresa")) campo = "empresa";
-else if (pergunta.includes("setor")) campo = "setor";
-else if (pergunta.includes("cargo")) campo = "cargo";
-else if (pergunta.includes("status")) campo = "status";
+if (termo) tipo = "equipe";
 
-const palavras = pergunta.split(" ");
-const nome = palavras[palavras.length - 1];
+if (!termo) {
+termo = extrairTermo(pergunta, ["empresa","da empresa"]);
+if (termo) tipo = "empresa";
+}
 
-try {
-const response = await fetch(WEBHOOK_URL + "?nome=" + encodeURIComponent(nome));
+if (!termo) {
+termo = extrairTermo(pergunta, ["setor","do setor"]);
+if (termo) tipo = "setor";
+}
+
+if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
+tipo = "contagem";
+termo = termo || pergunta.split(" ").pop();
+}
+
+if (pergunta.includes("estatística") || pergunta.includes("resumo")) {
+tipo = "estatistica";
+}
+
+if (!termo && tipo === "nome")
+termo = pergunta.split(" ").pop();
+
+const response = await fetch(WEBHOOK_URL);
 const data = await response.json();
 
-if (!data || data.length === 0) {
-respostaDiv.innerHTML = "Registro não encontrado.";
-return;
+let resultados = [];
+
+if (tipo === "equipe")
+resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
+
+else if (tipo === "empresa")
+resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
+
+else if (tipo === "setor")
+resultados = data.filter(f => f.setor.toLowerCase().includes(termo));
+
+else if (tipo === "contagem") {
+resultados = data.filter(f =>
+f.setor.toLowerCase().includes(termo) ||
+f.empresa.toLowerCase().includes(termo) ||
+f.chefe.toLowerCase().includes(termo)
+);
+return respostaDiv.innerHTML =
+`Total encontrado: <strong>${resultados.length}</strong>`;
 }
 
-let html = `<strong>${data.length} resultado(s) encontrado(s)</strong><br><br>`;
+else if (tipo === "estatistica") {
 
-data.forEach(func => {
-
-if (campo !== "completo") {
-html += `
-<div style="margin-bottom:12px;">
-<strong>👤 ${func.nome}</strong><br>
-${campo.toUpperCase()}: ${func[campo]}
-</div>`;
-} else {
-html += `
-<div style="margin-bottom:12px;">
-<strong>👤 ${func.nome}</strong><br>
-🏢 Setor: ${func.setor}<br>
-💼 Cargo: ${func.cargo}<br>
-👨‍💼 Chefe: ${func.chefe}<br>
-🏬 Empresa: ${func.empresa}<br>
-📊 Status: ${func.status}
-</div>`;
-}
-
+let setores={}, empresas={};
+data.forEach(f=>{
+setores[f.setor]=(setores[f.setor]||0)+1;
+empresas[f.empresa]=(empresas[f.empresa]||0)+1;
 });
 
-respostaDiv.innerHTML = html;
+let html="<strong>Resumo Estatístico</strong><br><br><b>Por setor:</b><br>";
+for(let s in setores) html+=`${s}: ${setores[s]}<br>`;
+html+="<br><b>Por empresa:</b><br>";
+for(let e in empresas) html+=`${e}: ${empresas[e]}<br>`;
 
-} catch (error) {
-respostaDiv.innerHTML = "Erro ao consultar sistema.";
+return respostaDiv.innerHTML=html;
 }
+
+else resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
+
+if (!resultados.length)
+return respostaDiv.innerHTML="Nenhum registro encontrado.";
+
+let html=`<strong>${resultados.length} resultado(s)</strong><br><br>`;
+
+resultados.forEach(f=>{
+html+=`
+<div style="margin-bottom:12px;">
+<strong>👤 ${f.nome}</strong><br>
+🏢 Setor: ${f.setor}<br>
+💼 Cargo: ${f.cargo}<br>
+👨‍💼 Chefe: ${f.chefe}<br>
+🏬 Empresa: ${f.empresa}<br>
+📊 Status: ${f.status}
+</div>`;
+});
+
+respostaDiv.innerHTML=html;
 }
 
 window.limpar = function() {
-perguntaInput.value = "";
-respostaDiv.innerHTML = "";
+perguntaInput.value="";
+respostaDiv.innerHTML="";
 perguntaInput.focus();
 }
 
@@ -294,4 +316,5 @@ perguntaInput.focus();
 
 </body>
 </html>
+
 
