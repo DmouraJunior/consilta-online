@@ -69,6 +69,7 @@ h2 {
     font-size: 18px;
 }
 
+/* ===== CAMPOS ===== */
 input {
     width: 100%;
     padding: 12px;
@@ -78,6 +79,7 @@ input {
     font-size: 14px;
 }
 
+/* ===== BOTÕES ===== */
 button {
     width: 100%;
     padding: 12px;
@@ -91,13 +93,25 @@ button {
     transition: 0.2s;
 }
 
-button:hover { background: #002244; }
+button:hover {
+    background: #002244;
+}
 
-.secondary { background: #5c6f82; }
-.secondary:hover { background: #4b5c6b; }
+.secondary {
+    background: #5c6f82;
+}
 
-.logout { background: #8b0000; }
-.logout:hover { background: #6e0000; }
+.secondary:hover {
+    background: #4b5c6b;
+}
+
+.logout {
+    background: #8b0000;
+}
+
+.logout:hover {
+    background: #6e0000;
+}
 
 .hidden { display: none; }
 
@@ -135,6 +149,7 @@ button:hover { background: #002244; }
 
     <!-- LOGIN -->
     <div id="loginArea">
+        
         <div class="titulo-area">
             <img src="brasao-dgf.png" alt="Brasão DGF" class="logo-titulo">
             <h2>Sistema Integrado de Consulta de Servidores - DGF</h2>
@@ -145,11 +160,11 @@ button:hover { background: #002244; }
         <button onclick="login()">Entrar no Sistema</button>
     </div>
 
-    <!-- SISTEMA -->
+    <!-- SISTEMA INTERNO -->
     <div id="sistemaArea" class="hidden">
         <h2>Assistente de Consulta</h2>
 
-        <input type="text" id="pergunta" placeholder="Ex: Quem é o chefe de Edson Moura Junior?">
+        <input type="text" id="pergunta" placeholder="Ex: Quem é o chefe de Edson?">
         <button onclick="consultar()">Consultar</button>
         <button class="secondary" onclick="limpar()">Nova Consulta</button>
         <button class="logout" onclick="logout()">Encerrar Sessão</button>
@@ -233,8 +248,7 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        let perguntaOriginal = perguntaInput.value.trim();
-        let pergunta = perguntaOriginal.toLowerCase();
+        let pergunta = perguntaInput.value.trim().toLowerCase();
 
         if (!pergunta) {
             respostaDiv.innerHTML = "Digite uma pergunta.";
@@ -243,8 +257,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
         respostaDiv.innerHTML = "Consultando...";
 
+        // Remove pontuação
         pergunta = pergunta.replace(/[?.,]/g, "");
 
+        // Detecta campo
         let campo = "completo";
 
         if (pergunta.includes("chefe")) campo = "chefe";
@@ -253,56 +269,36 @@ document.addEventListener("DOMContentLoaded", function() {
         else if (pergunta.includes("cargo")) campo = "cargo";
         else if (pergunta.includes("status")) campo = "status";
 
-        const palavrasRemover = [
-            "quem", "é", "o", "a", "do", "da", "de",
-            "qual", "os", "as", "me", "diga"
-        ];
-
-        let palavras = pergunta.split(" ");
-        let nomeArray = palavras.filter(p => !palavrasRemover.includes(p));
-        let nome = nomeArray.join(" ");
+        // Extrai nome (última palavra)
+        const palavras = pergunta.split(" ");
+        const nome = palavras[palavras.length - 1];
 
         try {
-
             const response = await fetch(WEBHOOK_URL + "?nome=" + encodeURIComponent(nome));
             const data = await response.json();
 
             if (!data || data.length === 0) {
-                respostaDiv.innerHTML = "Nenhum registro encontrado.";
+                respostaDiv.innerHTML = "Registro não encontrado.";
                 return;
             }
 
-            let resultadoHTML = "";
+            const func = data[0];
 
-            data.forEach(func => {
-
-                if (campo !== "completo") {
-
-                    resultadoHTML += `
-                        <strong>👤 ${func.nome}</strong><br>
-                        ${campo.toUpperCase()}: ${func[campo]}<br>
-                        <hr>
-                    `;
-
-                } else {
-
-                    resultadoHTML += `
-                        <strong>👤 ${func.nome}</strong><br>
-                        🏢 Setor: ${func.setor}<br>
-                        💼 Cargo: ${func.cargo}<br>
-                        👨‍💼 Chefe: ${func.chefe}<br>
-                        🏬 Empresa: ${func.empresa}<br>
-                        📊 Status: ${func.status}
-                        <hr>
-                    `;
-                }
-
-            });
-
-            respostaDiv.innerHTML = `
-                🔎 Encontrei ${data.length} resultado(s):<br><br>
-                ${resultadoHTML}
-            `;
+            if (campo !== "completo") {
+                respostaDiv.innerHTML = `
+                    <strong>👤 ${func.nome}</strong><br>
+                    ${campo.toUpperCase()}: ${func[campo]}
+                `;
+            } else {
+                respostaDiv.innerHTML = `
+                    <strong>👤 ${func.nome}</strong><br>
+                    🏢 Setor: ${func.setor}<br>
+                    💼 Cargo: ${func.cargo}<br>
+                    👨‍💼 Chefe: ${func.chefe}<br>
+                    🏬 Empresa: ${func.empresa}<br>
+                    📊 Status: ${func.status}
+                `;
+            }
 
         } catch (error) {
             respostaDiv.innerHTML = "Erro ao consultar sistema.";
@@ -320,5 +316,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
 
 
