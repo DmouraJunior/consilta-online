@@ -24,7 +24,6 @@ body {
 .topbar small {
     display: block;
     font-size: 12px;
-    font-weight: 400;
     opacity: 0.8;
 }
 
@@ -109,8 +108,8 @@ button:hover { background: #002244; }
 <body>
 
 <div class="topbar">
-    Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
-    <small>Sistema Interno Oficial</small>
+Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
+<small>Sistema Interno Oficial</small>
 </div>
 
 <div class="gold-line"></div>
@@ -165,11 +164,11 @@ const senhaInput = document.getElementById("senha");
 const perguntaInput = document.getElementById("pergunta");
 const respostaDiv = document.getElementById("resposta");
 
-/* ENTER no login */
+/* ENTER login */
 usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 
-/* ENTER na consulta */
+/* ENTER consulta */
 perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
 
 function verificarSessao() {
@@ -253,23 +252,31 @@ respostaDiv.innerHTML = "Registro não encontrado.";
 return;
 }
 
-const func = data[0];
+let html = `<strong>${data.length} resultado(s) encontrado(s)</strong><br><br>`;
+
+data.forEach(func => {
 
 if (campo !== "completo") {
-respostaDiv.innerHTML = `
+html += `
+<div style="margin-bottom:12px;">
 <strong>👤 ${func.nome}</strong><br>
 ${campo.toUpperCase()}: ${func[campo]}
-`;
+</div>`;
 } else {
-respostaDiv.innerHTML = `
+html += `
+<div style="margin-bottom:12px;">
 <strong>👤 ${func.nome}</strong><br>
 🏢 Setor: ${func.setor}<br>
 💼 Cargo: ${func.cargo}<br>
 👨‍💼 Chefe: ${func.chefe}<br>
 🏬 Empresa: ${func.empresa}<br>
 📊 Status: ${func.status}
-`;
+</div>`;
 }
+
+});
+
+respostaDiv.innerHTML = html;
 
 } catch (error) {
 respostaDiv.innerHTML = "Erro ao consultar sistema.";
@@ -287,3 +294,4 @@ perguntaInput.focus();
 
 </body>
 </html>
+
