@@ -6,131 +6,85 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI', sans-serif; background:#f4f6f9; }
 
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #f4f6f9;
-}
-
-/* ===== BARRA SUPERIOR ===== */
 .topbar {
-    background: #002b5c;
-    color: white;
-    padding: 18px 30px;
-    font-size: 18px;
-    font-weight: 600;
+    background:#002b5c;
+    color:white;
+    padding:18px 30px;
+    font-size:18px;
+    font-weight:600;
 }
 
 .topbar small {
-    display: block;
-    font-size: 12px;
-    font-weight: 400;
-    opacity: 0.8;
+    display:block;
+    font-size:12px;
+    opacity:0.8;
 }
 
-.gold-line {
-    height: 4px;
-    background: #c9a227;
-}
+.gold-line { height:4px; background:#c9a227; }
 
-/* ===== ÁREA CENTRAL ===== */
 .main {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: calc(100vh - 110px);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:calc(100vh - 110px);
 }
 
 .container {
-    background: white;
-    padding: 40px;
-    border-radius: 12px;
-    width: 460px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    background:white;
+    padding:40px;
+    border-radius:12px;
+    width:460px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.1);
 }
 
-.titulo-area {
-    text-align: center;
-    margin-bottom: 25px;
-}
+h2 { color:#002b5c; font-size:18px; margin-bottom:15px; }
 
-.logo-titulo {
-    height: 70px;
-    margin-bottom: 10px;
-}
-
-h2 {
-    color: #002b5c;
-    font-size: 18px;
-}
-
-/* ===== CAMPOS ===== */
 input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    margin-bottom: 12px;
-    font-size: 14px;
+    width:100%;
+    padding:12px;
+    border-radius:6px;
+    border:1px solid #ccc;
+    margin-bottom:12px;
 }
 
-/* ===== BOTÕES ===== */
 button {
-    width: 100%;
-    padding: 12px;
-    border-radius: 6px;
-    border: none;
-    background: #003366;
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    margin-bottom: 8px;
-    transition: 0.2s;
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:6px;
+    background:#003366;
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+    margin-bottom:8px;
 }
 
-button:hover {
-    background: #002244;
-}
+button:hover { background:#002244; }
+.secondary { background:#5c6f82; }
+.secondary:hover { background:#4b5c6b; }
+.logout { background:#8b0000; }
+.logout:hover { background:#6e0000; }
 
-.secondary {
-    background: #5c6f82;
-}
-
-.secondary:hover {
-    background: #4b5c6b;
-}
-
-.logout {
-    background: #8b0000;
-}
-
-.logout:hover {
-    background: #6e0000;
-}
-
-.hidden { display: none; }
+.hidden { display:none; }
 
 .response {
-    margin-top: 15px;
-    background: #f1f3f6;
-    padding: 15px;
-    border-radius: 8px;
-    min-height: 60px;
-    font-size: 14px;
-    border-left: 4px solid #002b5c;
+    margin-top:15px;
+    background:#f1f3f6;
+    padding:15px;
+    border-radius:8px;
+    min-height:60px;
+    font-size:14px;
+    border-left:4px solid #002b5c;
 }
 
 .footer {
-    text-align: center;
-    padding: 15px;
-    font-size: 12px;
-    color: #555;
-    background: #e9edf2;
+    text-align:center;
+    padding:15px;
+    font-size:12px;
+    background:#e9edf2;
 }
 </style>
 </head>
@@ -147,169 +101,171 @@ button:hover {
 <div class="main">
 <div class="container">
 
-    <!-- LOGIN -->
-    <div id="loginArea">
-        
-        <div class="titulo-area">
-            <img src="brasao-dgf.png" alt="Brasão DGF" class="logo-titulo">
-            <h2>Sistema Integrado de Consulta de Servidores - DGF</h2>
-        </div>
+<div id="loginArea">
+    <h2>Login</h2>
+    <input type="text" id="usuario" placeholder="Usuário">
+    <input type="password" id="senha" placeholder="Senha">
+    <button onclick="login()">Entrar</button>
+</div>
 
-        <input type="text" id="usuario" placeholder="Usuário institucional">
-        <input type="password" id="senha" placeholder="Senha">
-        <button onclick="login()">Entrar no Sistema</button>
-    </div>
-
-    <!-- SISTEMA INTERNO -->
-    <div id="sistemaArea" class="hidden">
-        <h2>Assistente de Consulta</h2>
-
-        <input type="text" id="pergunta" placeholder="Ex: Quem é o chefe de Edson?">
-        <button onclick="consultar()">Consultar</button>
-        <button class="secondary" onclick="limpar()">Nova Consulta</button>
-        <button class="logout" onclick="logout()">Encerrar Sessão</button>
-
-        <div class="response" id="resposta"></div>
-    </div>
+<div id="sistemaArea" class="hidden">
+    <h2>Assistente Inteligente</h2>
+    <input type="text" id="pergunta" placeholder="Ex: Quem é o chefe de Edson?">
+    <button onclick="consultar()">Consultar</button>
+    <button class="secondary" onclick="limpar()">Nova Consulta</button>
+    <button class="logout" onclick="logout()">Encerrar Sessão</button>
+    <div class="response" id="resposta"></div>
+</div>
 
 </div>
 </div>
 
 <div class="footer">
-    © 2026 - Diretoria Geral de Finanças (DGF) • Uso interno e restrito
+© 2026 - Diretoria Geral de Finanças (DGF)
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
-    const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxpXRSc5LcL7yW_2St6q28CQzMj5nR4YI4pHEWQKHZ2Fgym1EWvbTW1ME5Qu0cKp9Mc/exec";
-    const TEMPO_EXPIRACAO = 30 * 60 * 1000;
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxpXRSc5LcL7yW_2St6q28CQzMj5nR4YI4pHEWQKHZ2Fgym1EWvbTW1ME5Qu0cKp9Mc/exec";
+const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
-    const usuarios = [
-        { usuario: "admin", senha: "1234" },
-        { usuario: "rh", senha: "rh123" }
-    ];
+const usuarios = [
+    { usuario: "admin", senha: "1234" },
+    { usuario: "rh", senha: "rh123" }
+];
 
-    const loginArea = document.getElementById("loginArea");
-    const sistemaArea = document.getElementById("sistemaArea");
-    const usuarioInput = document.getElementById("usuario");
-    const senhaInput = document.getElementById("senha");
-    const perguntaInput = document.getElementById("pergunta");
-    const respostaDiv = document.getElementById("resposta");
+const loginArea = document.getElementById("loginArea");
+const sistemaArea = document.getElementById("sistemaArea");
+const usuarioInput = document.getElementById("usuario");
+const senhaInput = document.getElementById("senha");
+const perguntaInput = document.getElementById("pergunta");
+const respostaDiv = document.getElementById("resposta");
 
-    function verificarSessao() {
-        const tempoLogin = localStorage.getItem("tempoLogin");
-        if (!tempoLogin) return false;
+function verificarSessao() {
+    const tempoLogin = localStorage.getItem("tempoLogin");
+    if (!tempoLogin) return false;
+    return (Date.now() - parseInt(tempoLogin)) <= TEMPO_EXPIRACAO;
+}
 
-        const agora = Date.now();
-        const diferenca = agora - parseInt(tempoLogin);
+if (localStorage.getItem("logado") === "true" && verificarSessao()) {
+    loginArea.classList.add("hidden");
+    sistemaArea.classList.remove("hidden");
+}
 
-        if (diferenca > TEMPO_EXPIRACAO) {
-            localStorage.removeItem("logado");
-            localStorage.removeItem("tempoLogin");
-            return false;
-        }
-        return true;
-    }
+window.login = function() {
+    const user = usuarioInput.value.trim();
+    const pass = senhaInput.value.trim();
+    const autorizado = usuarios.find(u => u.usuario === user && u.senha === pass);
 
-    if (localStorage.getItem("logado") === "true" && verificarSessao()) {
+    if (autorizado) {
+        localStorage.setItem("logado", "true");
+        localStorage.setItem("tempoLogin", Date.now());
         loginArea.classList.add("hidden");
         sistemaArea.classList.remove("hidden");
+    } else {
+        alert("Usuário ou senha inválidos.");
+    }
+}
+
+window.logout = function() {
+    localStorage.clear();
+    location.reload();
+}
+
+window.consultar = async function() {
+
+    if (!verificarSessao()) {
+        alert("Sessão expirada.");
+        logout();
+        return;
     }
 
-    window.login = function() {
-        const user = usuarioInput.value.trim();
-        const pass = senhaInput.value.trim();
+    let pergunta = perguntaInput.value.trim().toLowerCase();
 
-        const autorizado = usuarios.find(u => u.usuario === user && u.senha === pass);
-
-        if (autorizado) {
-            localStorage.setItem("logado", "true");
-            localStorage.setItem("tempoLogin", Date.now());
-            loginArea.classList.add("hidden");
-            sistemaArea.classList.remove("hidden");
-            perguntaInput.focus();
-        } else {
-            alert("Usuário ou senha inválidos.");
-        }
+    if (!pergunta) {
+        respostaDiv.innerHTML = "Digite uma pergunta.";
+        return;
     }
 
-    window.logout = function() {
-        localStorage.removeItem("logado");
-        localStorage.removeItem("tempoLogin");
-        location.reload();
+    respostaDiv.innerHTML = "Consultando...";
+    pergunta = pergunta.replace(/[?.,]/g, "");
+
+    let campo = null;
+    if (pergunta.includes("chefe")) campo = "chefe";
+    if (pergunta.includes("empresa")) campo = "empresa";
+    if (pergunta.includes("setor")) campo = "setor";
+    if (pergunta.includes("cargo")) campo = "cargo";
+    if (pergunta.includes("status")) campo = "status";
+
+    let filtroSetor = null;
+    let filtroEmpresa = null;
+    let nome = null;
+
+    if (pergunta.includes("mostrar todos do setor")) {
+        filtroSetor = pergunta.split("mostrar todos do setor")[1].trim();
+    }
+    else if (pergunta.includes("mostrar todos da empresa")) {
+        filtroEmpresa = pergunta.split("mostrar todos da empresa")[1].trim();
+    }
+    else {
+        if (pergunta.includes(" de "))
+            nome = pergunta.split(" de ")[1].trim();
+        else if (pergunta.includes(" do "))
+            nome = pergunta.split(" do ")[1].trim();
+        else if (pergunta.includes(" da "))
+            nome = pergunta.split(" da ")[1].trim();
+        else
+            nome = pergunta;
     }
 
-    window.consultar = async function() {
+    try {
 
-        if (!verificarSessao()) {
-            alert("Sessão expirada.");
-            logout();
+        let query = "";
+
+        if (filtroSetor) query = "?setor=" + encodeURIComponent(filtroSetor);
+        else if (filtroEmpresa) query = "?empresa=" + encodeURIComponent(filtroEmpresa);
+        else query = "?nome=" + encodeURIComponent(nome);
+
+        const response = await fetch(WEBHOOK_URL + query);
+        const data = await response.json();
+
+        if (!data || data.length === 0) {
+            respostaDiv.innerHTML = "Nenhum registro encontrado.";
             return;
         }
 
-        let pergunta = perguntaInput.value.trim().toLowerCase();
+        let html = "";
 
-        if (!pergunta) {
-            respostaDiv.innerHTML = "Digite uma pergunta.";
-            return;
-        }
+        data.forEach(func => {
 
-        respostaDiv.innerHTML = "Consultando...";
-
-        // Remove pontuação
-        pergunta = pergunta.replace(/[?.,]/g, "");
-
-        // Detecta campo
-        let campo = "completo";
-
-        if (pergunta.includes("chefe")) campo = "chefe";
-        else if (pergunta.includes("empresa")) campo = "empresa";
-        else if (pergunta.includes("setor")) campo = "setor";
-        else if (pergunta.includes("cargo")) campo = "cargo";
-        else if (pergunta.includes("status")) campo = "status";
-
-        // Extrai nome (última palavra)
-        const palavras = pergunta.split(" ");
-        const nome = palavras[palavras.length - 1];
-
-        try {
-            const response = await fetch(WEBHOOK_URL + "?nome=" + encodeURIComponent(nome));
-            const data = await response.json();
-
-            if (!data || data.length === 0) {
-                respostaDiv.innerHTML = "Registro não encontrado.";
-                return;
+            if (campo && nome) {
+                html += `O ${campo} de <strong>${func.nome}</strong> é <strong>${func[campo]}</strong>.<br><br>`;
+            } 
+            else {
+                html += `
+                <strong>${func.nome}</strong><br>
+                Setor: ${func.setor}<br>
+                Cargo: ${func.cargo}<br>
+                Chefe: ${func.chefe}<br>
+                Empresa: ${func.empresa}<br>
+                Status: ${func.status}
+                <hr>`;
             }
 
-            const func = data[0];
+        });
 
-            if (campo !== "completo") {
-                respostaDiv.innerHTML = `
-                    <strong>👤 ${func.nome}</strong><br>
-                    ${campo.toUpperCase()}: ${func[campo]}
-                `;
-            } else {
-                respostaDiv.innerHTML = `
-                    <strong>👤 ${func.nome}</strong><br>
-                    🏢 Setor: ${func.setor}<br>
-                    💼 Cargo: ${func.cargo}<br>
-                    👨‍💼 Chefe: ${func.chefe}<br>
-                    🏬 Empresa: ${func.empresa}<br>
-                    📊 Status: ${func.status}
-                `;
-            }
+        respostaDiv.innerHTML = html;
 
-        } catch (error) {
-            respostaDiv.innerHTML = "Erro ao consultar sistema.";
-        }
+    } catch (error) {
+        respostaDiv.innerHTML = "Erro ao consultar sistema.";
     }
+}
 
-    window.limpar = function() {
-        perguntaInput.value = "";
-        respostaDiv.innerHTML = "";
-        perguntaInput.focus();
-    }
+window.limpar = function() {
+    perguntaInput.value = "";
+    respostaDiv.innerHTML = "";
+}
 
 });
 </script>
