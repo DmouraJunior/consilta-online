@@ -21,6 +21,12 @@ body {
     font-weight: 600;
 }
 
+.topbar small {
+    display: block;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
 .gold-line { height: 4px; background: #c9a227; }
 
 .main {
@@ -37,6 +43,15 @@ body {
     width: 460px;
     box-shadow: 0 15px 40px rgba(0,0,0,0.1);
 }
+
+.titulo-area { text-align: center; margin-bottom: 25px; }
+
+.logo-titulo {
+    height: 70px;
+    margin-bottom: 10px;
+}
+
+h2 { color: #002b5c; font-size: 18px; }
 
 input {
     width: 100%;
@@ -58,8 +73,15 @@ button {
     margin-bottom: 8px;
 }
 
+button:hover { background: #002244; }
+
 .secondary { background: #5c6f82; }
+.secondary:hover { background: #4b5c6b; }
+
 .logout { background: #8b0000; }
+.logout:hover { background: #6e0000; }
+
+.hidden { display: none; }
 
 .response {
     margin-top: 15px;
@@ -67,6 +89,7 @@ button {
     padding: 15px;
     border-radius: 8px;
     font-size: 14px;
+    border-left: 4px solid #002b5c;
 }
 
 .footer {
@@ -82,6 +105,7 @@ button {
 
 <div class="topbar">
 Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
+<small>Sistema Interno Oficial</small>
 </div>
 
 <div class="gold-line"></div>
@@ -89,13 +113,22 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div class="main">
 <div class="container">
 
+<!-- LOGIN -->
 <div id="loginArea">
+<div class="titulo-area">
+<img src="brasao-dgf.png" class="logo-titulo">
+<h2>Sistema Integrado de Consulta de Servidores - DGF</h2>
+</div>
+
 <input type="text" id="usuario" placeholder="Usuário institucional">
 <input type="password" id="senha" placeholder="Senha">
 <button onclick="login()">Entrar no Sistema</button>
 </div>
 
+<!-- SISTEMA -->
 <div id="sistemaArea" class="hidden">
+<h2>Assistente de Consulta</h2>
+
 <input type="text" id="pergunta" placeholder="Ex: todos da equipe de Lourdes">
 <button onclick="consultar()">Consultar</button>
 <button class="secondary" onclick="limpar()">Nova Consulta</button>
@@ -107,7 +140,9 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 </div>
 </div>
 
-<div class="footer">© 2026 - DGF</div>
+<div class="footer">
+© 2026 - Diretoria Geral de Finanças (DGF)
+</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -137,7 +172,8 @@ u.usuario===usuarioInput.value && u.senha===senhaInput.value
 if (autorizado) {
 loginArea.classList.add("hidden");
 sistemaArea.classList.remove("hidden");
-} else alert("Login inválido");
+perguntaInput.focus();
+} else alert("Usuário ou senha inválidos.");
 }
 
 window.logout = () => location.reload();
@@ -152,7 +188,7 @@ respostaDiv.innerHTML = "Consultando...";
 let tipo = "nome";
 let termo = "";
 
-// equipe de chefe
+// equipe
 if (pergunta.includes("equipe de")) {
 tipo = "chefe";
 termo = pergunta.split("equipe de")[1].trim();
@@ -170,7 +206,6 @@ tipo = "setor";
 termo = pergunta.split("da ")[1].trim();
 }
 
-// fallback nome
 else {
 termo = pergunta.split(" ").pop();
 }
@@ -184,7 +219,7 @@ respostaDiv.innerHTML = "Nenhum resultado.";
 return;
 }
 
-let html = `<strong>${data.length} encontrado(s)</strong><br><br>`;
+let html = `<strong>${data.length} resultado(s)</strong><br><br>`;
 
 data.forEach(f => {
 html += `
