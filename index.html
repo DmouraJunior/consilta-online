@@ -17,12 +17,7 @@ body { font-family:'Segoe UI', sans-serif; background:#f4f6f9; }
     font-weight:600;
 }
 
-.topbar small {
-    display:block;
-    font-size:12px;
-    opacity:0.8;
-}
-
+.topbar small { display:block; font-size:12px; opacity:0.8; }
 .gold-line { height:4px; background:#c9a227; }
 
 .main {
@@ -103,7 +98,7 @@ button:hover { background:#002244; }
 
 <div id="loginArea">
     <h2>Login</h2>
-    <input type="text" id="usuario" placeholder="Usuário">
+    <input type="text" id="usuario" placeholder="Usuário institucional">
     <input type="password" id="senha" placeholder="Senha">
     <button onclick="login()">Entrar</button>
 </div>
@@ -127,7 +122,7 @@ button:hover { background:#002244; }
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
-const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxpXRSc5LcL7yW_2St6q28CQzMj5nR4YI4pHEWQKHZ2Fgym1EWvbTW1ME5Qu0cKp9Mc/exec";
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxA3anDchuSGHN-E0d6dybvAEFI-NYWK1xIKSoz22Zd8CHpADzzNHfzvd_uvlqqigYZ/exec";
 const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
 const usuarios = [
@@ -144,8 +139,7 @@ const respostaDiv = document.getElementById("resposta");
 
 function verificarSessao() {
     const tempoLogin = localStorage.getItem("tempoLogin");
-    if (!tempoLogin) return false;
-    return (Date.now() - parseInt(tempoLogin)) <= TEMPO_EXPIRACAO;
+    return tempoLogin && (Date.now() - parseInt(tempoLogin)) <= TEMPO_EXPIRACAO;
 }
 
 if (localStorage.getItem("logado") === "true" && verificarSessao()) {
@@ -182,15 +176,12 @@ window.consultar = async function() {
     }
 
     let pergunta = perguntaInput.value.trim().toLowerCase();
-
-    if (!pergunta) {
-        respostaDiv.innerHTML = "Digite uma pergunta.";
-        return;
-    }
+    if (!pergunta) { respostaDiv.innerHTML="Digite uma pergunta."; return; }
 
     respostaDiv.innerHTML = "Consultando...";
     pergunta = pergunta.replace(/[?.,]/g, "");
 
+    // Detecta o campo principal
     let campo = null;
     if (pergunta.includes("chefe")) campo = "chefe";
     if (pergunta.includes("empresa")) campo = "empresa";
@@ -198,67 +189,62 @@ window.consultar = async function() {
     if (pergunta.includes("cargo")) campo = "cargo";
     if (pergunta.includes("status")) campo = "status";
 
-    let filtroSetor = null;
-    let filtroEmpresa = null;
-    let nome = null;
+    // Detecta filtros
+    let nome = null, filtroSetor=null, filtroEmpresa=null;
 
-    if (pergunta.includes("mostrar todos do setor")) {
+    if (pergunta.includes("mostrar todos do setor"))
         filtroSetor = pergunta.split("mostrar todos do setor")[1].trim();
-    }
-    else if (pergunta.includes("mostrar todos da empresa")) {
+    else if (pergunta.includes("mostrar todos da empresa"))
         filtroEmpresa = pergunta.split("mostrar todos da empresa")[1].trim();
-    }
-    else {
-        if (pergunta.includes(" de "))
-            nome = pergunta.split(" de ")[1].trim();
-        else if (pergunta.includes(" do "))
-            nome = pergunta.split(" do ")[1].trim();
-        else if (pergunta.includes(" da "))
-            nome = pergunta.split(" da ")[1].trim();
-        else
-            nome = pergunta;
-    }
+    else if (pergunta.includes(" de "))
+        nome = pergunta.split(" de ")[1].trim();
+    else if (pergunta.includes(" do "))
+        nome = pergunta.split(" do ")[1].trim();
+    else if (pergunta.includes(" da "))
+        nome = pergunta.split(" da ")[1].trim();
+    else
+        nome = pergunta;
 
     try {
-
-        let query = "";
-
-        if (filtroSetor) query = "?setor=" + encodeURIComponent(filtroSetor);
-        else if (filtroEmpresa) query = "?empresa=" + encodeURIComponent(filtroEmpresa);
-        else query = "?nome=" + encodeURIComponent(nome);
-
-        const response = await fetch(WEBHOOK_URL + query);
+        // Sempre puxa todos os registros do webhook
+        const response = await fetch(WEBHOOK_URL + "?nome=");
         const data = await response.json();
 
-        if (!data || data.length === 0) {
-            respostaDiv.innerHTML = "Nenhum registro encontrado.";
-            return;
-        }
+        if (!data || data.length === 0) { respostaDiv.innerHTML="Nenhum registro encontrado."; return; }
 
+        let resultados = data;
+
+        // FILTROS LOCAIS
+        if (nome && !filtroSetor && !filtroEmpresa)
+            resultados = data.filter(f => f.nome.toLowerCase().includes(nome));
+
+        if (filtroSetor)
+            resultados = data.filter(f => f.setor.toLowerCase().includes(filtroSetor));
+
+        if (filtroEmpresa)
+            resultados = data.filter(f => f.empresa.toLowerCase().includes(filtroEmpresa));
+
+        if (resultados.length === 0) { respostaDiv.innerHTML="Nenhum registro encontrado."; return; }
+
+        // MONTAR RESPOSTA NATURAL
         let html = "";
-
-        data.forEach(func => {
-
+        resultados.forEach(func => {
             if (campo && nome) {
                 html += `O ${campo} de <strong>${func.nome}</strong> é <strong>${func[campo]}</strong>.<br><br>`;
-            } 
-            else {
-                html += `
-                <strong>${func.nome}</strong><br>
-                Setor: ${func.setor}<br>
-                Cargo: ${func.cargo}<br>
-                Chefe: ${func.chefe}<br>
-                Empresa: ${func.empresa}<br>
-                Status: ${func.status}
-                <hr>`;
+            } else {
+                html += `<strong>${func.nome}</strong><br>
+                    Setor: ${func.setor}<br>
+                    Cargo: ${func.cargo}<br>
+                    Chefe: ${func.chefe}<br>
+                    Empresa: ${func.empresa}<br>
+                    Status: ${func.status}<hr>`;
             }
-
         });
 
-        respostaDiv.innerHTML = html;
+        respostaDiv.innerHTML = `🔎 Encontrei ${resultados.length} resultado(s):<br><br>` + html;
 
     } catch (error) {
-        respostaDiv.innerHTML = "Erro ao consultar sistema.";
+        respostaDiv.innerHTML="Erro ao consultar sistema.";
     }
 }
 
@@ -272,6 +258,5 @@ window.limpar = function() {
 
 </body>
 </html>
-
 
 
