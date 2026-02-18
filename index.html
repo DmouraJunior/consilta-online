@@ -59,6 +59,7 @@ input {
     border-radius: 6px;
     border: 1px solid #ccc;
     margin-bottom: 12px;
+    font-size: 14px;
 }
 
 button {
@@ -71,6 +72,7 @@ button {
     font-weight: 600;
     cursor: pointer;
     margin-bottom: 8px;
+    transition: 0.2s;
 }
 
 button:hover { background: #002244; }
@@ -88,6 +90,7 @@ button:hover { background: #002244; }
     background: #f1f3f6;
     padding: 15px;
     border-radius: 8px;
+    min-height: 60px;
     font-size: 14px;
     border-left: 4px solid #002b5c;
 }
@@ -96,6 +99,7 @@ button:hover { background: #002244; }
     text-align: center;
     padding: 15px;
     font-size: 12px;
+    color: #555;
     background: #e9edf2;
 }
 </style>
@@ -113,10 +117,9 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div class="main">
 <div class="container">
 
-<!-- LOGIN -->
 <div id="loginArea">
 <div class="titulo-area">
-<img src="brasao-dgf.png" class="logo-titulo">
+<img src="brasao-dgf.png" alt="Brasão DGF" class="logo-titulo">
 <h2>Sistema Integrado de Consulta de Servidores - DGF</h2>
 </div>
 
@@ -125,11 +128,10 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <button onclick="login()">Entrar no Sistema</button>
 </div>
 
-<!-- SISTEMA -->
 <div id="sistemaArea" class="hidden">
 <h2>Assistente de Consulta</h2>
 
-<input type="text" id="pergunta" placeholder="Ex: todos da equipe de Lourdes">
+<input type="text" id="pergunta" placeholder="Ex: Quem é o chefe de Edson?">
 <button onclick="consultar()">Consultar</button>
 <button class="secondary" onclick="limpar()">Nova Consulta</button>
 <button class="logout" onclick="logout()">Encerrar Sessão</button>
@@ -141,13 +143,14 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 </div>
 
 <div class="footer">
-© 2026 - Diretoria Geral de Finanças (DGF)
+© 2026 - Diretoria Geral de Finanças (DGF) • Uso interno e restrito
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
-const WEBHOOK_URL = "SEU_WEBHOOK_AQUI";
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
+const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
 const usuarios = [
 { usuario: "admin", senha: "1234" },
@@ -161,85 +164,129 @@ const senhaInput = document.getElementById("senha");
 const perguntaInput = document.getElementById("pergunta");
 const respostaDiv = document.getElementById("resposta");
 
-usuarioInput.addEventListener("keydown", e => { if (e.key==="Enter") login(); });
-senhaInput.addEventListener("keydown", e => { if (e.key==="Enter") login(); });
-perguntaInput.addEventListener("keydown", e => { if (e.key==="Enter") consultar(); });
+/* ENTER login */
+usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+
+/* ENTER consulta */
+perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
+
+function verificarSessao() {
+const tempoLogin = localStorage.getItem("tempoLogin");
+if (!tempoLogin) return false;
+
+const agora = Date.now();
+const diferenca = agora - parseInt(tempoLogin);
+
+if (diferenca > TEMPO_EXPIRACAO) {
+localStorage.removeItem("logado");
+localStorage.removeItem("tempoLogin");
+return false;
+}
+return true;
+}
+
+if (localStorage.getItem("logado") === "true" && verificarSessao()) {
+loginArea.classList.add("hidden");
+sistemaArea.classList.remove("hidden");
+}
 
 window.login = function() {
-const autorizado = usuarios.find(u =>
-u.usuario===usuarioInput.value && u.senha===senhaInput.value
-);
+const user = usuarioInput.value.trim();
+const pass = senhaInput.value.trim();
+
+const autorizado = usuarios.find(u => u.usuario === user && u.senha === pass);
+
 if (autorizado) {
+localStorage.setItem("logado", "true");
+localStorage.setItem("tempoLogin", Date.now());
 loginArea.classList.add("hidden");
 sistemaArea.classList.remove("hidden");
 perguntaInput.focus();
-} else alert("Usuário ou senha inválidos.");
+} else {
+alert("Usuário ou senha inválidos.");
+}
 }
 
-window.logout = () => location.reload();
+window.logout = function() {
+localStorage.removeItem("logado");
+localStorage.removeItem("tempoLogin");
+location.reload();
+}
 
 window.consultar = async function() {
 
-let pergunta = perguntaInput.value.toLowerCase().trim();
-if (!pergunta) return;
-
-respostaDiv.innerHTML = "Consultando...";
-
-let tipo = "nome";
-let termo = "";
-
-// equipe
-if (pergunta.includes("equipe de")) {
-tipo = "chefe";
-termo = pergunta.split("equipe de")[1].trim();
-}
-
-// empresa explícita
-else if (pergunta.includes("empresa")) {
-tipo = "empresa";
-termo = pergunta.split("empresa")[1].trim();
-}
-
-// padrão "da ___" = setor
-else if (pergunta.includes("da ")) {
-tipo = "setor";
-termo = pergunta.split("da ")[1].trim();
-}
-
-else {
-termo = pergunta.split(" ").pop();
-}
-
-try {
-const response = await fetch(`${WEBHOOK_URL}?tipo=${tipo}&busca=${encodeURIComponent(termo)}`);
-const data = await response.json();
-
-if (!data.length) {
-respostaDiv.innerHTML = "Nenhum resultado.";
+if (!verificarSessao()) {
+alert("Sessão expirada.");
+logout();
 return;
 }
 
-let html = `<strong>${data.length} resultado(s)</strong><br><br>`;
+let pergunta = perguntaInput.value.trim().toLowerCase();
 
-data.forEach(f => {
+if (!pergunta) {
+respostaDiv.innerHTML = "Digite uma pergunta.";
+return;
+}
+
+respostaDiv.innerHTML = "Consultando...";
+pergunta = pergunta.replace(/[?.,]/g, "");
+
+let campo = "completo";
+
+if (pergunta.includes("chefe")) campo = "chefe";
+else if (pergunta.includes("empresa")) campo = "empresa";
+else if (pergunta.includes("setor")) campo = "setor";
+else if (pergunta.includes("cargo")) campo = "cargo";
+else if (pergunta.includes("status")) campo = "status";
+
+const palavras = pergunta.split(" ");
+const nome = palavras[palavras.length - 1];
+
+try {
+const response = await fetch(WEBHOOK_URL + "?nome=" + encodeURIComponent(nome));
+const data = await response.json();
+
+if (!data || data.length === 0) {
+respostaDiv.innerHTML = "Registro não encontrado.";
+return;
+}
+
+let html = `<strong>${data.length} resultado(s) encontrado(s)</strong><br><br>`;
+
+data.forEach(func => {
+
+if (campo !== "completo") {
 html += `
 <div style="margin-bottom:12px;">
-<strong>👤 ${f.nome}</strong><br>
-🏢 ${f.setor} | 💼 ${f.cargo}<br>
-👨‍💼 ${f.chefe} | 🏬 ${f.empresa}
+<strong>👤 ${func.nome}</strong><br>
+${campo.toUpperCase()}: ${func[campo]}
 </div>`;
+} else {
+html += `
+<div style="margin-bottom:12px;">
+<strong>👤 ${func.nome}</strong><br>
+🏢 Setor: ${func.setor}<br>
+💼 Cargo: ${func.cargo}<br>
+👨‍💼 Chefe: ${func.chefe}<br>
+🏬 Empresa: ${func.empresa}<br>
+📊 Status: ${func.status}
+</div>`;
+}
+
 });
 
 respostaDiv.innerHTML = html;
 
-} catch {
-respostaDiv.innerHTML = "Erro na consulta.";
+} catch (error) {
+respostaDiv.innerHTML = "Erro ao consultar sistema.";
 }
 }
 
 window.limpar = function() {
-perguntaInput.value="";
-respostaDiv.innerHTML="";
+perguntaInput.value = "";
+respostaDiv.innerHTML = "";
+perguntaInput.focus();
 }
 
 });
@@ -247,5 +294,4 @@ respostaDiv.innerHTML="";
 
 </body>
 </html>
-
 
