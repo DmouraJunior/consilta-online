@@ -175,33 +175,34 @@ async function consultar() {
     const campo = document.getElementById("nome");
     const resultado = document.getElementById("resultado");
 
-    const perguntaOriginal = campo.value.trim();
+    const texto = campo.value.trim();
 
-    if (!perguntaOriginal) {
-        resultado.innerHTML = "Digite algo para consultar.";
+    if (!texto) {
+        resultado.innerHTML = "Digite nome ou consulta funcional.";
         return;
     }
 
-    const pergunta = perguntaOriginal.toLowerCase();
+    const pergunta = texto.toLowerCase();
 
-    let nome = perguntaOriginal;
+    let nome = texto;
     let tipo = "todos";
 
+    // 🔥 Extrai nome corretamente
     if (pergunta.includes("chefe")) {
         tipo = "chefe";
-        nome = pergunta.split("de")[1]?.trim();
+        nome = texto.toLowerCase().replace("quem é o chefe de", "").trim();
     }
     else if (pergunta.includes("empresa")) {
         tipo = "empresa";
-        nome = pergunta.split("de")[1]?.trim();
+        nome = texto.toLowerCase().replace("qual a empresa de", "").trim();
     }
     else if (pergunta.includes("setor")) {
         tipo = "setor";
-        nome = pergunta.split("de")[1]?.trim();
+        nome = texto.toLowerCase().replace("qual o setor de", "").trim();
     }
     else if (pergunta.includes("cargo")) {
         tipo = "cargo";
-        nome = pergunta.split("de")[1]?.trim();
+        nome = texto.toLowerCase().replace("cargo de", "").trim();
     }
 
     try {
@@ -215,7 +216,7 @@ async function consultar() {
         }
 
         if (!Array.isArray(dados)) {
-            resultado.innerHTML = "Formato inesperado.";
+            resultado.innerHTML = "Erro no formato dos dados.";
             return;
         }
 
@@ -223,11 +224,11 @@ async function consultar() {
 
         dados.forEach(func => {
 
-            const nomeResp   = func.Nome   || func.nome   || "";
-            const cargoResp  = func.Cargo  || func.cargo  || "";
-            const setorResp  = func.Setor  || func.setor  || "";
-            const chefeResp  = func.Chefe  || func.chefe  || "";
-            const empresaResp= func.Empresa|| func.empresa|| "";
+            const nomeResp    = func.Nome    || func.nome    || "";
+            const cargoResp   = func.Cargo   || func.cargo   || "";
+            const setorResp   = func.Setor   || func.setor   || "";
+            const chefeResp   = func.Chefe   || func.chefe   || "";
+            const empresaResp = func.Empresa || func.empresa || "";
 
             if (tipo === "chefe") {
                 html += `<p><strong>${nomeResp}</strong> → Chefe: ${chefeResp}</p>`;
@@ -265,7 +266,6 @@ async function consultar() {
 }
 
 </script>
-
 
 </body>
 </html>
