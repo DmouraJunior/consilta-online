@@ -1,3 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Consulta de Funcionários</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 400px;
+            margin: auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #resultado {
+            margin-top: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Consulta Interna</h2>
+    <input type="text" id="nome" placeholder="Digite sua pergunta...">
+    <br>
+    <button onclick="consultar()">Consultar</button>
+
+    <div id="resultado"></div>
+</div>
+
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbxpXRSc5LcL7yW_2St6q28CQzMj5nR4YI4pHEWQKHZ2Fgym1EWvbTW1ME5Qu0cKp9Mc/exec";
 
@@ -50,10 +110,10 @@ async function consultar() {
                 break;
             default:
                 resultado.innerHTML = `
-                    Nome: ${data.nome} <br>
-                    Cargo: ${data.cargo} <br>
-                    Setor: ${data.setor} <br>
-                    Chefe: ${data.chefe}
+                    <strong>Nome:</strong> ${data.nome} <br>
+                    <strong>Cargo:</strong> ${data.cargo} <br>
+                    <strong>Setor:</strong> ${data.setor} <br>
+                    <strong>Chefe:</strong> ${data.chefe}
                 `;
         }
 
@@ -62,3 +122,6 @@ async function consultar() {
     }
 }
 </script>
+
+</body>
+</html>
