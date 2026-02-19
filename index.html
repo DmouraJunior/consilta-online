@@ -388,9 +388,10 @@ html += `
 <div style="margin-bottom:12px; display:flex; align-items:center; gap:10px;">
 
 <img src="${f.foto || 'https://via.placeholder.com/60'}"
-style="width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #002b5c;">
+<div style="margin-bottom:12px;">
 
-<div>
+<img src="${f.foto}" style="width:60px; height:60px; border-radius:50%; object-fit:cover; margin-bottom:5px;">
+
 <strong>👤 ${f.nome}</strong><br>
 🏢 Setor: ${f.setor}<br>
 💼 Cargo: ${f.cargo}<br>
