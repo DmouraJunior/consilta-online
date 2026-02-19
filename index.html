@@ -206,7 +206,7 @@ if (frase.includes(c)) return frase.split(c)[1]?.trim();
 return null;
 }
 
-// 🚀 CONSULTA INTELIGENTE ATUALIZADA
+// 🚀 CONSULTA FINAL COMPLETA
 window.consultar = async function() {
 
 if (!verificarSessao()) { logout(); return; }
@@ -226,22 +226,28 @@ tipo = "equipe";
 termo = extrairTermo(pergunta, ["equipe de","time de"]);
 }
 
-// funcionarios empresa
+// funcionarios
 if (!termo && (pergunta.includes("funcionarios") || pergunta.includes("funcionários"))) {
 tipo = "empresa";
 termo = extrairTermo(pergunta, ["funcionarios da","funcionários da"]);
 }
 
-// setor
+// setor (RETORNOU)
 if (!termo && pergunta.includes("setor")) {
-tipo = "setor";
-termo = extrairTermo(pergunta, ["setor de","do setor"]);
+tipo = "setor_nome";
+termo = extrairTermo(pergunta, ["setor de","qual setor","do setor"]);
 }
 
-// empresa
+// empresa (RETORNOU)
 if (!termo && pergunta.includes("empresa")) {
-tipo = "empresa";
-termo = extrairTermo(pergunta, ["empresa de","da empresa"]);
+tipo = "empresa_nome";
+termo = extrairTermo(pergunta, ["empresa de","da empresa","trabalha"]);
+}
+
+// cargo (RETORNOU)
+if (!termo && pergunta.includes("cargo")) {
+tipo = "cargo_nome";
+termo = extrairTermo(pergunta, ["cargo de"]);
 }
 
 // chefe
@@ -272,43 +278,91 @@ const data = await response.json();
 
 let resultados = [];
 
-// ✅ CORREÇÃO AQUI
+// ✅ CHEFE (MÚLTIPLOS)
 if (tipo === "chefe") {
 
-    let pessoas = data.filter(f =>
-        f.nome.toLowerCase().includes(termo)
-    );
+let pessoas = data.filter(f =>
+f.nome.toLowerCase().includes(termo)
+);
 
-    if (!pessoas.length)
-        return respostaDiv.innerHTML = "Pessoa não encontrada.";
+if (!pessoas.length)
+return respostaDiv.innerHTML = "Pessoa não encontrada.";
 
-    let html = `<strong>${pessoas.length} resultado(s)</strong><br><br>`;
+let html = `<strong>${pessoas.length} resultado(s)</strong><br><br>`;
 
-    pessoas.forEach(p => {
-        html += `
-        <div style="margin-bottom:12px;">
-        👤 <strong>${p.nome}</strong><br>
-        👨‍💼 Chefe: ${p.chefe}
-        </div>`;
-    });
+pessoas.forEach(p => {
+html += `
+<div style="margin-bottom:12px;">
+👤 <strong>${p.nome}</strong><br>
+👨‍💼 Chefe: ${p.chefe}
+</div>`;
+});
 
-    return respostaDiv.innerHTML = html;
+return respostaDiv.innerHTML = html;
 }
 
-else if (tipo === "equipe") {
+// ✅ SETOR
+if (tipo === "setor_nome") {
+let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
+
+if (!pessoas.length)
+return respostaDiv.innerHTML = "Pessoa não encontrada.";
+
+let html = "";
+pessoas.forEach(p => {
+html += `🏢 ${p.nome} está no setor: <strong>${p.setor}</strong><br>`;
+});
+
+return respostaDiv.innerHTML = html;
+}
+
+// ✅ EMPRESA
+if (tipo === "empresa_nome") {
+let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
+
+if (!pessoas.length)
+return respostaDiv.innerHTML = "Pessoa não encontrada.";
+
+let html = "";
+pessoas.forEach(p => {
+html += `🏬 ${p.nome} trabalha na empresa: <strong>${p.empresa}</strong><br>`;
+});
+
+return respostaDiv.innerHTML = html;
+}
+
+// ✅ CARGO
+if (tipo === "cargo_nome") {
+let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
+
+if (!pessoas.length)
+return respostaDiv.innerHTML = "Pessoa não encontrada.";
+
+let html = "";
+pessoas.forEach(p => {
+html += `💼 Cargo de ${p.nome}: <strong>${p.cargo}</strong><br>`;
+});
+
+return respostaDiv.innerHTML = html;
+}
+
+// equipe
+if (tipo === "equipe") {
 resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
 }
 
+// empresa geral
 else if (tipo === "empresa") {
 resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
 }
 
+// setor geral
 else if (tipo === "setor") {
 resultados = data.filter(f => f.setor.toLowerCase().includes(termo));
 }
 
+// contagem
 else if (tipo === "contagem") {
-
 resultados = data.filter(f =>
 f.setor.toLowerCase().includes(termo) ||
 f.empresa.toLowerCase().includes(termo) ||
@@ -319,6 +373,7 @@ return respostaDiv.innerHTML =
 `📊 Total encontrado para "<strong>${termo}</strong>": <strong>${resultados.length}</strong>`;
 }
 
+// padrão
 else {
 resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
 }
