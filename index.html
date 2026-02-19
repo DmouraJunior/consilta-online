@@ -272,7 +272,30 @@ const data = await response.json();
 
 let resultados = [];
 
-if (tipo === "equipe") {
+// ✅ CORREÇÃO AQUI
+if (tipo === "chefe") {
+
+    let pessoas = data.filter(f =>
+        f.nome.toLowerCase().includes(termo)
+    );
+
+    if (!pessoas.length)
+        return respostaDiv.innerHTML = "Pessoa não encontrada.";
+
+    let html = `<strong>${pessoas.length} resultado(s)</strong><br><br>`;
+
+    pessoas.forEach(p => {
+        html += `
+        <div style="margin-bottom:12px;">
+        👤 <strong>${p.nome}</strong><br>
+        👨‍💼 Chefe: ${p.chefe}
+        </div>`;
+    });
+
+    return respostaDiv.innerHTML = html;
+}
+
+else if (tipo === "equipe") {
 resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
 }
 
@@ -282,13 +305,6 @@ resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
 
 else if (tipo === "setor") {
 resultados = data.filter(f => f.setor.toLowerCase().includes(termo));
-}
-
-else if (tipo === "chefe") {
-let p = data.find(f => f.nome.toLowerCase().includes(termo));
-return respostaDiv.innerHTML = p
-? `👨‍💼 Chefe de <strong>${p.nome}</strong>: ${p.chefe}`
-: "Pessoa não encontrada.";
 }
 
 else if (tipo === "contagem") {
