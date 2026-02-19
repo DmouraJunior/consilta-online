@@ -3,89 +3,104 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Inteligente DGF</title>
+<title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     font-family: 'Segoe UI', sans-serif;
-    background:#f4f6f9;
+    background: #f4f6f9;
 }
 
 .topbar {
-    background:#002b5c;
-    color:#fff;
-    padding:18px 30px;
-    font-weight:600;
+    background: #002b5c;
+    color: white;
+    padding: 18px 30px;
+    font-size: 18px;
+    font-weight: 600;
 }
 
-.gold-line { height:4px; background:#c9a227; }
+.topbar small {
+    display: block;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.gold-line { height: 4px; background: #c9a227; }
 
 .main {
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:calc(100vh - 110px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 110px);
 }
 
 .container {
-    background:#fff;
-    padding:30px;
-    border-radius:12px;
-    width:500px;
-    box-shadow:0 15px 40px rgba(0,0,0,0.1);
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    width: 460px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
 }
 
-.logo {
-    height:60px;
-    display:block;
-    margin:0 auto 10px;
+.titulo-area { text-align: center; margin-bottom: 25px; }
+
+.logo-titulo {
+    height: 70px;
+    margin-bottom: 10px;
 }
 
-h2 {
-    text-align:center;
-    color:#002b5c;
-    margin-bottom:20px;
-}
+h2 { color: #002b5c; font-size: 18px; }
 
 input {
-    width:100%;
-    padding:12px;
-    border-radius:6px;
-    border:1px solid #ccc;
-    margin-bottom:10px;
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 12px;
+    font-size: 14px;
 }
 
 button {
-    width:100%;
-    padding:12px;
-    border:none;
-    border-radius:6px;
-    background:#003366;
-    color:#fff;
-    font-weight:600;
-    cursor:pointer;
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: none;
+    background: #003366;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 8px;
+    transition: 0.2s;
 }
 
-.chat {
-    margin-top:15px;
-    max-height:250px;
-    overflow-y:auto;
-    background:#f1f3f6;
-    padding:10px;
-    border-radius:8px;
+button:hover { background: #002244; }
+
+.secondary { background: #5c6f82; }
+.secondary:hover { background: #4b5c6b; }
+
+.logout { background: #8b0000; }
+.logout:hover { background: #6e0000; }
+
+.hidden { display: none; }
+
+.response {
+    margin-top: 15px;
+    background: #f1f3f6;
+    padding: 15px;
+    border-radius: 8px;
+    min-height: 60px;
+    font-size: 14px;
+    border-left: 4px solid #002b5c;
 }
-
-.msg { margin-bottom:10px; }
-
-.user { text-align:right; color:#003366; }
-.bot { text-align:left; }
 
 .footer {
-    text-align:center;
-    padding:10px;
-    font-size:12px;
+    text-align: center;
+    padding: 15px;
+    font-size: 12px;
+    color: #555;
+    background: #e9edf2;
 }
 </style>
 </head>
@@ -93,127 +108,204 @@ button {
 <body>
 
 <div class="topbar">
-Secretaria Estadual de Pernambuco - DGF
+Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
+<small>Sistema Interno Oficial</small>
 </div>
+
 <div class="gold-line"></div>
 
 <div class="main">
 <div class="container">
 
-<img src="brasao-dgf.png" class="logo">
-<h2>Assistente Inteligente DGF</h2>
+<div id="loginArea">
+<div class="titulo-area">
+<img src="brasao-dgf.png" alt="Brasão DGF" class="logo-titulo">
+<h2>Sistema Integrado de Consulta de Servidores - DGF</h2>
+</div>
 
-<input type="text" id="pergunta" placeholder="Ex: chefe e setor de edson">
-<button onclick="consultar()">Perguntar</button>
+<input type="text" id="usuario" placeholder="Usuário institucional">
+<input type="password" id="senha" placeholder="Senha">
+<button onclick="login()">Entrar no Sistema</button>
+</div>
 
-<div class="chat" id="chat"></div>
+<div id="sistemaArea" class="hidden">
+<h2>Assistente de Consulta</h2>
+
+<input type="text" id="pergunta" placeholder="Ex: quem é o chefe de João?">
+<button onclick="consultar()">Consultar</button>
+<button class="secondary" onclick="limpar()">Nova Consulta</button>
+<button class="logout" onclick="logout()">Encerrar Sessão</button>
+
+<div class="response" id="resposta"></div>
+</div>
 
 </div>
 </div>
 
 <div class="footer">
-© 2026 - DGF
+© 2026 - Diretoria Geral de Finanças (DGF) • Uso interno e restrito
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", function() {
 
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
+const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
-const chatDiv = document.getElementById("chat");
-const input = document.getElementById("pergunta");
+const usuarios = [
+{ usuario: "admin", senha: "1234" },
+{ usuario: "mauro", senha: "0000" }
+];
 
-input.addEventListener("keydown", e => {
-if(e.key === "Enter") consultar();
+const loginArea = document.getElementById("loginArea");
+const sistemaArea = document.getElementById("sistemaArea");
+const usuarioInput = document.getElementById("usuario");
+const senhaInput = document.getElementById("senha");
+const perguntaInput = document.getElementById("pergunta");
+const respostaDiv = document.getElementById("resposta");
+
+usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
+
+function verificarSessao() {
+const tempoLogin = localStorage.getItem("tempoLogin");
+if (!tempoLogin) return false;
+return (Date.now() - parseInt(tempoLogin)) <= TEMPO_EXPIRACAO;
+}
+
+if (localStorage.getItem("logado") === "true" && verificarSessao()) {
+loginArea.classList.add("hidden");
+sistemaArea.classList.remove("hidden");
+}
+
+window.login = function() {
+const autorizado = usuarios.find(u =>
+u.usuario === usuarioInput.value.trim() &&
+u.senha === senhaInput.value.trim()
+);
+
+if (autorizado) {
+localStorage.setItem("logado", "true");
+localStorage.setItem("tempoLogin", Date.now());
+loginArea.classList.add("hidden");
+sistemaArea.classList.remove("hidden");
+perguntaInput.focus();
+} else alert("Usuário ou senha inválidos.");
+}
+
+window.logout = function() {
+localStorage.clear();
+location.reload();
+}
+
+function extrairTermo(frase, chaves) {
+for (let c of chaves) {
+if (frase.includes(c)) return frase.split(c)[1]?.trim();
+}
+return null;
+}
+
+window.consultar = async function() {
+
+if (!verificarSessao()) { logout(); return; }
+
+let pergunta = perguntaInput.value.trim().toLowerCase();
+if (!pergunta) return respostaDiv.innerHTML = "Digite uma pergunta.";
+
+respostaDiv.innerHTML = "Consultando...";
+pergunta = pergunta.replace(/[?.,]/g, "");
+
+let tipo = "nome";
+let termo = extrairTermo(pergunta, ["equipe de","time de","chefiados por"]);
+
+if (termo) tipo = "equipe";
+
+// NOVOS TIPOS
+
+if (!termo && (pergunta.includes("chefe de") || pergunta.includes("chefe do"))) {
+tipo = "chefe";
+termo = extrairTermo(pergunta, ["chefe de","chefe do"]);
+}
+
+if (!termo && (pergunta.includes("empresa de") || pergunta.includes("trabalha"))) {
+tipo = "empresa_nome";
+termo = extrairTermo(pergunta, ["empresa de","trabalha"]);
+}
+
+if (!termo && (pergunta.includes("setor de") || pergunta.includes("qual setor"))) {
+tipo = "setor_nome";
+termo = extrairTermo(pergunta, ["setor de","qual setor"]);
+}
+
+if (!termo && (pergunta.includes("cargo de"))) {
+tipo = "cargo_nome";
+termo = extrairTermo(pergunta, ["cargo de"]);
+}
+
+if (!termo) {
+termo = pergunta.split(" ").pop();
+}
+
+const response = await fetch(WEBHOOK_URL);
+const data = await response.json();
+
+// RESPOSTAS DIRETAS
+
+if (tipo === "chefe") {
+let p = data.find(f => f.nome.toLowerCase().includes(termo));
+return respostaDiv.innerHTML = p ? `👨‍💼 Chefe de <strong>${p.nome}</strong>: ${p.chefe}` : "Pessoa não encontrada.";
+}
+
+if (tipo === "empresa_nome") {
+let p = data.find(f => f.nome.toLowerCase().includes(termo));
+return respostaDiv.innerHTML = p ? `🏬 ${p.nome} trabalha na empresa: <strong>${p.empresa}</strong>` : "Pessoa não encontrada.";
+}
+
+if (tipo === "setor_nome") {
+let p = data.find(f => f.nome.toLowerCase().includes(termo));
+return respostaDiv.innerHTML = p ? `🏢 ${p.nome} está no setor: <strong>${p.setor}</strong>` : "Pessoa não encontrada.";
+}
+
+if (tipo === "cargo_nome") {
+let p = data.find(f => f.nome.toLowerCase().includes(termo));
+return respostaDiv.innerHTML = p ? `💼 Cargo de ${p.nome}: <strong>${p.cargo}</strong>` : "Pessoa não encontrada.";
+}
+
+// PADRÃO (BUSCA NORMAL)
+
+let resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
+
+if (!resultados.length)
+return respostaDiv.innerHTML = "Nenhum registro encontrado.";
+
+let html = `<strong>${resultados.length} resultado(s)</strong><br><br>`;
+
+resultados.forEach(f => {
+html += `
+<div style="margin-bottom:12px;">
+<strong>👤 ${f.nome}</strong><br>
+🏢 Setor: ${f.setor}<br>
+💼 Cargo: ${f.cargo}<br>
+👨‍💼 Chefe: ${f.chefe}<br>
+🏬 Empresa: ${f.empresa}<br>
+📊 Status: ${f.status}
+</div>`;
 });
 
-// MEMÓRIA
-let memoria = [];
-
-// FUNÇÃO CHAT
-function addMsg(texto, tipo){
-let div = document.createElement("div");
-div.className = "msg " + tipo;
-div.innerHTML = texto;
-chatDiv.appendChild(div);
-chatDiv.scrollTop = chatDiv.scrollHeight;
+respostaDiv.innerHTML = html;
 }
 
-// SIMILARIDADE
-function similar(a,b){
-let iguais=0;
-for(let i=0;i<Math.min(a.length,b.length);i++){
-if(a[i]===b[i]) iguais++;
-}
-return iguais/Math.max(a.length,b.length);
+window.limpar = function() {
+perguntaInput.value="";
+respostaDiv.innerHTML="";
+perguntaInput.focus();
 }
 
-function acharPessoa(data, termo){
-let melhor=null, score=0;
-
-data.forEach(p=>{
-let s = similar(p.nome.toLowerCase(), termo);
-if(s>score){ score=s; melhor=p; }
 });
-
-return score>0.5 ? melhor : null;
-}
-
-// CONSULTA
-async function consultar(){
-
-let pergunta = input.value.toLowerCase().trim();
-if(!pergunta) return;
-
-addMsg(pergunta,"user");
-input.value="";
-
-const res = await fetch(WEBHOOK_URL);
-const data = await res.json();
-
-// IDENTIFICAR NOME
-let termo = pergunta.split(" ").pop();
-let pessoa = data.find(p=>p.nome.toLowerCase().includes(termo)) || acharPessoa(data, termo);
-
-if(!pessoa){
-addMsg("❌ Não encontrei. Tente outro nome.","bot");
-return;
-}
-
-// MEMORIZAR
-memoria.push(pessoa);
-
-// PERGUNTAS COMPOSTAS
-let resposta = `💡 Sobre <strong>${pessoa.nome}</strong>:<br><br>`;
-
-if(pergunta.includes("chefe"))
-resposta += `👨‍💼 Chefe: <strong>${pessoa.chefe}</strong><br>`;
-
-if(pergunta.includes("setor"))
-resposta += `🏢 Setor: <strong>${pessoa.setor}</strong><br>`;
-
-if(pergunta.includes("empresa") || pergunta.includes("trabalha"))
-resposta += `🏬 Empresa: <strong>${pessoa.empresa}</strong><br>`;
-
-if(pergunta.includes("cargo"))
-resposta += `💼 Cargo: <strong>${pessoa.cargo}</strong><br>`;
-
-// SE NÃO ESPECIFICAR → TUDO
-if(resposta.includes("<br><br>") && resposta.split("<br>").length <= 3){
-resposta += `
-👤 Nome: ${pessoa.nome}<br>
-🏢 ${pessoa.setor}<br>
-💼 ${pessoa.cargo}<br>
-👨‍💼 ${pessoa.chefe}<br>
-🏬 ${pessoa.empresa}
-`;
-}
-
-addMsg(resposta,"bot");
-
-}
-
 </script>
 
 </body>
 </html>
+
 
