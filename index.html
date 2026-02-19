@@ -131,7 +131,7 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div id="sistemaArea" class="hidden">
 <h2>Assistente de Consulta</h2>
 
-<input type="text" id="pergunta" placeholder="Ex: quem é da equipe de Lourdes?">
+<input type="text" id="pergunta" placeholder="Ex: quem é o chefe de João?">
 <button onclick="consultar()">Consultar</button>
 <button class="secondary" onclick="limpar()">Nova Consulta</button>
 <button class="logout" onclick="logout()">Encerrar Sessão</button>
@@ -221,77 +221,68 @@ let termo = extrairTermo(pergunta, ["equipe de","time de","chefiados por"]);
 
 if (termo) tipo = "equipe";
 
-if (!termo) {
-termo = extrairTermo(pergunta, ["empresa","da empresa"]);
-if (termo) tipo = "empresa";
+// NOVOS TIPOS
+
+if (!termo && (pergunta.includes("chefe de") || pergunta.includes("chefe do"))) {
+tipo = "chefe";
+termo = extrairTermo(pergunta, ["chefe de","chefe do"]);
+}
+
+if (!termo && (pergunta.includes("empresa de") || pergunta.includes("trabalha"))) {
+tipo = "empresa_nome";
+termo = extrairTermo(pergunta, ["empresa de","trabalha"]);
+}
+
+if (!termo && (pergunta.includes("setor de") || pergunta.includes("qual setor"))) {
+tipo = "setor_nome";
+termo = extrairTermo(pergunta, ["setor de","qual setor"]);
+}
+
+if (!termo && (pergunta.includes("cargo de"))) {
+tipo = "cargo_nome";
+termo = extrairTermo(pergunta, ["cargo de"]);
 }
 
 if (!termo) {
-termo = extrairTermo(pergunta, ["setor","do setor"]);
-if (termo) tipo = "setor";
-}
-
-if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
-tipo = "contagem";
-termo = termo || pergunta.split(" ").pop();
-}
-
-if (pergunta.includes("estatística") || pergunta.includes("resumo")) {
-tipo = "estatistica";
-}
-
-if (!termo && tipo === "nome")
 termo = pergunta.split(" ").pop();
+}
 
 const response = await fetch(WEBHOOK_URL);
 const data = await response.json();
 
-let resultados = [];
+// RESPOSTAS DIRETAS
 
-if (tipo === "equipe")
-resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
-
-else if (tipo === "empresa")
-resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
-
-else if (tipo === "setor")
-resultados = data.filter(f => f.setor.toLowerCase().includes(termo));
-
-else if (tipo === "contagem") {
-resultados = data.filter(f =>
-f.setor.toLowerCase().includes(termo) ||
-f.empresa.toLowerCase().includes(termo) ||
-f.chefe.toLowerCase().includes(termo)
-);
-return respostaDiv.innerHTML =
-`Total encontrado: <strong>${resultados.length}</strong>`;
+if (tipo === "chefe") {
+let p = data.find(f => f.nome.toLowerCase().includes(termo));
+return respostaDiv.innerHTML = p ? `👨‍💼 Chefe de <strong>${p.nome}</strong>: ${p.chefe}` : "Pessoa não encontrada.";
 }
 
-else if (tipo === "estatistica") {
-
-let setores={}, empresas={};
-data.forEach(f=>{
-setores[f.setor]=(setores[f.setor]||0)+1;
-empresas[f.empresa]=(empresas[f.empresa]||0)+1;
-});
-
-let html="<strong>Resumo Estatístico</strong><br><br><b>Por setor:</b><br>";
-for(let s in setores) html+=`${s}: ${setores[s]}<br>`;
-html+="<br><b>Por empresa:</b><br>";
-for(let e in empresas) html+=`${e}: ${empresas[e]}<br>`;
-
-return respostaDiv.innerHTML=html;
+if (tipo === "empresa_nome") {
+let p = data.find(f => f.nome.toLowerCase().includes(termo));
+return respostaDiv.innerHTML = p ? `🏬 ${p.nome} trabalha na empresa: <strong>${p.empresa}</strong>` : "Pessoa não encontrada.";
 }
 
-else resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
+if (tipo === "setor_nome") {
+let p = data.find(f => f.nome.toLowerCase().includes(termo));
+return respostaDiv.innerHTML = p ? `🏢 ${p.nome} está no setor: <strong>${p.setor}</strong>` : "Pessoa não encontrada.";
+}
+
+if (tipo === "cargo_nome") {
+let p = data.find(f => f.nome.toLowerCase().includes(termo));
+return respostaDiv.innerHTML = p ? `💼 Cargo de ${p.nome}: <strong>${p.cargo}</strong>` : "Pessoa não encontrada.";
+}
+
+// PADRÃO (BUSCA NORMAL)
+
+let resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
 
 if (!resultados.length)
-return respostaDiv.innerHTML="Nenhum registro encontrado.";
+return respostaDiv.innerHTML = "Nenhum registro encontrado.";
 
-let html=`<strong>${resultados.length} resultado(s)</strong><br><br>`;
+let html = `<strong>${resultados.length} resultado(s)</strong><br><br>`;
 
-resultados.forEach(f=>{
-html+=`
+resultados.forEach(f => {
+html += `
 <div style="margin-bottom:12px;">
 <strong>👤 ${f.nome}</strong><br>
 🏢 Setor: ${f.setor}<br>
@@ -302,7 +293,7 @@ html+=`
 </div>`;
 });
 
-respostaDiv.innerHTML=html;
+respostaDiv.innerHTML = html;
 }
 
 window.limpar = function() {
@@ -316,5 +307,4 @@ perguntaInput.focus();
 
 </body>
 </html>
-
 
