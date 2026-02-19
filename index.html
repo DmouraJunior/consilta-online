@@ -131,7 +131,7 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div id="sistemaArea" class="hidden">
 <h2>Assistente de Consulta</h2>
 
-<input type="text" id="pergunta" placeholder="Ex: quem é o chefe de João?">
+<input type="text" id="pergunta" placeholder="Ex: equipe de Lourdes ou quantos na GC">
 <button onclick="consultar()">Consultar</button>
 <button class="secondary" onclick="limpar()">Nova Consulta</button>
 <button class="logout" onclick="logout()">Encerrar Sessão</button>
@@ -206,6 +206,7 @@ if (frase.includes(c)) return frase.split(c)[1]?.trim();
 return null;
 }
 
+// 🚀 CONSULTA INTELIGENTE ATUALIZADA
 window.consultar = async function() {
 
 if (!verificarSessao()) { logout(); return; }
@@ -217,64 +218,94 @@ respostaDiv.innerHTML = "Consultando...";
 pergunta = pergunta.replace(/[?.,]/g, "");
 
 let tipo = "nome";
-let termo = extrairTermo(pergunta, ["equipe de","time de","chefiados por"]);
+let termo = null;
 
-if (termo) tipo = "equipe";
+// equipe
+if (pergunta.includes("equipe") || pergunta.includes("time")) {
+tipo = "equipe";
+termo = extrairTermo(pergunta, ["equipe de","time de"]);
+}
 
-// NOVOS TIPOS
+// funcionarios empresa
+if (!termo && (pergunta.includes("funcionarios") || pergunta.includes("funcionários"))) {
+tipo = "empresa";
+termo = extrairTermo(pergunta, ["funcionarios da","funcionários da"]);
+}
 
-if (!termo && (pergunta.includes("chefe de") || pergunta.includes("chefe do"))) {
+// setor
+if (!termo && pergunta.includes("setor")) {
+tipo = "setor";
+termo = extrairTermo(pergunta, ["setor de","do setor"]);
+}
+
+// empresa
+if (!termo && pergunta.includes("empresa")) {
+tipo = "empresa";
+termo = extrairTermo(pergunta, ["empresa de","da empresa"]);
+}
+
+// chefe
+if (!termo && pergunta.includes("chefe")) {
 tipo = "chefe";
 termo = extrairTermo(pergunta, ["chefe de","chefe do"]);
 }
 
-if (!termo && (pergunta.includes("empresa de") || pergunta.includes("trabalha"))) {
-tipo = "empresa_nome";
-termo = extrairTermo(pergunta, ["empresa de","trabalha"]);
+// contagem
+if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
+tipo = "contagem";
+
+termo = extrairTermo(pergunta, [
+"quantos tem na",
+"quantos tem no",
+"quantos na",
+"quantas na",
+"quantas no"
+]);
+
+if (!termo) termo = pergunta.split(" ").pop();
 }
 
-if (!termo && (pergunta.includes("setor de") || pergunta.includes("qual setor"))) {
-tipo = "setor_nome";
-termo = extrairTermo(pergunta, ["setor de","qual setor"]);
-}
-
-if (!termo && (pergunta.includes("cargo de"))) {
-tipo = "cargo_nome";
-termo = extrairTermo(pergunta, ["cargo de"]);
-}
-
-if (!termo) {
-termo = pergunta.split(" ").pop();
-}
+if (!termo) termo = pergunta.split(" ").pop();
 
 const response = await fetch(WEBHOOK_URL);
 const data = await response.json();
 
-// RESPOSTAS DIRETAS
+let resultados = [];
 
-if (tipo === "chefe") {
-let p = data.find(f => f.nome.toLowerCase().includes(termo));
-return respostaDiv.innerHTML = p ? `👨‍💼 Chefe de <strong>${p.nome}</strong>: ${p.chefe}` : "Pessoa não encontrada.";
+if (tipo === "equipe") {
+resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
 }
 
-if (tipo === "empresa_nome") {
-let p = data.find(f => f.nome.toLowerCase().includes(termo));
-return respostaDiv.innerHTML = p ? `🏬 ${p.nome} trabalha na empresa: <strong>${p.empresa}</strong>` : "Pessoa não encontrada.";
+else if (tipo === "empresa") {
+resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
 }
 
-if (tipo === "setor_nome") {
-let p = data.find(f => f.nome.toLowerCase().includes(termo));
-return respostaDiv.innerHTML = p ? `🏢 ${p.nome} está no setor: <strong>${p.setor}</strong>` : "Pessoa não encontrada.";
+else if (tipo === "setor") {
+resultados = data.filter(f => f.setor.toLowerCase().includes(termo));
 }
 
-if (tipo === "cargo_nome") {
+else if (tipo === "chefe") {
 let p = data.find(f => f.nome.toLowerCase().includes(termo));
-return respostaDiv.innerHTML = p ? `💼 Cargo de ${p.nome}: <strong>${p.cargo}</strong>` : "Pessoa não encontrada.";
+return respostaDiv.innerHTML = p
+? `👨‍💼 Chefe de <strong>${p.nome}</strong>: ${p.chefe}`
+: "Pessoa não encontrada.";
 }
 
-// PADRÃO (BUSCA NORMAL)
+else if (tipo === "contagem") {
 
-let resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
+resultados = data.filter(f =>
+f.setor.toLowerCase().includes(termo) ||
+f.empresa.toLowerCase().includes(termo) ||
+f.chefe.toLowerCase().includes(termo)
+);
+
+return respostaDiv.innerHTML =
+`📊 Total encontrado para "<strong>${termo}</strong>": <strong>${resultados.length}</strong>`;
+}
+
+else {
+resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
+}
 
 if (!resultados.length)
 return respostaDiv.innerHTML = "Nenhum registro encontrado.";
@@ -307,5 +338,4 @@ perguntaInput.focus();
 
 </body>
 </html>
-
 
