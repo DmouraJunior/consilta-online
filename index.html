@@ -29,41 +29,6 @@ body {
 
 .gold-line { height: 4px; background: #c9a227; }
 
-/* ===== NOVO LOGIN ===== */
-.login-wrapper {
-    display: flex;
-    height: calc(100vh - 110px);
-}
-
-.login-left {
-    flex: 1;
-    background: linear-gradient(135deg, #002b5c, #003f88);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    text-align: center;
-    padding: 40px;
-}
-
-.login-left h1 {
-    font-size: 28px;
-    margin-bottom: 10px;
-}
-
-.login-left p {
-    font-size: 15px;
-    opacity: 0.85;
-}
-
-.login-right {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 .main {
     display: flex;
     justify-content: center;
@@ -128,6 +93,8 @@ button:hover { background: #002244; }
     min-height: 60px;
     font-size: 14px;
     border-left: 4px solid #002b5c;
+
+    /* ✅ ADICIONADO */
     height: 250px;
     overflow-y: auto;
 }
@@ -151,47 +118,32 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 
 <div class="gold-line"></div>
 
-<!-- NOVO WRAPPER -->
-<div class="login-wrapper">
+<div class="main">
+<div class="container">
 
-    <!-- LADO ESQUERDO -->
-    <div class="login-left">
-        <h1>Sistema DGF</h1>
-        <p>Consulta inteligente de servidores</p>
-    </div>
+<div id="loginArea">
+<div class="titulo-area">
+<img src="brasao-dgf.png" alt="Brasão DGF" class="logo-titulo">
+<h2>Sistema Integrado de Consulta de Servidores - DGF</h2>
+</div>
 
-    <!-- LADO DIREITO -->
-    <div class="login-right">
+<input type="text" id="usuario" placeholder="Usuário institucional">
+<input type="password" id="senha" placeholder="Senha">
+<button onclick="login()">Entrar no Sistema</button>
+</div>
 
-        <div class="main">
-        <div class="container">
+<div id="sistemaArea" class="hidden">
+<h2>Assistente de Consulta</h2>
 
-        <div id="loginArea">
-        <div class="titulo-area">
-        <img src="brasao-dgf.png" class="logo-titulo">
-        <h2>Sistema Integrado de Consulta de Servidores - DGF</h2>
-        </div>
+<input type="text" id="pergunta" placeholder="Ex: equipe de Lourdes ou quantos na GC">
+<button onclick="consultar()">Consultar</button>
+<button class="secondary" onclick="limpar()">Nova Consulta</button>
+<button class="logout" onclick="logout()">Encerrar Sessão</button>
 
-        <input type="text" id="usuario" placeholder="Usuário institucional">
-        <input type="password" id="senha" placeholder="Senha">
-        <button onclick="login()">Entrar no Sistema</button>
-        </div>
+<div class="response" id="resposta"></div>
+</div>
 
-        <div id="sistemaArea" class="hidden">
-        <h2>Assistente de Consulta</h2>
-
-        <input type="text" id="pergunta" placeholder="Ex: equipe de Lourdes ou quantos na GC">
-        <button onclick="consultar()">Consultar</button>
-        <button class="secondary" onclick="limpar()">Nova Consulta</button>
-        <button class="logout" onclick="logout()">Encerrar Sessão</button>
-
-        <div class="response" id="resposta"></div>
-        </div>
-
-        </div>
-        </div>
-
-    </div>
+</div>
 </div>
 
 <div class="footer">
@@ -199,7 +151,6 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 </div>
 
 <script>
-// SEU JS ORIGINAL (100% intacto)
 document.addEventListener("DOMContentLoaded", function() {
 
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
@@ -221,6 +172,7 @@ usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); 
 senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
 
+/* ✅ PAGINAÇÃO (ADICIONADO SEM MEXER NO RESTO) */
 let paginaAtual = 1;
 const itensPorPagina = 10;
 let resultadosGlobais = [];
@@ -439,6 +391,7 @@ resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
 if (!resultados.length)
 return respostaDiv.innerHTML = "Nenhum registro encontrado.";
 
+/* ✅ AQUI FOI A ÚNICA SUBSTITUIÇÃO */
 resultadosGlobais = resultados;
 paginaAtual = 1;
 renderizarPagina();
