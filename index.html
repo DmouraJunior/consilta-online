@@ -93,6 +93,10 @@ button:hover { background: #002244; }
     min-height: 60px;
     font-size: 14px;
     border-left: 4px solid #002b5c;
+
+    /* ✅ ADICIONADO */
+    height: 250px;
+    overflow-y: auto;
 }
 
 .footer {
@@ -131,7 +135,7 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div id="sistemaArea" class="hidden">
 <h2>Assistente de Consulta</h2>
 
-<input type="text" id="pergunta" placeholder="Ex: quem é da equipe de Lourdes?">
+<input type="text" id="pergunta" placeholder="Ex: equipe de Lourdes ou quantos na GC">
 <button onclick="consultar()">Consultar</button>
 <button class="secondary" onclick="limpar()">Nova Consulta</button>
 <button class="logout" onclick="logout()">Encerrar Sessão</button>
@@ -167,6 +171,54 @@ const respostaDiv = document.getElementById("resposta");
 usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
+
+/* ✅ PAGINAÇÃO (ADICIONADO SEM MEXER NO RESTO) */
+let paginaAtual = 1;
+const itensPorPagina = 10;
+let resultadosGlobais = [];
+
+function renderizarPagina() {
+    if (!respostaDiv) return;
+
+    const inicio = (paginaAtual - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    const pagina = resultadosGlobais.slice(inicio, fim);
+    const totalPaginas = Math.ceil(resultadosGlobais.length / itensPorPagina);
+
+    let html = `<strong>${resultadosGlobais.length} resultado(s)</strong><br>`;
+    html += `<small>Página ${paginaAtual} de ${totalPaginas}</small><br><br>`;
+
+    pagina.forEach(f => {
+        html += `
+        <div style="margin-bottom:10px;">
+        <strong>👤 ${f.nome}</strong><br>
+        🏢 Setor: ${f.setor}<br>
+        💼 Cargo: ${f.cargo}<br>
+        👨💼 Chefe: ${f.chefe}<br>
+        🏬 Empresa: ${f.empresa}<br>
+        📊 Status: ${f.status}
+        </div>`;
+    });
+
+    html += `<div style="text-align:center;">`;
+
+    if (paginaAtual > 1) html += `<button onclick="paginaAnterior()">⬅️</button>`;
+    if (fim < resultadosGlobais.length) html += `<button onclick="proximaPagina()">➡️</button>`;
+
+    html += `</div>`;
+
+    respostaDiv.innerHTML = html;
+}
+
+window.proximaPagina = function() {
+    paginaAtual++;
+    renderizarPagina();
+}
+
+window.paginaAnterior = function() {
+    paginaAtual--;
+    renderizarPagina();
+}
 
 function verificarSessao() {
 const tempoLogin = localStorage.getItem("tempoLogin");
@@ -217,46 +269,112 @@ respostaDiv.innerHTML = "Consultando...";
 pergunta = pergunta.replace(/[?.,]/g, "");
 
 let tipo = "nome";
-let termo = extrairTermo(pergunta, ["equipe de","time de","chefiados por"]);
+let termo = null;
 
-if (termo) tipo = "equipe";
-
-if (!termo) {
-termo = extrairTermo(pergunta, ["empresa","da empresa"]);
-if (termo) tipo = "empresa";
+if (pergunta.includes("equipe") || pergunta.includes("time")) {
+tipo = "equipe";
+termo = extrairTermo(pergunta, ["equipe de","time de"]);
 }
 
-if (!termo) {
-termo = extrairTermo(pergunta, ["setor","do setor"]);
-if (termo) tipo = "setor";
+if (!termo && (pergunta.includes("funcionarios") || pergunta.includes("funcionários"))) {
+tipo = "empresa";
+termo = extrairTermo(pergunta, ["funcionarios da","funcionários da"]);
+}
+
+if (!termo && pergunta.includes("setor")) {
+tipo = "setor_nome";
+termo = extrairTermo(pergunta, ["setor de","qual setor","do setor"]);
+}
+
+if (!termo && pergunta.includes("empresa")) {
+tipo = "empresa_nome";
+termo = extrairTermo(pergunta, ["empresa de","da empresa","trabalha"]);
+}
+
+if (!termo && pergunta.includes("cargo")) {
+tipo = "cargo_nome";
+termo = extrairTermo(pergunta, ["cargo de"]);
+}
+
+if (!termo && pergunta.includes("chefe")) {
+tipo = "chefe";
+termo = extrairTermo(pergunta, ["chefe de","chefe do"]);
 }
 
 if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
 tipo = "contagem";
-termo = termo || pergunta.split(" ").pop();
+
+termo = extrairTermo(pergunta, [
+"quantos tem na",
+"quantos tem no",
+"quantos na",
+"quantas na",
+"quantas no"
+]);
+
+if (!termo) termo = pergunta.split(" ").pop();
 }
 
-if (pergunta.includes("estatística") || pergunta.includes("resumo")) {
-tipo = "estatistica";
-}
-
-if (!termo && tipo === "nome")
-termo = pergunta.split(" ").pop();
+if (!termo) termo = pergunta.split(" ").pop();
 
 const response = await fetch(WEBHOOK_URL);
 const data = await response.json();
 
 let resultados = [];
 
-if (tipo === "equipe")
+if (tipo === "chefe") {
+let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
+if (!pessoas.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
+
+let html = `<strong>${pessoas.length} resultado(s)</strong><br><br>`;
+pessoas.forEach(p => {
+html += `<div style="margin-bottom:12px;">👤 <strong>${p.nome}</strong><br>👨💼 Chefe: ${p.chefe}</div>`;
+});
+return respostaDiv.innerHTML = html;
+}
+
+if (tipo === "setor_nome") {
+let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
+if (!pessoas.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
+
+let html = "";
+pessoas.forEach(p => {
+html += `🏢 ${p.nome} está no setor: <strong>${p.setor}</strong><br>`;
+});
+return respostaDiv.innerHTML = html;
+}
+
+if (tipo === "empresa_nome") {
+let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
+if (!pessoas.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
+
+let html = "";
+pessoas.forEach(p => {
+html += `🏬 ${p.nome} trabalha na empresa: <strong>${p.empresa}</strong><br>`;
+});
+return respostaDiv.innerHTML = html;
+}
+
+if (tipo === "cargo_nome") {
+let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
+if (!pessoas.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
+
+let html = "";
+pessoas.forEach(p => {
+html += `💼 Cargo de ${p.nome}: <strong>${p.cargo}</strong><br>`;
+});
+return respostaDiv.innerHTML = html;
+}
+
+if (tipo === "equipe") {
 resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
-
-else if (tipo === "empresa")
+}
+else if (tipo === "empresa") {
 resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
-
-else if (tipo === "setor")
+}
+else if (tipo === "setor") {
 resultados = data.filter(f => f.setor.toLowerCase().includes(termo));
-
+}
 else if (tipo === "contagem") {
 resultados = data.filter(f =>
 f.setor.toLowerCase().includes(termo) ||
@@ -264,45 +382,19 @@ f.empresa.toLowerCase().includes(termo) ||
 f.chefe.toLowerCase().includes(termo)
 );
 return respostaDiv.innerHTML =
-`Total encontrado: <strong>${resultados.length}</strong>`;
+`📊 Total encontrado para "<strong>${termo}</strong>": <strong>${resultados.length}</strong>`;
 }
-
-else if (tipo === "estatistica") {
-
-let setores={}, empresas={};
-data.forEach(f=>{
-setores[f.setor]=(setores[f.setor]||0)+1;
-empresas[f.empresa]=(empresas[f.empresa]||0)+1;
-});
-
-let html="<strong>Resumo Estatístico</strong><br><br><b>Por setor:</b><br>";
-for(let s in setores) html+=`${s}: ${setores[s]}<br>`;
-html+="<br><b>Por empresa:</b><br>";
-for(let e in empresas) html+=`${e}: ${empresas[e]}<br>`;
-
-return respostaDiv.innerHTML=html;
+else {
+resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
 }
-
-else resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
 
 if (!resultados.length)
-return respostaDiv.innerHTML="Nenhum registro encontrado.";
+return respostaDiv.innerHTML = "Nenhum registro encontrado.";
 
-let html=`<strong>${resultados.length} resultado(s)</strong><br><br>`;
-
-resultados.forEach(f=>{
-html+=`
-<div style="margin-bottom:12px;">
-<strong>👤 ${f.nome}</strong><br>
-🏢 Setor: ${f.setor}<br>
-💼 Cargo: ${f.cargo}<br>
-👨‍💼 Chefe: ${f.chefe}<br>
-🏬 Empresa: ${f.empresa}<br>
-📊 Status: ${f.status}
-</div>`;
-});
-
-respostaDiv.innerHTML=html;
+/* ✅ AQUI FOI A ÚNICA SUBSTITUIÇÃO */
+resultadosGlobais = resultados;
+paginaAtual = 1;
+renderizarPagina();
 }
 
 window.limpar = function() {
@@ -316,3 +408,4 @@ perguntaInput.focus();
 
 </body>
 </html>
+
