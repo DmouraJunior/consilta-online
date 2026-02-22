@@ -6,9 +6,14 @@
 <title>Sistema DGF</title>
 
 <style>
-body {
+* {
     margin: 0;
-    font-family: Arial, sans-serif;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
     background: #f4f6f9;
 }
 
@@ -18,75 +23,116 @@ body {
     height: 100vh;
     justify-content: center;
     align-items: center;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
 }
 
-.login-box {
-    background: white;
+.login-card {
+    background: #fff;
     padding: 40px;
-    border-radius: 10px;
-    width: 320px;
+    width: 350px;
+    border-radius: 12px;
     text-align: center;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-.login-box img {
-    width: 60px;
-    margin-bottom: 10px;
-}
-
-.login-box h2 {
-    margin-bottom: 20px;
-}
-
-.login-box input {
+.login-card input {
     width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-    border-radius: 5px;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
     border: 1px solid #ccc;
 }
 
-.login-box button {
+.login-card button {
     width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    background: #007BFF;
-    color: white;
+    padding: 12px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
+    background: #2a5298;
+    color: white;
     cursor: pointer;
 }
 
-.login-box button:hover {
-    background: #0056b3;
-}
-
-.nomes {
-    margin-top: 15px;
-    font-size: 12px;
-    color: #555;
-}
-
 /* SISTEMA */
-#sistemaPage {
+#sistema {
     display: none;
 }
 
-.header {
-    background: #007BFF;
+/* SIDEBAR */
+.sidebar {
+    width: 220px;
+    height: 100vh;
+    background: #2a5298;
     color: white;
-    padding: 15px;
-    text-align: center;
-}
-
-.container {
+    position: fixed;
     padding: 20px;
 }
 
-input.buscar {
-    padding: 10px;
-    width: 300px;
+.sidebar h2 {
+    margin-bottom: 20px;
 }
+
+.sidebar button {
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    border: none;
+    background: white;
+    color: #2a5298;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* HEADER */
+.header {
+    margin-left: 220px;
+    padding: 15px;
+    background: white;
+    border-bottom: 1px solid #ddd;
+}
+
+/* CONTEÚDO */
+.content {
+    margin-left: 220px;
+    padding: 20px;
+}
+
+/* CARDS */
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* INPUT */
+input {
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+}
+
+/* BUTTON */
+.btn {
+    padding: 10px;
+    background: #2a5298;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* TABLE */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
 </style>
 </head>
 
@@ -94,73 +140,142 @@ input.buscar {
 
 <!-- LOGIN -->
 <div id="loginPage">
-    <div class="login-box">
-        <!-- Se quiser, coloque o brasão aqui -->
-        <!-- <img src="brasao.png"> -->
-
-        <h2>Sistema Integrado de Consulta de Servidores - DGF</h2>
-
-        <input type="text" id="usuario" placeholder="Usuário">
-        <input type="password" id="senha" placeholder="Senha">
-
-        <button onclick="entrar()">Entrar</button>
-
-        <!-- NOMES EMBAIXO -->
-        <div class="nomes">
-            Desenvolvido por:<br>
-            Edson Elias<br>
-            Equipe DGF
-        </div>
+    <div class="login-card">
+        <h2>Sistema DGF</h2>
+        <input type="text" id="user" placeholder="Usuário">
+        <input type="password" id="pass" placeholder="Senha">
+        <button onclick="login()">Entrar</button>
     </div>
 </div>
 
 <!-- SISTEMA -->
-<div id="sistemaPage">
-    <div class="header">
-        Sistema Integrado de Consulta de Servidores - DGF
+<div id="sistema">
+
+    <div class="sidebar">
+        <h2>DGF</h2>
+        <button onclick="mostrar('dashboard')">Dashboard</button>
+        <button onclick="mostrar('consulta')">Consultar</button>
+        <button onclick="mostrar('cadastro')">Cadastrar</button>
+        <button onclick="logout()">Sair</button>
     </div>
 
-    <div class="container">
-        <h3>Bem-vindo ao sistema</h3>
+    <div class="header">
+        Sistema Integrado de Consulta de Servidores
+    </div>
 
-        <input class="buscar" type="text" id="busca" placeholder="Buscar servidor..." onkeypress="if(event.key==='Enter') buscar()">
-        <button onclick="buscar()">Buscar</button>
+    <div class="content">
 
-        <p id="resultado"></p>
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="card">
+            <h3>Bem-vindo ao sistema</h3>
+            <p>Total de servidores: <span id="total"></span></p>
+        </div>
+
+        <!-- CONSULTA -->
+        <div id="consulta" class="card" style="display:none;">
+            <h3>Consulta de Servidores</h3>
+            <input type="text" id="busca" placeholder="Digite o nome..." onkeyup="buscar()">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Setor</th>
+                    </tr>
+                </thead>
+                <tbody id="resultado"></tbody>
+            </table>
+        </div>
+
+        <!-- CADASTRO -->
+        <div id="cadastro" class="card" style="display:none;">
+            <h3>Cadastrar Servidor</h3>
+            <input type="text" id="nome" placeholder="Nome">
+            <input type="text" id="setor" placeholder="Setor">
+            <button class="btn" onclick="cadastrar()">Salvar</button>
+        </div>
+
     </div>
 </div>
 
 <script>
-// LOGIN
-function entrar() {
-    let user = document.getElementById("usuario").value;
-    let pass = document.getElementById("senha").value;
 
-    if(user === "admin" && pass === "123") {
+// LOGIN
+function login(){
+    let u = document.getElementById("user").value;
+    let p = document.getElementById("pass").value;
+
+    if(u === "admin" && p === "123"){
         document.getElementById("loginPage").style.display = "none";
-        document.getElementById("sistemaPage").style.display = "block";
+        document.getElementById("sistema").style.display = "block";
+        atualizarTotal();
+        buscar();
     } else {
-        alert("Usuário ou senha incorretos!");
+        alert("Erro no login");
     }
 }
 
-// ENTER NO LOGIN
-document.addEventListener("keypress", function(e) {
-    if(e.key === "Enter") {
-        entrar();
-    }
+// ENTER LOGIN
+document.addEventListener("keypress", e => {
+    if(e.key === "Enter") login();
 });
 
-// BUSCA SIMPLES
-function buscar() {
-    let valor = document.getElementById("busca").value;
+// LOGOUT
+function logout(){
+    location.reload();
+}
 
-    if(valor === "") {
-        document.getElementById("resultado").innerText = "Digite algo para buscar.";
-    } else {
-        document.getElementById("resultado").innerText = "Resultado para: " + valor;
+// MENU
+function mostrar(secao){
+    document.getElementById("dashboard").style.display = "none";
+    document.getElementById("consulta").style.display = "none";
+    document.getElementById("cadastro").style.display = "none";
+
+    document.getElementById(secao).style.display = "block";
+}
+
+// BASE
+let servidores = [
+    {nome: "João Silva", setor: "RH"},
+    {nome: "Maria Souza", setor: "Financeiro"}
+];
+
+// TOTAL
+function atualizarTotal(){
+    document.getElementById("total").innerText = servidores.length;
+}
+
+// CADASTRO
+function cadastrar(){
+    let nome = document.getElementById("nome").value;
+    let setor = document.getElementById("setor").value;
+
+    if(nome && setor){
+        servidores.push({nome, setor});
+        alert("Cadastrado!");
+        atualizarTotal();
     }
 }
+
+// BUSCA
+function buscar(){
+    let valor = document.getElementById("busca").value.toLowerCase();
+    let tabela = document.getElementById("resultado");
+
+    tabela.innerHTML = "";
+
+    servidores
+        .filter(s => s.nome.toLowerCase().includes(valor))
+        .forEach(s => {
+            tabela.innerHTML += `
+                <tr>
+                    <td>${s.nome}</td>
+                    <td>${s.setor}</td>
+                </tr>
+            `;
+        });
+}
+
 </script>
 
 </body>
