@@ -6,7 +6,7 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* ... (Seu CSS original mantido) ... */
+/* --- CSS ORIGINAL MANTIDO --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; }
 .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
@@ -16,7 +16,7 @@ body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; }
 .container { background: white; padding: 40px; border-radius: 12px; width: 460px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
 .titulo-area { text-align: center; margin-bottom: 25px; }
 .logo-titulo { height: 70px; margin-bottom: 10px; }
-h2 { color: #002b5c; font-size: 18px; margin-bottom: 15px; }
+h2 { color: #002b5c; font-size: 18px; margin-bottom: 10px; }
 input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 12px; font-size: 14px; }
 button { width: 100%; padding: 12px; border-radius: 6px; border: none; background: #003366; color: white; font-weight: 600; cursor: pointer; margin-bottom: 8px; transition: 0.2s; }
 button:hover { background: #002244; }
@@ -28,25 +28,10 @@ button:hover { background: #002244; }
 .response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 250px; overflow-y: auto; }
 .footer { text-align: center; padding: 15px; font-size: 12px; color: #555; background: #e9edf2; }
 
-/* ✅ NOVOS ESTILOS PARA O OLHINHO E TROCA DE SENHA */
-.password-container { position: relative; width: 100%; }
-.toggle-password {
-    position: absolute;
-    right: 10px;
-    top: 12px;
-    cursor: pointer;
-    color: #666;
-    user-select: none;
-}
-.alert-info {
-    background: #e1f5fe;
-    color: #01579b;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 13px;
-    margin-bottom: 15px;
-    border-left: 4px solid #0288d1;
-}
+/* --- NOVOS ESTILOS (OLHINHO) --- */
+.pass-wrapper { position: relative; width: 100%; }
+.toggle-eye { position: absolute; right: 12px; top: 12px; cursor: pointer; color: #666; font-size: 18px; }
+.alert-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px; border: 1px solid #ffeeba; }
 </style>
 </head>
 
@@ -59,55 +44,48 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div class="gold-line"></div>
 
 <div class="main">
-    <div class="container">
+<div class="container">
 
-        <div id="loginArea">
-            <div class="titulo-area">
-                <img src="brasao-dgf.png" alt="Brasão DGF" class="logo-titulo">
-                <h2>Sistema Integrado de Consulta de Servidores</h2>
-            </div>
-            <input type="text" id="usuario" placeholder="Usuário institucional">
-            
-            <div class="password-container">
-                <input type="password" id="senha" placeholder="Senha">
-                <span class="toggle-password" onclick="toggleView('senha')">👁️</span>
-            </div>
-            
-            <button onclick="login()">Entrar no Sistema</button>
+    <div id="loginArea">
+        <div class="titulo-area">
+            <img src="brasao-dgf.png" alt="Brasão DGF" class="logo-titulo">
+            <h2>Sistema Integrado de Consulta de Servidores</h2>
         </div>
-
-        <div id="trocaSenhaArea" class="hidden">
-            <h2>🔒 Primeiro Acesso</h2>
-            <p class="alert-info">Por segurança, você precisa alterar sua senha inicial para continuar.</p>
-            
-            <div class="password-container">
-                <input type="password" id="novaSenha" placeholder="Nova senha">
-                <span class="toggle-password" onclick="toggleView('novaSenha')">👁️</span>
-            </div>
-            
-            <div class="password-container">
-                <input type="password" id="confirmaSenha" placeholder="Confirme a nova senha">
-                <span class="toggle-password" onclick="toggleView('confirmaSenha')">👁️</span>
-            </div>
-            
-            <button onclick="salvarNovaSenha()">Atualizar Senha e Entrar</button>
+        <input type="text" id="usuario" placeholder="Usuário institucional">
+        <div class="pass-wrapper">
+            <input type="password" id="senha" placeholder="Senha">
+            <span class="toggle-eye" onclick="togglePass('senha')">👁️</span>
         </div>
-
-        <div id="sistemaArea" class="hidden">
-            <h2>Assistente de Consulta</h2>
-            <input type="text" id="pergunta" placeholder="Ex: equipe de Lourdes ou quantos na GC">
-            <button onclick="consultar()">Consultar</button>
-            <button class="secondary" onclick="limpar()">Nova Consulta</button>
-            <button class="logout" onclick="logout()">Encerrar Sessão</button>
-            <div class="response" id="resposta"></div>
-        </div>
-
+        <button id="btnLogin" onclick="login()">Entrar no Sistema</button>
     </div>
+
+    <div id="trocaSenhaArea" class="hidden">
+        <h2>🔒 Alterar Senha</h2>
+        <div class="alert-box">Este é seu primeiro acesso. Defina uma nova senha.</div>
+        <div class="pass-wrapper">
+            <input type="password" id="novaSenha" placeholder="Nova senha">
+            <span class="toggle-eye" onclick="togglePass('novaSenha')">👁️</span>
+        </div>
+        <div class="pass-wrapper">
+            <input type="password" id="confirmaSenha" placeholder="Confirme a nova senha">
+            <span class="toggle-eye" onclick="togglePass('confirmaSenha')">👁️</span>
+        </div>
+        <button onclick="salvarNovaSenha()">Confirmar Alteração</button>
+    </div>
+
+    <div id="sistemaArea" class="hidden">
+        <h2>Assistente de Consulta</h2>
+        <input type="text" id="pergunta" placeholder="Ex: equipe de Lourdes ou quantos na GC">
+        <button id="btnConsultar" onclick="consultar()">Consultar</button>
+        <button class="secondary" onclick="limpar()">Nova Consulta</button>
+        <button class="logout" onclick="logout()">Encerrar Sessão</button>
+        <div class="response" id="resposta"></div>
+    </div>
+
+</div>
 </div>
 
-<div class="footer">
-© 2026 - Diretoria Geral de Finanças (DGF) • Uso interno e restrito
-</div>
+<div class="footer">© 2026 - Diretoria Geral de Finanças (DGF) • Uso interno e restrito</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -115,17 +93,17 @@ document.addEventListener("DOMContentLoaded", function() {
     const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
     const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
-    // Base de usuários (Simulando banco de dados local com localStorage)
-    const usuariosPadrao = [
+    // Gerenciamento de Usuários com Persistência
+    const defaultUsers = [
         { usuario: "admin", senha: "1234", primeiroAcesso: true },
         { usuario: "mauro", senha: "0000", primeiroAcesso: true }
     ];
-
-    // Inicializa os usuários no navegador se for a primeira vez
+    
     if (!localStorage.getItem("db_usuarios")) {
-        localStorage.setItem("db_usuarios", JSON.stringify(usuariosPadrao));
+        localStorage.setItem("db_usuarios", JSON.stringify(defaultUsers));
     }
 
+    // Seletores
     const loginArea = document.getElementById("loginArea");
     const trocaSenhaArea = document.getElementById("trocaSenhaArea");
     const sistemaArea = document.getElementById("sistemaArea");
@@ -135,69 +113,175 @@ document.addEventListener("DOMContentLoaded", function() {
     const respostaDiv = document.getElementById("resposta");
 
     // ✅ FUNÇÃO OLHINHO
-    window.toggleView = function(id) {
+    window.togglePass = function(id) {
         const input = document.getElementById(id);
         input.type = input.type === "password" ? "text" : "password";
     }
 
-    // ✅ LOGIN COM LÓGICA DE PRIMEIRO ACESSO
+    // ✅ EVENTOS DE ENTER (RESTAURADOS)
+    usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+    senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+    perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
+
+    // ✅ LÓGICA DE LOGIN
     window.login = function() {
         const db = JSON.parse(localStorage.getItem("db_usuarios"));
-        const user = db.find(u => u.usuario === usuarioInput.value.trim() && u.senha === senhaInput.value.trim());
+        const u = usuarioInput.value.trim();
+        const s = senhaInput.value.trim();
+        const user = db.find(x => x.usuario === u && x.senha === s);
 
         if (user) {
             if (user.primeiroAcesso) {
-                localStorage.setItem("usuarioTemporario", user.usuario);
+                localStorage.setItem("tempUser", user.usuario);
                 loginArea.classList.add("hidden");
                 trocaSenhaArea.classList.remove("hidden");
             } else {
-                iniciarSessao();
+                sucessoLogin();
             }
         } else {
             alert("Usuário ou senha inválidos.");
         }
     }
 
-    // ✅ SALVAR NOVA SENHA
     window.salvarNovaSenha = function() {
-        const nova = document.getElementById("novaSenha").value;
-        const confirma = document.getElementById("confirmaSenha").value;
-        const usuarioAtual = localStorage.getItem("usuarioTemporario");
-
-        if (nova.length < 4) return alert("A senha deve ter pelo menos 4 caracteres.");
-        if (nova !== confirma) return alert("As senhas não coincidem.");
+        const n = document.getElementById("novaSenha").value;
+        const c = document.getElementById("confirmaSenha").value;
+        if (n.length < 4) return alert("Mínimo 4 caracteres.");
+        if (n !== c) return alert("As senhas não conferem.");
 
         let db = JSON.parse(localStorage.getItem("db_usuarios"));
-        let index = db.findIndex(u => u.usuario === usuarioAtual);
-        
-        db[index].senha = nova;
-        db[index].primeiroAcesso = false;
+        let idx = db.findIndex(x => x.usuario === localStorage.getItem("tempUser"));
+        db[idx].senha = n;
+        db[idx].primeiroAcesso = false;
         
         localStorage.setItem("db_usuarios", JSON.stringify(db));
-        localStorage.removeItem("usuarioTemporario");
-        
-        alert("Senha atualizada com sucesso!");
-        iniciarSessao();
+        localStorage.removeItem("tempUser");
+        alert("Senha atualizada!");
+        sucessoLogin();
     }
 
-    function iniciarSessao() {
+    function sucessoLogin() {
         localStorage.setItem("logado", "true");
         localStorage.setItem("tempoLogin", Date.now());
         loginArea.classList.add("hidden");
         trocaSenhaArea.classList.add("hidden");
         sistemaArea.classList.remove("hidden");
+        perguntaInput.focus();
     }
 
-    window.logout = function() {
-        localStorage.removeItem("logado");
-        localStorage.removeItem("tempoLogin");
-        location.reload();
+    window.logout = function() { localStorage.clear(); location.reload(); }
+
+    function verificarSessao() {
+        const tempo = localStorage.getItem("tempoLogin");
+        return tempo && (Date.now() - parseInt(tempo)) <= TEMPO_EXPIRACAO;
     }
 
-    /* --- RESTANTE DA LOGICA DE CONSULTA (MANTIDA) --- */
+    if (localStorage.getItem("logado") === "true" && verificarSessao()) {
+        loginArea.classList.add("hidden");
+        sistemaArea.classList.remove("hidden");
+    }
+
+    // ✅ LÓGICA DE CONSULTA (TODA A SUA LÓGICA ORIGINAL RESTAURADA)
     let paginaAtual = 1;
     const itensPorPagina = 10;
     let resultadosGlobais = [];
+
+    function extrairTermo(frase, chaves) {
+        for (let c of chaves) { if (frase.includes(c)) return frase.split(c)[1]?.trim(); }
+        return null;
+    }
+
+    window.consultar = async function() {
+        if (!verificarSessao()) { logout(); return; }
+        
+        let pergunta = perguntaInput.value.trim().toLowerCase();
+        if (!pergunta) return respostaDiv.innerHTML = "Digite uma pergunta.";
+
+        respostaDiv.innerHTML = "Consultando...";
+        pergunta = pergunta.replace(/[?.,]/g, "");
+
+        let tipo = "nome";
+        let termo = null;
+
+        // Suas regras de detecção
+        if (pergunta.includes("equipe") || pergunta.includes("time")) {
+            tipo = "equipe"; termo = extrairTermo(pergunta, ["equipe de","time de"]);
+        }
+        if (!termo && (pergunta.includes("funcionarios") || pergunta.includes("funcionários"))) {
+            tipo = "empresa"; termo = extrairTermo(pergunta, ["funcionarios da","funcionários da"]);
+        }
+        if (!termo && pergunta.includes("setor")) {
+            tipo = "setor_nome"; termo = extrairTermo(pergunta, ["setor de","qual setor","do setor"]);
+        }
+        if (!termo && pergunta.includes("empresa")) {
+            tipo = "empresa_nome"; termo = extrairTermo(pergunta, ["empresa de","da empresa","trabalha"]);
+        }
+        if (!termo && pergunta.includes("cargo")) {
+            tipo = "cargo_nome"; termo = extrairTermo(pergunta, ["cargo de"]);
+        }
+        if (!termo && pergunta.includes("chefe")) {
+            tipo = "chefe"; termo = extrairTermo(pergunta, ["chefe de","chefe do"]);
+        }
+        if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
+            tipo = "contagem";
+            termo = extrairTermo(pergunta, ["quantos tem na","quantos tem no","quantos na","quantas na","quantas no"]);
+            if (!termo) termo = pergunta.split(" ").pop();
+        }
+        if (!termo) termo = pergunta.split(" ").pop();
+
+        try {
+            const response = await fetch(WEBHOOK_URL);
+            const data = await response.json();
+            let resultados = [];
+
+            if (tipo === "chefe") {
+                let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
+                if (!pessoas.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
+                let html = `<strong>${pessoas.length} resultado(s)</strong><br><br>`;
+                pessoas.forEach(p => html += `<div>👤 <strong>${p.nome}</strong><br>👨💼 Chefe: ${p.chefe}</div><br>`);
+                return respostaDiv.innerHTML = html;
+            }
+
+            if (tipo === "setor_nome") {
+                let p = data.filter(f => f.nome.toLowerCase().includes(termo));
+                if (!p.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
+                let html = ""; p.forEach(x => html += `🏢 ${x.nome}: <strong>${x.setor}</strong><br>`);
+                return respostaDiv.innerHTML = html;
+            }
+
+            if (tipo === "empresa_nome") {
+                let p = data.filter(f => f.nome.toLowerCase().includes(termo));
+                if (!p.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
+                let html = ""; p.forEach(x => html += `🏬 ${x.nome}: <strong>${x.empresa}</strong><br>`);
+                return respostaDiv.innerHTML = html;
+            }
+
+            if (tipo === "cargo_nome") {
+                let p = data.filter(f => f.nome.toLowerCase().includes(termo));
+                if (!p.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
+                let html = ""; p.forEach(x => html += `💼 ${x.nome}: <strong>${x.cargo}</strong><br>`);
+                return respostaDiv.innerHTML = html;
+            }
+
+            if (tipo === "equipe") resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
+            else if (tipo === "empresa") resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
+            else if (tipo === "setor") resultados = data.filter(f => f.setor.toLowerCase().includes(termo));
+            else if (tipo === "contagem") {
+                resultados = data.filter(f => f.setor.toLowerCase().includes(termo) || f.empresa.toLowerCase().includes(termo) || f.chefe.toLowerCase().includes(termo));
+                return respostaDiv.innerHTML = `📊 Total para "<strong>${termo}</strong>": <strong>${resultados.length}</strong>`;
+            }
+            else resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
+
+            if (!resultados.length) return respostaDiv.innerHTML = "Nenhum registro encontrado.";
+
+            resultadosGlobais = resultados;
+            paginaAtual = 1;
+            renderizarPagina();
+
+        } catch (error) {
+            respostaDiv.innerHTML = "Erro na conexão com o servidor.";
+        }
+    }
 
     window.renderizarPagina = function() {
         const inicio = (paginaAtual - 1) * itensPorPagina;
@@ -209,40 +293,24 @@ document.addEventListener("DOMContentLoaded", function() {
         html += `<small>Página ${paginaAtual} de ${totalPaginas}</small><br><br>`;
 
         pagina.forEach(f => {
-            html += `<div style="margin-bottom:10px; border-bottom:1px solid #ddd; padding-bottom:5px;">
-            <strong>👤 ${f.nome}</strong><br>
-            🏢 Setor: ${f.setor} | 💼 Cargo: ${f.cargo}
+            html += `<div style="margin-bottom:12px; border-bottom: 1px solid #ddd; padding-bottom: 8px;">
+            👤 <strong>${f.nome}</strong><br>
+            🏢 ${f.setor} | 💼 ${f.cargo}<br>
+            👨💼 Chefe: ${f.chefe} | 📊 ${f.status}
             </div>`;
         });
 
-        html += `<div style="text-align:center; margin-top:10px;">`;
-        if (paginaAtual > 1) html += `<button style="width:50px" onclick="paginaAnterior()">⬅️</button> `;
-        if (fim < resultadosGlobais.length) html += `<button style="width:50px" onclick="proximaPagina()">➡️</button>`;
+        html += `<div style="text-align:center;">`;
+        if (paginaAtual > 1) html += `<button style="width:60px" onclick="paginaAnterior()">⬅️</button> `;
+        if (fim < resultadosGlobais.length) html += `<button style="width:60px" onclick="proximaPagina()">➡️</button>`;
         html += `</div>`;
         respostaDiv.innerHTML = html;
     }
 
     window.proximaPagina = () => { paginaAtual++; renderizarPagina(); }
     window.paginaAnterior = () => { paginaAtual--; renderizarPagina(); }
+    window.limpar = () => { perguntaInput.value=""; respostaDiv.innerHTML=""; perguntaInput.focus(); }
 
-    window.consultar = async function() {
-        const p = perguntaInput.value.toLowerCase();
-        respostaDiv.innerHTML = "Buscando...";
-        try {
-            const response = await fetch(WEBHOOK_URL);
-            const data = await response.json();
-            // Lógica simplificada para exemplo (você pode manter sua extração de termos aqui)
-            resultadosGlobais = data.filter(f => f.nome.toLowerCase().includes(p.split(" ").pop()) || f.setor.toLowerCase().includes(p.split(" ").pop()));
-            paginaAtual = 1;
-            renderizarPagina();
-        } catch (e) { respostaDiv.innerHTML = "Erro ao consultar dados."; }
-    }
-
-    window.limpar = function() {
-        perguntaInput.value="";
-        respostaDiv.innerHTML="";
-        perguntaInput.focus();
-    }
 });
 </script>
 </body>
