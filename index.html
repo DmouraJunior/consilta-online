@@ -306,10 +306,83 @@ if (!pergunta) return respostaDiv.innerHTML = "Digite uma pergunta.";
 
 respostaDiv.innerHTML = "<div class='loading'>Consultando...</div>";
 
+pergunta = pergunta.replace(/[?.,]/g, "");
+
+function extrairTermo(frase, chaves) {
+    for (let c of chaves) {
+        if (frase.includes(c)) return frase.split(c)[1]?.trim();
+    }
+    return null;
+}
+
+let tipo = "nome";
+let termo = null;
+
+if (pergunta.includes("equipe")) {
+    tipo = "equipe";
+    termo = extrairTermo(pergunta, ["equipe de"]);
+}
+
+if (!termo && pergunta.includes("empresa")) {
+    tipo = "empresa";
+    termo = extrairTermo(pergunta, ["empresa de","da empresa"]);
+}
+
+if (!termo && pergunta.includes("setor")) {
+    tipo = "setor";
+    termo = extrairTermo(pergunta, ["setor de"]);
+}
+
+if (!termo && pergunta.includes("cargo")) {
+    tipo = "cargo";
+    termo = extrairTermo(pergunta, ["cargo de"]);
+}
+
+if (!termo && pergunta.includes("chefe")) {
+    tipo = "chefe";
+    termo = extrairTermo(pergunta, ["chefe de"]);
+}
+
+if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
+    tipo = "contagem";
+    termo = pergunta.split(" ").pop();
+}
+
+if (!termo) termo = pergunta;
+
 const response = await fetch(WEBHOOK_URL);
 const data = await response.json();
 
-let resultados = data.filter(f => f.nome.toLowerCase().includes(pergunta));
+let resultados = [];
+
+if (tipo === "equipe") {
+    resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
+}
+else if (tipo === "empresa") {
+    resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
+}
+else if (tipo === "setor") {
+    resultados = data.filter(f => f.setor.toLowerCase().includes(termo));
+}
+else if (tipo === "cargo") {
+    resultados = data.filter(f => f.cargo.toLowerCase().includes(termo));
+}
+else if (tipo === "chefe") {
+    resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
+}
+else if (tipo === "contagem") {
+    resultados = data.filter(f =>
+        f.setor.toLowerCase().includes(termo) ||
+        f.empresa.toLowerCase().includes(termo) ||
+        f.chefe.toLowerCase().includes(termo)
+    );
+
+    return respostaDiv.innerHTML =
+    `📊 Total encontrado para "<strong>${termo}</strong>": <strong>${resultados.length}</strong>`;
+}
+else {
+    resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
+}
 
 if (!resultados.length)
 return respostaDiv.innerHTML = "Nenhum registro encontrado.";
@@ -317,6 +390,7 @@ return respostaDiv.innerHTML = "Nenhum registro encontrado.";
 resultadosGlobais = resultados;
 paginaAtual = 1;
 renderizarPagina();
+}
 }
 
 window.limpar = function() {
