@@ -3,279 +3,315 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema DGF</title>
+<title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', sans-serif;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
+    font-family: 'Segoe UI', sans-serif;
     background: #f4f6f9;
 }
 
-/* LOGIN */
-#loginPage {
+.topbar {
+    background: #002b5c;
+    color: white;
+    padding: 18px 30px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.topbar small {
+    display: block;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.gold-line { height: 4px; background: #c9a227; }
+
+.main {
     display: flex;
-    height: 100vh;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    height: calc(100vh - 110px);
 }
 
-.login-card {
-    background: #fff;
+.container {
+    background: white;
     padding: 40px;
-    width: 350px;
     border-radius: 12px;
-    text-align: center;
+    width: 460px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
 }
 
-.login-card input {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 8px;
-    border: 1px solid #ccc;
+.titulo-area { text-align: center; margin-bottom: 25px; }
+
+.logo-titulo {
+    height: 70px;
+    margin-bottom: 10px;
 }
 
-.login-card button {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    background: #2a5298;
-    color: white;
-    cursor: pointer;
-}
+h2 { color: #002b5c; font-size: 18px; }
 
-/* SISTEMA */
-#sistema {
-    display: none;
-}
-
-/* SIDEBAR */
-.sidebar {
-    width: 220px;
-    height: 100vh;
-    background: #2a5298;
-    color: white;
-    position: fixed;
-    padding: 20px;
-}
-
-.sidebar h2 {
-    margin-bottom: 20px;
-}
-
-.sidebar button {
-    width: 100%;
-    margin: 10px 0;
-    padding: 10px;
-    border: none;
-    background: white;
-    color: #2a5298;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-/* HEADER */
-.header {
-    margin-left: 220px;
-    padding: 15px;
-    background: white;
-    border-bottom: 1px solid #ddd;
-}
-
-/* CONTEÚDO */
-.content {
-    margin-left: 220px;
-    padding: 20px;
-}
-
-/* CARDS */
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-
-/* INPUT */
 input {
-    padding: 10px;
-    margin: 5px 0;
     width: 100%;
-}
-
-/* BUTTON */
-.btn {
-    padding: 10px;
-    background: #2a5298;
-    color: white;
-    border: none;
+    padding: 12px;
     border-radius: 6px;
-    cursor: pointer;
+    border: 1px solid #ccc;
+    margin-bottom: 12px;
+    font-size: 14px;
 }
 
-/* TABLE */
-table {
+button {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+    padding: 12px;
+    border-radius: 6px;
+    border: none;
+    background: #003366;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 8px;
+    transition: 0.2s;
 }
 
-th, td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
+button:hover { background: #002244; }
+
+.secondary { background: #5c6f82; }
+.secondary:hover { background: #4b5c6b; }
+
+.logout { background: #8b0000; }
+.logout:hover { background: #6e0000; }
+
+.hidden { display: none; }
+
+.response {
+    margin-top: 15px;
+    background: #f1f3f6;
+    padding: 15px;
+    border-radius: 8px;
+    min-height: 60px;
+    font-size: 14px;
+    border-left: 4px solid #002b5c;
 }
 
+.footer {
+    text-align: center;
+    padding: 15px;
+    font-size: 12px;
+    color: #555;
+    background: #e9edf2;
+}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="loginPage">
-    <div class="login-card">
-        <h2>Sistema DGF</h2>
-        <input type="text" id="user" placeholder="Usuário">
-        <input type="password" id="pass" placeholder="Senha">
-        <button onclick="login()">Entrar</button>
-    </div>
+<div class="topbar">
+Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
+<small>Sistema Interno Oficial</small>
 </div>
 
-<!-- SISTEMA -->
-<div id="sistema">
+<div class="gold-line"></div>
 
-    <div class="sidebar">
-        <h2>DGF</h2>
-        <button onclick="mostrar('dashboard')">Dashboard</button>
-        <button onclick="mostrar('consulta')">Consultar</button>
-        <button onclick="mostrar('cadastro')">Cadastrar</button>
-        <button onclick="logout()">Sair</button>
-    </div>
+<div class="main">
+<div class="container">
 
-    <div class="header">
-        Sistema Integrado de Consulta de Servidores
-    </div>
+<div id="loginArea">
+<div class="titulo-area">
+<img src="brasao-dgf.png" alt="Brasão DGF" class="logo-titulo">
+<h2>Sistema Integrado de Consulta de Servidores - DGF</h2>
+</div>
 
-    <div class="content">
+<input type="text" id="usuario" placeholder="Usuário institucional">
+<input type="password" id="senha" placeholder="Senha">
+<button onclick="login()">Entrar no Sistema</button>
+</div>
 
-        <!-- DASHBOARD -->
-        <div id="dashboard" class="card">
-            <h3>Bem-vindo ao sistema</h3>
-            <p>Total de servidores: <span id="total"></span></p>
-        </div>
+<div id="sistemaArea" class="hidden">
+<h2>Assistente de Consulta</h2>
 
-        <!-- CONSULTA -->
-        <div id="consulta" class="card" style="display:none;">
-            <h3>Consulta de Servidores</h3>
-            <input type="text" id="busca" placeholder="Digite o nome..." onkeyup="buscar()">
+<input type="text" id="pergunta" placeholder="Ex: quem é da equipe de Lourdes?">
+<button onclick="consultar()">Consultar</button>
+<button class="secondary" onclick="limpar()">Nova Consulta</button>
+<button class="logout" onclick="logout()">Encerrar Sessão</button>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Setor</th>
-                    </tr>
-                </thead>
-                <tbody id="resultado"></tbody>
-            </table>
-        </div>
+<div class="response" id="resposta"></div>
+</div>
 
-        <!-- CADASTRO -->
-        <div id="cadastro" class="card" style="display:none;">
-            <h3>Cadastrar Servidor</h3>
-            <input type="text" id="nome" placeholder="Nome">
-            <input type="text" id="setor" placeholder="Setor">
-            <button class="btn" onclick="cadastrar()">Salvar</button>
-        </div>
+</div>
+</div>
 
-    </div>
+<div class="footer">
+© 2026 - Diretoria Geral de Finanças (DGF) • Uso interno e restrito
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", function() {
 
-// LOGIN
-function login(){
-    let u = document.getElementById("user").value;
-    let p = document.getElementById("pass").value;
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
+const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
-    if(u === "admin" && p === "123"){
-        document.getElementById("loginPage").style.display = "none";
-        document.getElementById("sistema").style.display = "block";
-        atualizarTotal();
-        buscar();
-    } else {
-        alert("Erro no login");
-    }
-}
-
-// ENTER LOGIN
-document.addEventListener("keypress", e => {
-    if(e.key === "Enter") login();
-});
-
-// LOGOUT
-function logout(){
-    location.reload();
-}
-
-// MENU
-function mostrar(secao){
-    document.getElementById("dashboard").style.display = "none";
-    document.getElementById("consulta").style.display = "none";
-    document.getElementById("cadastro").style.display = "none";
-
-    document.getElementById(secao).style.display = "block";
-}
-
-// BASE
-let servidores = [
-    {nome: "João Silva", setor: "RH"},
-    {nome: "Maria Souza", setor: "Financeiro"}
+const usuarios = [
+{ usuario: "admin", senha: "1234" },
+{ usuario: "mauro", senha: "0000" }
 ];
 
-// TOTAL
-function atualizarTotal(){
-    document.getElementById("total").innerText = servidores.length;
+const loginArea = document.getElementById("loginArea");
+const sistemaArea = document.getElementById("sistemaArea");
+const usuarioInput = document.getElementById("usuario");
+const senhaInput = document.getElementById("senha");
+const perguntaInput = document.getElementById("pergunta");
+const respostaDiv = document.getElementById("resposta");
+
+usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
+
+function verificarSessao() {
+const tempoLogin = localStorage.getItem("tempoLogin");
+if (!tempoLogin) return false;
+return (Date.now() - parseInt(tempoLogin)) <= TEMPO_EXPIRACAO;
 }
 
-// CADASTRO
-function cadastrar(){
-    let nome = document.getElementById("nome").value;
-    let setor = document.getElementById("setor").value;
-
-    if(nome && setor){
-        servidores.push({nome, setor});
-        alert("Cadastrado!");
-        atualizarTotal();
-    }
+if (localStorage.getItem("logado") === "true" && verificarSessao()) {
+loginArea.classList.add("hidden");
+sistemaArea.classList.remove("hidden");
 }
 
-// BUSCA
-function buscar(){
-    let valor = document.getElementById("busca").value.toLowerCase();
-    let tabela = document.getElementById("resultado");
+window.login = function() {
+const autorizado = usuarios.find(u =>
+u.usuario === usuarioInput.value.trim() &&
+u.senha === senhaInput.value.trim()
+);
 
-    tabela.innerHTML = "";
-
-    servidores
-        .filter(s => s.nome.toLowerCase().includes(valor))
-        .forEach(s => {
-            tabela.innerHTML += `
-                <tr>
-                    <td>${s.nome}</td>
-                    <td>${s.setor}</td>
-                </tr>
-            `;
-        });
+if (autorizado) {
+localStorage.setItem("logado", "true");
+localStorage.setItem("tempoLogin", Date.now());
+loginArea.classList.add("hidden");
+sistemaArea.classList.remove("hidden");
+perguntaInput.focus();
+} else alert("Usuário ou senha inválidos.");
 }
 
+window.logout = function() {
+localStorage.clear();
+location.reload();
+}
+
+function extrairTermo(frase, chaves) {
+for (let c of chaves) {
+if (frase.includes(c)) return frase.split(c)[1]?.trim();
+}
+return null;
+}
+
+window.consultar = async function() {
+
+if (!verificarSessao()) { logout(); return; }
+
+let pergunta = perguntaInput.value.trim().toLowerCase();
+if (!pergunta) return respostaDiv.innerHTML = "Digite uma pergunta.";
+
+respostaDiv.innerHTML = "Consultando...";
+pergunta = pergunta.replace(/[?.,]/g, "");
+
+let tipo = "nome";
+let termo = extrairTermo(pergunta, ["equipe de","time de","chefiados por"]);
+
+if (termo) tipo = "equipe";
+
+if (!termo) {
+termo = extrairTermo(pergunta, ["empresa","da empresa"]);
+if (termo) tipo = "empresa";
+}
+
+if (!termo) {
+termo = extrairTermo(pergunta, ["setor","do setor"]);
+if (termo) tipo = "setor";
+}
+
+if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
+tipo = "contagem";
+termo = termo || pergunta.split(" ").pop();
+}
+
+if (pergunta.includes("estatística") || pergunta.includes("resumo")) {
+tipo = "estatistica";
+}
+
+if (!termo && tipo === "nome")
+termo = pergunta.split(" ").pop();
+
+const response = await fetch(WEBHOOK_URL);
+const data = await response.json();
+
+let resultados = [];
+
+if (tipo === "equipe")
+resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
+
+else if (tipo === "empresa")
+resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
+
+else if (tipo === "setor")
+resultados = data.filter(f => f.setor.toLowerCase().includes(termo));
+
+else if (tipo === "contagem") {
+resultados = data.filter(f =>
+f.setor.toLowerCase().includes(termo) ||
+f.empresa.toLowerCase().includes(termo) ||
+f.chefe.toLowerCase().includes(termo)
+);
+return respostaDiv.innerHTML =
+`Total encontrado: <strong>${resultados.length}</strong>`;
+}
+
+else if (tipo === "estatistica") {
+
+let setores={}, empresas={};
+data.forEach(f=>{
+setores[f.setor]=(setores[f.setor]||0)+1;
+empresas[f.empresa]=(empresas[f.empresa]||0)+1;
+});
+
+let html="<strong>Resumo Estatístico</strong><br><br><b>Por setor:</b><br>";
+for(let s in setores) html+=`${s}: ${setores[s]}<br>`;
+html+="<br><b>Por empresa:</b><br>";
+for(let e in empresas) html+=`${e}: ${empresas[e]}<br>`;
+
+return respostaDiv.innerHTML=html;
+}
+
+else resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
+
+if (!resultados.length)
+return respostaDiv.innerHTML="Nenhum registro encontrado.";
+
+let html=`<strong>${resultados.length} resultado(s)</strong><br><br>`;
+
+resultados.forEach(f=>{
+html+=`
+<div style="margin-bottom:12px;">
+<strong>👤 ${f.nome}</strong><br>
+🏢 Setor: ${f.setor}<br>
+💼 Cargo: ${f.cargo}<br>
+👨‍💼 Chefe: ${f.chefe}<br>
+🏬 Empresa: ${f.empresa}<br>
+📊 Status: ${f.status}
+</div>`;
+});
+
+respostaDiv.innerHTML=html;
+}
+
+window.limpar = function() {
+perguntaInput.value="";
+respostaDiv.innerHTML="";
+perguntaInput.focus();
+}
+
+});
 </script>
 
 </body>
