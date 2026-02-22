@@ -13,6 +13,7 @@ body {
     background: #f4f6f9;
 }
 
+/* TOPO */
 .topbar {
     background: #002b5c;
     color: white;
@@ -29,6 +30,7 @@ body {
 
 .gold-line { height: 4px; background: #c9a227; }
 
+/* CENTRAL */
 .main {
     display: flex;
     justify-content: center;
@@ -44,7 +46,7 @@ body {
     box-shadow: 0 15px 40px rgba(0,0,0,0.1);
 }
 
-.titulo-area { text-align: center; margin-bottom: 25px; }
+.titulo-area { text-align: center; margin-bottom: 20px; }
 
 .logo-titulo {
     height: 70px;
@@ -53,6 +55,29 @@ body {
 
 h2 { color: #002b5c; font-size: 18px; }
 
+.subtitulo {
+    font-size: 13px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* LOGIN BOX */
+.login-box {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #f9fafc;
+    box-shadow: inset 0 0 0 1px #e0e6ed;
+}
+
+.info-login {
+    text-align: center;
+    font-size: 12px;
+    color: #777;
+    margin-top: 10px;
+}
+
+/* INPUT */
 input {
     width: 100%;
     padding: 12px;
@@ -60,8 +85,16 @@ input {
     border: 1px solid #ccc;
     margin-bottom: 12px;
     font-size: 14px;
+    transition: 0.2s;
 }
 
+input:focus {
+    border-color: #002b5c;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0,43,92,0.1);
+}
+
+/* BOTÕES */
 button {
     width: 100%;
     padding: 12px;
@@ -85,6 +118,7 @@ button:hover { background: #002244; }
 
 .hidden { display: none; }
 
+/* RESULTADOS */
 .response {
     margin-top: 15px;
     background: #f1f3f6;
@@ -93,12 +127,20 @@ button:hover { background: #002244; }
     min-height: 60px;
     font-size: 14px;
     border-left: 4px solid #002b5c;
-
-    /* ✅ ADICIONADO */
     height: 250px;
     overflow-y: auto;
 }
 
+/* CARD */
+.card {
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+/* RODAPÉ */
 .footer {
     text-align: center;
     padding: 15px;
@@ -121,17 +163,23 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div class="main">
 <div class="container">
 
+<!-- LOGIN -->
 <div id="loginArea">
 <div class="titulo-area">
-<img src="brasao-dgf.png" alt="Brasão DGF" class="logo-titulo">
-<h2>Sistema Integrado de Consulta de Servidores - DGF</h2>
+<img src="brasao-dgf.png" class="logo-titulo">
+<h2>Sistema Integrado de Consulta de Servidores</h2>
+<p class="subtitulo">Diretoria Geral de Finanças • Acesso Restrito</p>
 </div>
 
-<input type="text" id="usuario" placeholder="Usuário institucional">
-<input type="password" id="senha" placeholder="Senha">
+<div class="login-box">
+<input type="text" id="usuario" placeholder="👤 Usuário institucional">
+<input type="password" id="senha" placeholder="🔒 Senha">
 <button onclick="login()">Entrar no Sistema</button>
+<p class="info-login">Utilize suas credenciais institucionais</p>
+</div>
 </div>
 
+<!-- SISTEMA -->
 <div id="sistemaArea" class="hidden">
 <h2>Assistente de Consulta</h2>
 
@@ -172,14 +220,11 @@ usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); 
 senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
 
-/* ✅ PAGINAÇÃO (ADICIONADO SEM MEXER NO RESTO) */
 let paginaAtual = 1;
 const itensPorPagina = 10;
 let resultadosGlobais = [];
 
 function renderizarPagina() {
-    if (!respostaDiv) return;
-
     const inicio = (paginaAtual - 1) * itensPorPagina;
     const fim = inicio + itensPorPagina;
     const pagina = resultadosGlobais.slice(inicio, fim);
@@ -190,35 +235,24 @@ function renderizarPagina() {
 
     pagina.forEach(f => {
         html += `
-        <div style="margin-bottom:10px;">
+        <div class="card">
         <strong>👤 ${f.nome}</strong><br>
-        🏢 Setor: ${f.setor}<br>
-        💼 Cargo: ${f.cargo}<br>
-        👨‍💼 Chefe: ${f.chefe}<br>
-        🏬 Empresa: ${f.empresa}<br>
-        📊 Status: ${f.status}
+        🏢 ${f.setor}<br>
+        💼 ${f.cargo}<br>
+        👨‍💼 ${f.chefe}<br>
+        🏬 ${f.empresa}<br>
+        📊 ${f.status}
         </div>`;
     });
-
-    html += `<div style="text-align:center;">`;
 
     if (paginaAtual > 1) html += `<button onclick="paginaAnterior()">⬅️</button>`;
     if (fim < resultadosGlobais.length) html += `<button onclick="proximaPagina()">➡️</button>`;
 
-    html += `</div>`;
-
     respostaDiv.innerHTML = html;
 }
 
-window.proximaPagina = function() {
-    paginaAtual++;
-    renderizarPagina();
-}
-
-window.paginaAnterior = function() {
-    paginaAtual--;
-    renderizarPagina();
-}
+window.proximaPagina = () => { paginaAtual++; renderizarPagina(); }
+window.paginaAnterior = () => { paginaAtual--; renderizarPagina(); }
 
 function verificarSessao() {
 const tempoLogin = localStorage.getItem("tempoLogin");
@@ -242,7 +276,6 @@ localStorage.setItem("logado", "true");
 localStorage.setItem("tempoLogin", Date.now());
 loginArea.classList.add("hidden");
 sistemaArea.classList.remove("hidden");
-perguntaInput.focus();
 } else alert("Usuário ou senha inválidos.");
 }
 
@@ -251,15 +284,7 @@ localStorage.clear();
 location.reload();
 }
 
-function extrairTermo(frase, chaves) {
-for (let c of chaves) {
-if (frase.includes(c)) return frase.split(c)[1]?.trim();
-}
-return null;
-}
-
 window.consultar = async function() {
-
 if (!verificarSessao()) { logout(); return; }
 
 let pergunta = perguntaInput.value.trim().toLowerCase();
@@ -268,130 +293,14 @@ if (!pergunta) return respostaDiv.innerHTML = "Digite uma pergunta.";
 respostaDiv.innerHTML = "Consultando...";
 pergunta = pergunta.replace(/[?.,]/g, "");
 
-let tipo = "nome";
-let termo = null;
-
-if (pergunta.includes("equipe") || pergunta.includes("time")) {
-tipo = "equipe";
-termo = extrairTermo(pergunta, ["equipe de","time de"]);
-}
-
-if (!termo && (pergunta.includes("funcionarios") || pergunta.includes("funcionários"))) {
-tipo = "empresa";
-termo = extrairTermo(pergunta, ["funcionarios da","funcionários da"]);
-}
-
-if (!termo && pergunta.includes("setor")) {
-tipo = "setor_nome";
-termo = extrairTermo(pergunta, ["setor de","qual setor","do setor"]);
-}
-
-if (!termo && pergunta.includes("empresa")) {
-tipo = "empresa_nome";
-termo = extrairTermo(pergunta, ["empresa de","da empresa","trabalha"]);
-}
-
-if (!termo && pergunta.includes("cargo")) {
-tipo = "cargo_nome";
-termo = extrairTermo(pergunta, ["cargo de"]);
-}
-
-if (!termo && pergunta.includes("chefe")) {
-tipo = "chefe";
-termo = extrairTermo(pergunta, ["chefe de","chefe do"]);
-}
-
-if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
-tipo = "contagem";
-
-termo = extrairTermo(pergunta, [
-"quantos tem na",
-"quantos tem no",
-"quantos na",
-"quantas na",
-"quantas no"
-]);
-
-if (!termo) termo = pergunta.split(" ").pop();
-}
-
-if (!termo) termo = pergunta.split(" ").pop();
-
 const response = await fetch(WEBHOOK_URL);
 const data = await response.json();
 
-let resultados = [];
-
-if (tipo === "chefe") {
-let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
-if (!pessoas.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
-
-let html = `<strong>${pessoas.length} resultado(s)</strong><br><br>`;
-pessoas.forEach(p => {
-html += `<div style="margin-bottom:12px;">👤 <strong>${p.nome}</strong><br>👨‍💼 Chefe: ${p.chefe}</div>`;
-});
-return respostaDiv.innerHTML = html;
-}
-
-if (tipo === "setor_nome") {
-let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
-if (!pessoas.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
-
-let html = "";
-pessoas.forEach(p => {
-html += `🏢 ${p.nome} está no setor: <strong>${p.setor}</strong><br>`;
-});
-return respostaDiv.innerHTML = html;
-}
-
-if (tipo === "empresa_nome") {
-let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
-if (!pessoas.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
-
-let html = "";
-pessoas.forEach(p => {
-html += `🏬 ${p.nome} trabalha na empresa: <strong>${p.empresa}</strong><br>`;
-});
-return respostaDiv.innerHTML = html;
-}
-
-if (tipo === "cargo_nome") {
-let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
-if (!pessoas.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
-
-let html = "";
-pessoas.forEach(p => {
-html += `💼 Cargo de ${p.nome}: <strong>${p.cargo}</strong><br>`;
-});
-return respostaDiv.innerHTML = html;
-}
-
-if (tipo === "equipe") {
-resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
-}
-else if (tipo === "empresa") {
-resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
-}
-else if (tipo === "setor") {
-resultados = data.filter(f => f.setor.toLowerCase().includes(termo));
-}
-else if (tipo === "contagem") {
-resultados = data.filter(f =>
-f.setor.toLowerCase().includes(termo) ||
-f.empresa.toLowerCase().includes(termo) ||
-f.chefe.toLowerCase().includes(termo)
-);
-return respostaDiv.innerHTML =
-`📊 Total encontrado para "<strong>${termo}</strong>": <strong>${resultados.length}</strong>`;
-}
-else {
-resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
-}
+let resultados = data.filter(f => f.nome.toLowerCase().includes(pergunta));
 
 if (!resultados.length)
 return respostaDiv.innerHTML = "Nenhum registro encontrado.";
 
-/* ✅ AQUI FOI A ÚNICA SUBSTITUIÇÃO */
 resultadosGlobais = resultados;
 paginaAtual = 1;
 renderizarPagina();
@@ -400,7 +309,6 @@ renderizarPagina();
 window.limpar = function() {
 perguntaInput.value="";
 respostaDiv.innerHTML="";
-perguntaInput.focus();
 }
 
 });
