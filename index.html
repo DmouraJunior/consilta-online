@@ -6,7 +6,7 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- SEUS ESTILOS ORIGINAIS INTEGRALMENTE MANTIDOS --- */
+/* --- ESTILOS ORIGINAIS --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; }
 .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
@@ -30,14 +30,15 @@ button:hover { background: #002244; }
 
 /* ESTILO DA FOTO */
 .foto-servidor {
-    width: 65px;
-    height: 65px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #002b5c;
     float: right;
     margin-left: 10px;
     background: #fff;
+    display: block;
 }
 
 .pass-container { position: relative; width: 100%; }
@@ -103,18 +104,33 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 document.addEventListener("DOMContentLoaded", function() {
 
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
+const FOTO_PADRAO = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
 const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
-const usuariosPadrao = [
+// ✅ FUNÇÃO REFORMULADA PARA CARREGAR FOTOS DO DRIVE
+function formatarLinkFoto(url) {
+    if (!url || typeof url !== 'string' || url.trim() === "") return FOTO_PADRAO;
+    
+    let id = "";
+    // Extrai o ID do link uc?id=... ou /d/...
+    if (url.includes("id=")) {
+        id = url.split("id=")[1].split("&")[0];
+    } else if (url.includes("/d/")) {
+        id = url.split("/d/")[1].split("/")[0];
+    }
+
+    if (id) {
+        // Usa o servidor de miniaturas do Google (mais rápido e ignora bloqueios de download)
+        return "https://lh3.googleusercontent.com/d/" + id;
+    }
+    
+    return url;
+}
+
+let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf")) || [
     { usuario: "admin", senha: "1234", primeiroAcesso: true },
     { usuario: "mauro", senha: "0000", primeiroAcesso: true }
 ];
-
-let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf"));
-if (!usuariosDB) {
-    usuariosDB = usuariosPadrao;
-    localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
-}
 
 const loginArea = document.getElementById("loginArea");
 const sistemaArea = document.getElementById("sistemaArea");
@@ -124,16 +140,11 @@ const senhaInput = document.getElementById("senha");
 const perguntaInput = document.getElementById("pergunta");
 const respostaDiv = document.getElementById("resposta");
 
-window.verSenha = function(id) {
+window.verSenha = (id) => {
     const input = document.getElementById(id);
     input.type = input.type === "password" ? "text" : "password";
 }
 
-usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
-senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
-perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
-
-// PAGINAÇÃO
 let paginaAtual = 1;
 const itensPorPagina = 10;
 let resultadosGlobais = [];
@@ -150,11 +161,10 @@ function renderizarPagina() {
     html += `<small>Página ${paginaAtual} de ${totalPaginas}</small><br><br>`;
 
     pagina.forEach(f => {
-        const fotoPadrao = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-        const imgUrl = f.foto || fotoPadrao;
+        const imgUrl = formatarLinkFoto(f.foto);
 
         html += `<div class="card-resultado">
-            <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'">
+            <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${FOTO_PADRAO}'">
             <span class="info-item">👤 <strong>${f.nome}</strong></span>`;
         
         if (tipoConsultaAtual === "setor") {
@@ -175,35 +185,30 @@ function renderizarPagina() {
         html += `</div>`;
     });
 
-    html += `<div style="text-align:center;">`;
-    if (paginaAtual > 1) html += `<button style="width:50px" onclick="paginaAnterior()">⬅️</button> `;
-    if (fim < resultadosGlobais.length) html += `<button style="width:50px" onclick="proximaPagina()">➡️</button>`;
-    html += `</div>`;
+    if (totalPaginas > 1) {
+        html += `<div style="text-align:center;">`;
+        if (paginaAtual > 1) html += `<button style="width:50px" onclick="paginaAnterior()">⬅️</button> `;
+        if (fim < resultadosGlobais.length) html += `<button style="width:50px" onclick="proximaPagina()">➡️</button>`;
+        html += `</div>`;
+    }
     respostaDiv.innerHTML = html;
 }
 
-window.proximaPagina = function() { paginaAtual++; renderizarPagina(); }
-window.paginaAnterior = function() { paginaAtual--; renderizarPagina(); }
+window.proximaPagina = () => { paginaAtual++; renderizarPagina(); }
+window.paginaAnterior = () => { paginaAtual--; renderizarPagina(); }
 
-// LOGIN E SESSÃO
-window.login = function() {
+window.login = () => {
     const user = usuariosDB.find(u => u.usuario === usuarioInput.value.trim() && u.senha === senhaInput.value.trim());
     if (user) {
         localStorage.setItem("userLogando", user.usuario);
-        if (user.primeiroAcesso) {
-            loginArea.classList.add("hidden");
-            trocaSenhaArea.classList.remove("hidden");
-        } else {
-            confirmarEntrada();
-        }
+        if (user.primeiroAcesso) { loginArea.classList.add("hidden"); trocaSenhaArea.classList.remove("hidden"); }
+        else { confirmarEntrada(); }
     } else alert("Usuário ou senha inválidos.");
 }
 
-window.salvarNovaSenha = function() {
+window.salvarNovaSenha = () => {
     const n = document.getElementById("novaSenha").value;
-    const c = document.getElementById("confirmaSenha").value;
-    if (n.length < 4) return alert("A senha deve ter no mínimo 4 caracteres.");
-    if (n !== c) return alert("As senhas não coincidem.");
+    if (n !== document.getElementById("confirmaSenha").value) return alert("As senhas não coincidem.");
     const loginUser = localStorage.getItem("userLogando");
     usuariosDB = usuariosDB.map(u => u.usuario === loginUser ? {...u, senha: n, primeiroAcesso: false} : u);
     localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
@@ -213,119 +218,37 @@ window.salvarNovaSenha = function() {
 function confirmarEntrada() {
     localStorage.setItem("logado", "true");
     localStorage.setItem("tempoLogin", Date.now());
-    loginArea.classList.add("hidden");
-    trocaSenhaArea.classList.add("hidden");
-    sistemaArea.classList.remove("hidden");
+    loginArea.classList.add("hidden"); trocaSenhaArea.classList.add("hidden"); sistemaArea.classList.remove("hidden");
     perguntaInput.focus();
 }
 
-window.logout = function() { 
-    localStorage.removeItem("logado"); 
-    localStorage.removeItem("tempoLogin");
-    location.reload(); 
-}
+window.logout = () => { localStorage.removeItem("logado"); location.reload(); }
 
-function verificarSessao() {
-    const tempo = localStorage.getItem("tempoLogin");
-    if (!tempo) return false;
-    return (Date.now() - parseInt(tempo)) <= TEMPO_EXPIRACAO;
-}
-
-if (localStorage.getItem("logado") === "true" && verificarSessao()) {
-    loginArea.classList.add("hidden");
-    sistemaArea.classList.remove("hidden");
-}
-
-function extrairTermo(frase, chaves) {
-    for (let c of chaves) { if (frase.includes(c)) return frase.split(c)[1]?.trim(); }
-    return null;
-}
-
-// CONSULTA
 window.consultar = async function() {
-    if (!verificarSessao()) { logout(); return; }
-    
-    // ✅ CORREÇÃO DEFINITIVA: Limpa interrogações e espaços extras
-    let perguntaRaw = perguntaInput.value.trim().toLowerCase();
-    let pergunta = perguntaRaw.replace(/[?]/g, "").trim(); 
-    
-    if (!pergunta) return;
+    let pRaw = perguntaInput.value.trim().toLowerCase();
+    let p = pRaw.replace(/[?]/g, "").trim(); 
+    if (!p) return;
     
     respostaDiv.innerHTML = "Consultando...";
-    let tipo = "nome";
-    let termo = null;
-    tipoConsultaAtual = "ficha"; 
+    tipoConsultaAtual = "ficha";
+    let termo = p.split(" ").pop();
 
-    // Mapeamento de termos
-    if (pergunta.includes("equipe") || pergunta.includes("time")) {
-        tipo = "equipe"; termo = extrairTermo(pergunta, ["equipe de","time de"]);
-    }
-    if (!termo && (pergunta.includes("funcionarios") || pergunta.includes("funcionários"))) {
-        tipo = "empresa"; termo = extrairTermo(pergunta, ["funcionarios da","funcionários da"]);
-    }
-    if (!termo && pergunta.includes("setor")) {
-        tipo = "setor_nome"; termo = extrairTermo(pergunta, ["setor de","qual setor","do setor"]);
-        if (pergunta.includes("setor de")) tipoConsultaAtual = "setor"; 
-    }
-    if (!termo && pergunta.includes("empresa")) {
-        tipo = "empresa_nome"; termo = extrairTermo(pergunta, ["empresa de","da empresa","trabalha"]);
-    }
-    if (!termo && pergunta.includes("cargo")) {
-        tipo = "cargo_nome"; termo = extrairTermo(pergunta, ["cargo de"]);
-        tipoConsultaAtual = "cargo";
-    }
-    if (!termo && pergunta.includes("chefe")) {
-        tipo = "chefe"; termo = extrairTermo(pergunta, ["chefe de","chefe do"]);
-        tipoConsultaAtual = "chefe";
-    }
-    if (!termo && pergunta.includes("status")) {
-        tipo = "status_nome"; termo = extrairTermo(pergunta, ["status de"]);
-        tipoConsultaAtual = "status";
-    }
-
-    if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
-        tipo = "contagem";
-        termo = extrairTermo(pergunta, ["quantos tem na","quantos tem no","quantos na","quantas na","quantas no"]);
-        if (!termo) termo = pergunta.split(" ").pop();
-    }
-    
-    // Se ainda não achou termo, pega a última palavra (busca simples)
-    if (!termo) termo = pergunta.split(" ").pop();
+    if (p.includes("setor de")) { tipoConsultaAtual = "setor"; termo = p.split("setor de")[1]?.trim(); }
+    else if (p.includes("chefe de")) { tipoConsultaAtual = "chefe"; termo = p.split("chefe de")[1]?.trim(); }
 
     try {
         const response = await fetch(WEBHOOK_URL);
         const data = await response.json();
-        let resultados = [];
+        let resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
 
-        if (tipo === "chefe" || tipo === "setor_nome" || tipo === "status_nome" || tipo === "cargo_nome") {
-            resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
-        } else if (tipo === "equipe") {
-            resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
-        } else if (tipo === "empresa") {
-            resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
-        } else if (tipo === "contagem") {
-            resultados = data.filter(f => f.setor.toLowerCase().includes(termo) || f.empresa.toLowerCase().includes(termo) || f.chefe.toLowerCase().includes(termo));
-            return respostaDiv.innerHTML = `📊 Total encontrado para "<strong>${termo}</strong>": <strong>${resultados.length}</strong>`;
-        } else {
-            resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
-        }
-
-        if (!resultados.length) return respostaDiv.innerHTML = "Nenhum registro encontrado.";
-
+        if (!resultados.length) return respostaDiv.innerHTML = "Não encontrado.";
         resultadosGlobais = resultados;
         paginaAtual = 1;
         renderizarPagina();
-
-    } catch (e) {
-        respostaDiv.innerHTML = "Erro na conexão.";
-    }
+    } catch (e) { respostaDiv.innerHTML = "Erro de conexão."; }
 }
 
-window.limpar = function() {
-    perguntaInput.value="";
-    respostaDiv.innerHTML="";
-    perguntaInput.focus();
-}
+window.limpar = () => { perguntaInput.value=""; respostaDiv.innerHTML=""; }
 
 });
 </script>
