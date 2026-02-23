@@ -139,21 +139,6 @@ const itensPorPagina = 10;
 let resultadosGlobais = [];
 let tipoConsultaAtual = "ficha"; 
 
-// FUNÇÃO PARA CONVERTER LINK DO DRIVE EM LINK DE IMAGEM DIRETA
-function formatarLinkFoto(url) {
-    if (!url) return 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-    if (url.includes('drive.google.com')) {
-        let id = '';
-        if (url.includes('id=')) {
-            id = url.split('id=')[1].split('&')[0];
-        } else if (url.includes('/d/')) {
-            id = url.split('/d/')[1].split('/')[0];
-        }
-        return id ? `https://lh3.googleusercontent.com/d/${id}` : url;
-    }
-    return url;
-}
-
 function renderizarPagina() {
     if (!respostaDiv) return;
     const inicio = (paginaAtual - 1) * itensPorPagina;
@@ -166,8 +151,7 @@ function renderizarPagina() {
 
     pagina.forEach(f => {
         const fotoPadrao = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-        // APLICANDO A FORMATAÇÃO DO LINK DO DRIVE
-        const imgUrl = formatarLinkFoto(f.foto);
+        const imgUrl = f.foto || fotoPadrao;
 
         html += `<div class="card-resultado">
             <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'">
@@ -261,6 +245,7 @@ function extrairTermo(frase, chaves) {
 window.consultar = async function() {
     if (!verificarSessao()) { logout(); return; }
     
+    // ✅ CORREÇÃO DEFINITIVA: Limpa interrogações e espaços extras
     let perguntaRaw = perguntaInput.value.trim().toLowerCase();
     let pergunta = perguntaRaw.replace(/[?]/g, "").trim(); 
     
@@ -304,6 +289,7 @@ window.consultar = async function() {
         if (!termo) termo = pergunta.split(" ").pop();
     }
     
+    // Se ainda não achou termo, pega a última palavra (busca simples)
     if (!termo) termo = pergunta.split(" ").pop();
 
     try {
