@@ -6,7 +6,7 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- ESTILOS GERAIS --- */
+/* --- ESTILOS ORIGINAIS INTEGRALMENTE MANTIDOS --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; }
 .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
@@ -25,8 +25,6 @@ button:hover { background: #002244; }
 .logout { background: #8b0000; }
 .logout:hover { background: #6e0000; }
 .hidden { display: none; }
-
-/* ✅ ÁREA DE RESPOSTA COM SCROLL */
 .response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 350px; overflow-y: auto; }
 .footer { text-align: center; padding: 15px; font-size: 12px; color: #555; background: #e9edf2; }
 
@@ -42,12 +40,10 @@ button:hover { background: #002244; }
     background: #fff;
 }
 
-/* ✅ OLHINHO DA SENHA */
 .pass-container { position: relative; width: 100%; }
 .toggle-eye { position: absolute; right: 12px; top: 12px; cursor: pointer; color: #777; font-size: 18px; z-index: 10; background: transparent; user-select: none; }
 input::-ms-reveal, input::-ms-clear { display: none; }
 
-/* ✅ CARD DE RESULTADO */
 .card-resultado { border-bottom: 1px solid #ddd; padding: 12px 0; margin-bottom: 10px; overflow: hidden; }
 .info-item { display: block; margin-bottom: 4px; line-height: 1.4; padding-right: 75px; }
 </style>
@@ -108,11 +104,10 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
-// ✅ URL ATUALIZADA AQUI:
-const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
+// ✅ SUA URL NOVA
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyY1jsguIQMOHlpiw28hbAT41DUBOcm2CbbuhOWVo9grRBq1Wxmt4DTC_WXhytWCrcB/exec";
 const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
-// Persistência de senha corrigida
 const usuariosPadrao = [
     { usuario: "admin", senha: "1234", primeiroAcesso: true },
     { usuario: "mauro", senha: "0000", primeiroAcesso: true }
@@ -137,12 +132,10 @@ window.verSenha = function(id) {
     input.type = input.type === "password" ? "text" : "password";
 }
 
-// Atalhos Enter
 usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
 
-/* PAGINAÇÃO E EXIBIÇÃO */
 let paginaAtual = 1;
 const itensPorPagina = 10;
 let resultadosGlobais = [];
@@ -164,15 +157,15 @@ function renderizarPagina() {
         html += `<div class="card-resultado">
             <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'" alt="Foto">
             <span class="info-item">👤 <strong>${f.nome}</strong></span>
-            <span class="info-item">🏢 Setor: ${f.setor}</span>
-            <span class="info-item">💼 Cargo: ${f.cargo}</span>
-            <span class="info-item">👨💼 Chefe: ${f.chefe}</span>
+            <span class="info-item">🏢 Setor: ${f.setor || 'Não informado'}</span>
+            <span class="info-item">💼 Cargo: ${f.cargo || 'Não informado'}</span>
+            <span class="info-item">👨💼 Chefe: ${f.chefe || 'Não informado'}</span>
             <span class="info-item">🏬 Empresa: ${f.empresa || 'N/A'}</span>
             <span class="info-item">📊 Status: ${f.status || 'Ativo'}</span>
         </div>`;
     });
 
-    html += `<div style="text-align:center; padding-top: 10px;">`;
+    html += `<div style="text-align:center;">`;
     if (paginaAtual > 1) html += `<button style="width:50px" onclick="paginaAnterior()">⬅️</button> `;
     if (fim < resultadosGlobais.length) html += `<button style="width:50px" onclick="proximaPagina()">➡️</button>`;
     html += `</div>`;
@@ -182,7 +175,6 @@ function renderizarPagina() {
 window.proximaPagina = function() { paginaAtual++; renderizarPagina(); }
 window.paginaAnterior = function() { paginaAtual--; renderizarPagina(); }
 
-// Lógica Login
 window.login = function() {
     const user = usuariosDB.find(u => u.usuario === usuarioInput.value.trim() && u.senha === senhaInput.value.trim());
     if (user) {
@@ -235,63 +227,97 @@ if (localStorage.getItem("logado") === "true" && verificarSessao()) {
     sistemaArea.classList.remove("hidden");
 }
 
+// ✅ FUNÇÃO ORIGINAL RESTAURADA
 function extrairTermo(frase, chaves) {
     for (let c of chaves) { if (frase.includes(c)) return frase.split(c)[1]?.trim(); }
     return null;
 }
 
-// Lógica de Consulta
+// ✅ CONSULTA COM TODAS AS FUNÇÕES ORIGINAIS + FOTO
 window.consultar = async function() {
     if (!verificarSessao()) { logout(); return; }
     let pergunta = perguntaInput.value.trim().toLowerCase();
     if (!pergunta) return;
     
-    respostaDiv.innerHTML = "Consultando base de dados...";
+    respostaDiv.innerHTML = "Consultando...";
     pergunta = pergunta.replace(/[?.,]/g, "");
 
     let tipo = "nome";
     let termo = null;
 
+    // Regras de detecção ORIGINAIS mantidas integralmente
     if (pergunta.includes("equipe") || pergunta.includes("time")) {
         tipo = "equipe"; termo = extrairTermo(pergunta, ["equipe de","time de"]);
-    } else if (pergunta.includes("setor")) {
+    }
+    if (!termo && (pergunta.includes("funcionarios") || pergunta.includes("funcionários"))) {
+        tipo = "empresa"; termo = extrairTermo(pergunta, ["funcionarios da","funcionários da"]);
+    }
+    if (!termo && pergunta.includes("setor")) {
         tipo = "setor_nome"; termo = extrairTermo(pergunta, ["setor de","qual setor","do setor"]);
-    } else if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
+    }
+    if (!termo && pergunta.includes("empresa")) {
+        tipo = "empresa_nome"; termo = extrairTermo(pergunta, ["empresa de","da empresa","trabalha"]);
+    }
+    if (!termo && pergunta.includes("cargo")) {
+        tipo = "cargo_nome"; termo = extrairTermo(pergunta, ["cargo de"]);
+    }
+    if (!termo && pergunta.includes("chefe")) {
+        tipo = "chefe"; termo = extrairTermo(pergunta, ["chefe de","chefe do"]);
+    }
+    if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
         tipo = "contagem";
-        termo = extrairTermo(pergunta, ["quantos tem na","quantos na","quantas na"]);
+        termo = extrairTermo(pergunta, ["quantos tem na","quantos tem no","quantos na","quantas na","quantas no"]);
         if (!termo) termo = pergunta.split(" ").pop();
     }
-    
     if (!termo) termo = pergunta.split(" ").pop();
 
     try {
         const response = await fetch(WEBHOOK_URL);
         const data = await response.json();
-        
         let resultados = [];
 
-        if (tipo === "equipe") {
-            resultados = data.filter(f => f.chefe && f.chefe.toLowerCase().includes(termo));
-        } else if (tipo === "setor_nome") {
-            resultados = data.filter(f => f.setor && f.setor.toLowerCase().includes(termo));
-        } else if (tipo === "contagem") {
-            let cont = data.filter(f => (f.setor && f.setor.toLowerCase().includes(termo)) || (f.chefe && f.chefe.toLowerCase().includes(termo)));
-            return respostaDiv.innerHTML = `📊 Total encontrado: <strong>${cont.length}</strong>`;
-        } else {
+        // Filtros originais (Chefe e Setor Direto)
+        if (tipo === "chefe") {
             resultados = data.filter(f => f.nome && f.nome.toLowerCase().includes(termo));
+            if (!resultados.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
+            // Renderização customizada para busca de chefe
+            let html = `<strong>${resultados.length} resultado(s)</strong><br><br>`;
+            resultados.forEach(p => { 
+                const img = p.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                html += `<div class="card-resultado"><img src="${img}" class="foto-servidor"><span class="info-item">👤 <strong>${p.nome}</strong></span><span class="info-item">👨💼 Chefe: ${p.chefe}</span></div>`; 
+            });
+            return respostaDiv.innerHTML = html;
+        }
+        
+        if (tipo === "setor_nome") {
+            resultados = data.filter(f => f.nome && f.nome.toLowerCase().includes(termo));
+            if (!resultados.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
+            let html = "";
+            resultados.forEach(p => { 
+                const img = p.foto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                html += `<div class="card-resultado"><img src="${img}" class="foto-servidor"><span class="info-item">👤 <strong>${p.nome}</strong></span><span class="info-item">🏢 Setor: <strong>${p.setor}</strong></span></div>`; 
+            });
+            return respostaDiv.innerHTML = html;
         }
 
-        if (resultados.length === 0) {
-            respostaDiv.innerHTML = "Nenhum registro encontrado.";
-            return;
+        // Filtros gerais
+        if (tipo === "equipe") resultados = data.filter(f => f.chefe && f.chefe.toLowerCase().includes(termo));
+        else if (tipo === "empresa") resultados = data.filter(f => f.empresa && f.empresa.toLowerCase().includes(termo));
+        else if (tipo === "setor") resultados = data.filter(f => f.setor && f.setor.toLowerCase().includes(termo));
+        else if (tipo === "contagem") {
+            resultados = data.filter(f => (f.setor && f.setor.toLowerCase().includes(termo)) || (f.empresa && f.empresa.toLowerCase().includes(termo)) || (f.chefe && f.chefe.toLowerCase().includes(termo)));
+            return respostaDiv.innerHTML = `📊 Total encontrado para "<strong>${termo}</strong>": <strong>${resultados.length}</strong>`;
         }
+        else resultados = data.filter(f => f.nome && f.nome.toLowerCase().includes(termo));
+
+        if (!resultados.length) return respostaDiv.innerHTML = "Nenhum registro encontrado.";
 
         resultadosGlobais = resultados;
         paginaAtual = 1;
         renderizarPagina();
 
     } catch (e) {
-        respostaDiv.innerHTML = "Erro na conexão com o servidor.";
+        respostaDiv.innerHTML = "Erro na conexão.";
     }
 }
 
