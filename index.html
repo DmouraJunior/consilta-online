@@ -6,7 +6,7 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- ESTILOS ORIGINAIS --- */
+/* --- ESTILOS GERAIS --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; }
 .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
@@ -25,10 +25,12 @@ button:hover { background: #002244; }
 .logout { background: #8b0000; }
 .logout:hover { background: #6e0000; }
 .hidden { display: none; }
+
+/* ✅ ÁREA DE RESPOSTA COM SCROLL */
 .response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 350px; overflow-y: auto; }
 .footer { text-align: center; padding: 15px; font-size: 12px; color: #555; background: #e9edf2; }
 
-/* ✅ ESTILO DA FOTO */
+/* ✅ ESTILO DA FOTO REDONDA */
 .foto-servidor {
     width: 65px;
     height: 65px;
@@ -40,10 +42,12 @@ button:hover { background: #002244; }
     background: #fff;
 }
 
+/* ✅ OLHINHO DA SENHA */
 .pass-container { position: relative; width: 100%; }
 .toggle-eye { position: absolute; right: 12px; top: 12px; cursor: pointer; color: #777; font-size: 18px; z-index: 10; background: transparent; user-select: none; }
 input::-ms-reveal, input::-ms-clear { display: none; }
 
+/* ✅ CARD DE RESULTADO */
 .card-resultado { border-bottom: 1px solid #ddd; padding: 12px 0; margin-bottom: 10px; overflow: hidden; }
 .info-item { display: block; margin-bottom: 4px; line-height: 1.4; padding-right: 75px; }
 </style>
@@ -104,10 +108,11 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
+// ✅ URL ATUALIZADA AQUI:
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
 const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
-// --- PERSISTÊNCIA DE SENHA ---
+// Persistência de senha corrigida
 const usuariosPadrao = [
     { usuario: "admin", senha: "1234", primeiroAcesso: true },
     { usuario: "mauro", senha: "0000", primeiroAcesso: true }
@@ -132,11 +137,12 @@ window.verSenha = function(id) {
     input.type = input.type === "password" ? "text" : "password";
 }
 
+// Atalhos Enter
 usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
 
-/* PAGINAÇÃO E RENDERIZAÇÃO COM FOTO */
+/* PAGINAÇÃO E EXIBIÇÃO */
 let paginaAtual = 1;
 const itensPorPagina = 10;
 let resultadosGlobais = [];
@@ -152,7 +158,6 @@ function renderizarPagina() {
     html += `<small>Página ${paginaAtual} de ${totalPaginas}</small><br><br>`;
 
     pagina.forEach(f => {
-        // Foto padrão caso o link da planilha esteja vazio ou quebrado
         const fotoPadrao = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
         const imgUrl = f.foto && f.foto.trim() !== "" ? f.foto : fotoPadrao;
 
@@ -162,8 +167,8 @@ function renderizarPagina() {
             <span class="info-item">🏢 Setor: ${f.setor}</span>
             <span class="info-item">💼 Cargo: ${f.cargo}</span>
             <span class="info-item">👨💼 Chefe: ${f.chefe}</span>
-            <span class="info-item">🏬 Empresa: ${f.empresa}</span>
-            <span class="info-item">📊 Status: ${f.status}</span>
+            <span class="info-item">🏬 Empresa: ${f.empresa || 'N/A'}</span>
+            <span class="info-item">📊 Status: ${f.status || 'Ativo'}</span>
         </div>`;
     });
 
@@ -177,7 +182,7 @@ function renderizarPagina() {
 window.proximaPagina = function() { paginaAtual++; renderizarPagina(); }
 window.paginaAnterior = function() { paginaAtual--; renderizarPagina(); }
 
-// --- LÓGICA DE LOGIN ---
+// Lógica Login
 window.login = function() {
     const user = usuariosDB.find(u => u.usuario === usuarioInput.value.trim() && u.senha === senhaInput.value.trim());
     if (user) {
@@ -235,13 +240,13 @@ function extrairTermo(frase, chaves) {
     return null;
 }
 
-// --- CONSULTA ---
+// Lógica de Consulta
 window.consultar = async function() {
     if (!verificarSessao()) { logout(); return; }
     let pergunta = perguntaInput.value.trim().toLowerCase();
     if (!pergunta) return;
     
-    respostaDiv.innerHTML = "Consultando...";
+    respostaDiv.innerHTML = "Consultando base de dados...";
     pergunta = pergunta.replace(/[?.,]/g, "");
 
     let tipo = "nome";
@@ -249,63 +254,44 @@ window.consultar = async function() {
 
     if (pergunta.includes("equipe") || pergunta.includes("time")) {
         tipo = "equipe"; termo = extrairTermo(pergunta, ["equipe de","time de"]);
-    }
-    if (!termo && (pergunta.includes("funcionarios") || pergunta.includes("funcionários"))) {
-        tipo = "empresa"; termo = extrairTermo(pergunta, ["funcionarios da","funcionários da"]);
-    }
-    if (!termo && pergunta.includes("setor")) {
+    } else if (pergunta.includes("setor")) {
         tipo = "setor_nome"; termo = extrairTermo(pergunta, ["setor de","qual setor","do setor"]);
-    }
-    if (!termo && pergunta.includes("empresa")) {
-        tipo = "empresa_nome"; termo = extrairTermo(pergunta, ["empresa de","da empresa","trabalha"]);
-    }
-    if (!termo && pergunta.includes("cargo")) {
-        tipo = "cargo_nome"; termo = extrairTermo(pergunta, ["cargo de"]);
-    }
-    if (!termo && pergunta.includes("chefe")) {
-        tipo = "chefe"; termo = extrairTermo(pergunta, ["chefe de","chefe do"]);
-    }
-    if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
+    } else if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
         tipo = "contagem";
-        termo = extrairTermo(pergunta, ["quantos tem na","quantos tem no","quantos na","quantas na","quantas no"]);
+        termo = extrairTermo(pergunta, ["quantos tem na","quantos na","quantas na"]);
         if (!termo) termo = pergunta.split(" ").pop();
     }
+    
     if (!termo) termo = pergunta.split(" ").pop();
 
     try {
         const response = await fetch(WEBHOOK_URL);
         const data = await response.json();
+        
         let resultados = [];
 
-        // Filtros específicos
-        if (tipo === "chefe") {
-            let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
-            if (!pessoas.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
-            resultadosGlobais = pessoas; 
-        }
-        else if (tipo === "setor_nome") {
-            let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
-            if (!pessoas.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
-            resultadosGlobais = pessoas;
-        }
-        else if (tipo === "equipe") resultadosGlobais = data.filter(f => f.chefe.toLowerCase().includes(termo));
-        else if (tipo === "empresa") resultadosGlobais = data.filter(f => f.empresa.toLowerCase().includes(termo));
-        else if (tipo === "setor") resultadosGlobais = data.filter(f => f.setor.toLowerCase().includes(termo));
-        else if (tipo === "contagem") {
-            let contagem = data.filter(f => f.setor.toLowerCase().includes(termo) || f.empresa.toLowerCase().includes(termo) || f.chefe.toLowerCase().includes(termo));
-            return respostaDiv.innerHTML = `📊 Total encontrado para "<strong>${termo}</strong>": <strong>${contagem.length}</strong>`;
-        }
-        else {
-            resultadosGlobais = data.filter(f => f.nome.toLowerCase().includes(termo));
+        if (tipo === "equipe") {
+            resultados = data.filter(f => f.chefe && f.chefe.toLowerCase().includes(termo));
+        } else if (tipo === "setor_nome") {
+            resultados = data.filter(f => f.setor && f.setor.toLowerCase().includes(termo));
+        } else if (tipo === "contagem") {
+            let cont = data.filter(f => (f.setor && f.setor.toLowerCase().includes(termo)) || (f.chefe && f.chefe.toLowerCase().includes(termo)));
+            return respostaDiv.innerHTML = `📊 Total encontrado: <strong>${cont.length}</strong>`;
+        } else {
+            resultados = data.filter(f => f.nome && f.nome.toLowerCase().includes(termo));
         }
 
-        if (!resultadosGlobais.length) return respostaDiv.innerHTML = "Nenhum registro encontrado.";
+        if (resultados.length === 0) {
+            respostaDiv.innerHTML = "Nenhum registro encontrado.";
+            return;
+        }
 
+        resultadosGlobais = resultados;
         paginaAtual = 1;
         renderizarPagina();
 
     } catch (e) {
-        respostaDiv.innerHTML = "Erro na conexão.";
+        respostaDiv.innerHTML = "Erro na conexão com o servidor.";
     }
 }
 
