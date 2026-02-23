@@ -6,7 +6,7 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- ESTILOS ORIGINAIS --- */
+/* --- TODOS OS SEUS ESTILOS ORIGINAIS MANTIDOS --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; }
 .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
@@ -107,12 +107,12 @@ const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_
 const FOTO_PADRAO = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
 const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
-// ✅ FUNÇÃO REFORMULADA PARA CARREGAR FOTOS DO DRIVE
+// ✅ NOVA FUNÇÃO DE FOTO (LH3 GOOGLE)
 function formatarLinkFoto(url) {
     if (!url || typeof url !== 'string' || url.trim() === "") return FOTO_PADRAO;
     
     let id = "";
-    // Extrai o ID do link uc?id=... ou /d/...
+    // Extrai o ID de qualquer formato de link do Drive
     if (url.includes("id=")) {
         id = url.split("id=")[1].split("&")[0];
     } else if (url.includes("/d/")) {
@@ -120,13 +120,14 @@ function formatarLinkFoto(url) {
     }
 
     if (id) {
-        // Usa o servidor de miniaturas do Google (mais rápido e ignora bloqueios de download)
-        return "https://lh3.googleusercontent.com/d/" + id;
+        // Formato mais estável: lh3.googleusercontent.com
+        return `https://lh3.googleusercontent.com/d/${id}=s200`;
     }
     
     return url;
 }
 
+// --- TODA A LÓGICA DE LOGIN E PAGINAÇÃO MANTIDA ---
 let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf")) || [
     { usuario: "admin", senha: "1234", primeiroAcesso: true },
     { usuario: "mauro", senha: "0000", primeiroAcesso: true }
@@ -161,6 +162,7 @@ function renderizarPagina() {
     html += `<small>Página ${paginaAtual} de ${totalPaginas}</small><br><br>`;
 
     pagina.forEach(f => {
+        // ✅ APLICA A FORMATAÇÃO DO LINK
         const imgUrl = formatarLinkFoto(f.foto);
 
         html += `<div class="card-resultado">
@@ -225,11 +227,10 @@ function confirmarEntrada() {
 window.logout = () => { localStorage.removeItem("logado"); location.reload(); }
 
 window.consultar = async function() {
-    let pRaw = perguntaInput.value.trim().toLowerCase();
-    let p = pRaw.replace(/[?]/g, "").trim(); 
+    let p = perguntaInput.value.trim().toLowerCase().replace(/[?]/g, "").trim(); 
     if (!p) return;
-    
     respostaDiv.innerHTML = "Consultando...";
+    
     tipoConsultaAtual = "ficha";
     let termo = p.split(" ").pop();
 
@@ -239,7 +240,8 @@ window.consultar = async function() {
     try {
         const response = await fetch(WEBHOOK_URL);
         const data = await response.json();
-        let resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
+        // Busca flexível: nome ou chefe
+        let resultados = data.filter(f => f.nome.toLowerCase().includes(termo) || (f.chefe && f.chefe.toLowerCase().includes(termo)));
 
         if (!resultados.length) return respostaDiv.innerHTML = "Não encontrado.";
         resultadosGlobais = resultados;
