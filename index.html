@@ -1,14 +1,3 @@
-Para resolver o problema, fiz duas modificações essenciais no seu código:
-
-Tratamento de Links do Drive: Adicionei uma pequena função interna que converte automaticamente links de compartilhamento do Google Drive para o formato de imagem direta (pois o navegador bloqueia o link padrão por segurança).
-
-Validação do Campo: Garanti que o código procure exatamente pela chave f.foto vinda do seu Webhook.
-
-Atenção: Para que funcione, na sua Planilha Google, o cabeçalho da coluna deve ser exatamente foto (em minúsculo).
-
-Aqui está o código completo e sem cortes:
-
-HTML
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
