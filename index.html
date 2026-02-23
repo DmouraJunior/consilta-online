@@ -6,7 +6,7 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- SEU CSS ORIGINAL MANTIDO INTEGRALMENTE --- */
+/* --- ESTILOS MANTIDOS --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; }
 .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
@@ -28,28 +28,9 @@ button:hover { background: #002244; }
 .response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 300px; overflow-y: auto; }
 .footer { text-align: center; padding: 15px; font-size: 12px; color: #555; background: #e9edf2; }
 
-/* ✅ CORREÇÃO DO OLHINHO PARA PC E CELULAR */
-.pass-container { 
-    position: relative; 
-    width: 100%; 
-}
-
-.toggle-eye { 
-    position: absolute; 
-    right: 12px; 
-    top: 12px; /* Alinhado ao topo do input */
-    cursor: pointer; 
-    color: #777; 
-    font-size: 18px;
-    z-index: 10;
-    background: transparent;
-    user-select: none;
-}
-
-/* Esconde o ícone nativo do Windows/Edge que conflita com o nosso */
+.pass-container { position: relative; width: 100%; }
+.toggle-eye { position: absolute; right: 12px; top: 12px; cursor: pointer; color: #777; font-size: 18px; z-index: 10; background: transparent; user-select: none; }
 input::-ms-reveal, input::-ms-clear { display: none; }
-
-/* ✅ ESTILOS DAS RESPOSTAS EM LISTA VERTICAL */
 .card-resultado { border-bottom: 1px solid #ddd; padding: 10px 0; margin-bottom: 10px; }
 .info-item { display: block; margin-bottom: 4px; line-height: 1.4; }
 </style>
@@ -113,11 +94,18 @@ document.addEventListener("DOMContentLoaded", function() {
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
 const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
-// Persistência de usuários para troca de senha
-let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf")) || [
+// --- CORREÇÃO DA PERSISTÊNCIA ---
+const usuariosPadrao = [
     { usuario: "admin", senha: "1234", primeiroAcesso: true },
     { usuario: "mauro", senha: "0000", primeiroAcesso: true }
 ];
+
+// Carrega o banco do localStorage ou usa o padrão se for a primeira vez
+let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf"));
+if (!usuariosDB) {
+    usuariosDB = usuariosPadrao;
+    localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
+}
 
 const loginArea = document.getElementById("loginArea");
 const sistemaArea = document.getElementById("sistemaArea");
@@ -127,18 +115,14 @@ const senhaInput = document.getElementById("senha");
 const perguntaInput = document.getElementById("pergunta");
 const respostaDiv = document.getElementById("resposta");
 
-// ✅ FUNÇÃO VER SENHA (OLHINHO)
 window.verSenha = function(id) {
     const input = document.getElementById(id);
     input.type = input.type === "password" ? "text" : "password";
 }
 
-// ✅ ATALHOS DE TECLADO (ENTER) - RESTAURADOS
 usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
-document.getElementById("novaSenha")?.addEventListener("keydown", e => { if (e.key === "Enter") salvarNovaSenha(); });
-document.getElementById("confirmaSenha")?.addEventListener("keydown", e => { if (e.key === "Enter") salvarNovaSenha(); });
 
 /* PAGINAÇÃO */
 let paginaAtual = 1;
@@ -176,12 +160,12 @@ function renderizarPagina() {
 window.proximaPagina = function() { paginaAtual++; renderizarPagina(); }
 window.paginaAnterior = function() { paginaAtual--; renderizarPagina(); }
 
-// ✅ LÓGICA DE LOGIN E SESSÃO
+// --- LÓGICA DE LOGIN ---
 window.login = function() {
     const user = usuariosDB.find(u => u.usuario === usuarioInput.value.trim() && u.senha === senhaInput.value.trim());
     if (user) {
+        localStorage.setItem("userLogando", user.usuario);
         if (user.primeiroAcesso) {
-            localStorage.setItem("userLogando", user.usuario);
             loginArea.classList.add("hidden");
             trocaSenhaArea.classList.remove("hidden");
         } else {
@@ -197,8 +181,11 @@ window.salvarNovaSenha = function() {
     if (n !== c) return alert("As senhas não coincidem.");
 
     const loginUser = localStorage.getItem("userLogando");
+    
+    // Atualiza a lista e salva permanentemente
     usuariosDB = usuariosDB.map(u => u.usuario === loginUser ? {...u, senha: n, primeiroAcesso: false} : u);
     localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
+    
     confirmarEntrada();
 }
 
@@ -211,7 +198,13 @@ function confirmarEntrada() {
     perguntaInput.focus();
 }
 
-window.logout = function() { localStorage.clear(); location.reload(); }
+// Logout corrigido para não apagar as senhas novas
+window.logout = function() { 
+    localStorage.removeItem("logado"); 
+    localStorage.removeItem("tempoLogin");
+    localStorage.removeItem("userLogando");
+    location.reload(); 
+}
 
 function verificarSessao() {
     const tempo = localStorage.getItem("tempoLogin");
@@ -229,11 +222,10 @@ function extrairTermo(frase, chaves) {
     return null;
 }
 
-// ✅ SUA FUNÇÃO DE CONSULTA ORIGINAL INTEGRAL (NÃO PERDE NADA)
 window.consultar = async function() {
     if (!verificarSessao()) { logout(); return; }
     let pergunta = perguntaInput.value.trim().toLowerCase();
-    if (!pergunta) return respostaDiv.innerHTML = "Digite uma pergunta.";
+    if (!pergunta) return;
     
     respostaDiv.innerHTML = "Consultando...";
     pergunta = pergunta.replace(/[?.,]/g, "");
@@ -241,7 +233,6 @@ window.consultar = async function() {
     let tipo = "nome";
     let termo = null;
 
-    // Regras de detecção originais mantidas
     if (pergunta.includes("equipe") || pergunta.includes("time")) {
         tipo = "equipe"; termo = extrairTermo(pergunta, ["equipe de","time de"]);
     }
@@ -272,7 +263,6 @@ window.consultar = async function() {
         const data = await response.json();
         let resultados = [];
 
-        // Retornos específicos mantidos com ícones em lista
         if (tipo === "chefe") {
             let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
             if (!pessoas.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
@@ -288,7 +278,6 @@ window.consultar = async function() {
             return respostaDiv.innerHTML = html;
         }
 
-        // Filtros gerais
         if (tipo === "equipe") resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
         else if (tipo === "empresa") resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
         else if (tipo === "setor") resultados = data.filter(f => f.setor.toLowerCase().includes(termo));
