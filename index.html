@@ -6,7 +6,7 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- ESTILOS MANTIDOS --- */
+/* --- ESTILOS ORIGINAIS --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; }
 .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
@@ -25,14 +25,27 @@ button:hover { background: #002244; }
 .logout { background: #8b0000; }
 .logout:hover { background: #6e0000; }
 .hidden { display: none; }
-.response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 300px; overflow-y: auto; }
+.response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 350px; overflow-y: auto; }
 .footer { text-align: center; padding: 15px; font-size: 12px; color: #555; background: #e9edf2; }
+
+/* ✅ ESTILO DA FOTO */
+.foto-servidor {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #002b5c;
+    float: right;
+    margin-left: 10px;
+    background: #fff;
+}
 
 .pass-container { position: relative; width: 100%; }
 .toggle-eye { position: absolute; right: 12px; top: 12px; cursor: pointer; color: #777; font-size: 18px; z-index: 10; background: transparent; user-select: none; }
 input::-ms-reveal, input::-ms-clear { display: none; }
-.card-resultado { border-bottom: 1px solid #ddd; padding: 10px 0; margin-bottom: 10px; }
-.info-item { display: block; margin-bottom: 4px; line-height: 1.4; }
+
+.card-resultado { border-bottom: 1px solid #ddd; padding: 12px 0; margin-bottom: 10px; overflow: hidden; }
+.info-item { display: block; margin-bottom: 4px; line-height: 1.4; padding-right: 75px; }
 </style>
 </head>
 
@@ -94,13 +107,12 @@ document.addEventListener("DOMContentLoaded", function() {
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
 const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
-// --- CORREÇÃO DA PERSISTÊNCIA ---
+// --- PERSISTÊNCIA DE SENHA ---
 const usuariosPadrao = [
     { usuario: "admin", senha: "1234", primeiroAcesso: true },
     { usuario: "mauro", senha: "0000", primeiroAcesso: true }
 ];
 
-// Carrega o banco do localStorage ou usa o padrão se for a primeira vez
 let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf"));
 if (!usuariosDB) {
     usuariosDB = usuariosPadrao;
@@ -124,7 +136,7 @@ usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); 
 senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
 
-/* PAGINAÇÃO */
+/* PAGINAÇÃO E RENDERIZAÇÃO COM FOTO */
 let paginaAtual = 1;
 const itensPorPagina = 10;
 let resultadosGlobais = [];
@@ -140,7 +152,12 @@ function renderizarPagina() {
     html += `<small>Página ${paginaAtual} de ${totalPaginas}</small><br><br>`;
 
     pagina.forEach(f => {
+        // Foto padrão caso o link da planilha esteja vazio ou quebrado
+        const fotoPadrao = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+        const imgUrl = f.foto && f.foto.trim() !== "" ? f.foto : fotoPadrao;
+
         html += `<div class="card-resultado">
+            <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'" alt="Foto">
             <span class="info-item">👤 <strong>${f.nome}</strong></span>
             <span class="info-item">🏢 Setor: ${f.setor}</span>
             <span class="info-item">💼 Cargo: ${f.cargo}</span>
@@ -150,7 +167,7 @@ function renderizarPagina() {
         </div>`;
     });
 
-    html += `<div style="text-align:center;">`;
+    html += `<div style="text-align:center; padding-top: 10px;">`;
     if (paginaAtual > 1) html += `<button style="width:50px" onclick="paginaAnterior()">⬅️</button> `;
     if (fim < resultadosGlobais.length) html += `<button style="width:50px" onclick="proximaPagina()">➡️</button>`;
     html += `</div>`;
@@ -181,11 +198,8 @@ window.salvarNovaSenha = function() {
     if (n !== c) return alert("As senhas não coincidem.");
 
     const loginUser = localStorage.getItem("userLogando");
-    
-    // Atualiza a lista e salva permanentemente
     usuariosDB = usuariosDB.map(u => u.usuario === loginUser ? {...u, senha: n, primeiroAcesso: false} : u);
     localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
-    
     confirmarEntrada();
 }
 
@@ -198,7 +212,6 @@ function confirmarEntrada() {
     perguntaInput.focus();
 }
 
-// Logout corrigido para não apagar as senhas novas
 window.logout = function() { 
     localStorage.removeItem("logado"); 
     localStorage.removeItem("tempoLogin");
@@ -222,6 +235,7 @@ function extrairTermo(frase, chaves) {
     return null;
 }
 
+// --- CONSULTA ---
 window.consultar = async function() {
     if (!verificarSessao()) { logout(); return; }
     let pergunta = perguntaInput.value.trim().toLowerCase();
@@ -263,33 +277,30 @@ window.consultar = async function() {
         const data = await response.json();
         let resultados = [];
 
+        // Filtros específicos
         if (tipo === "chefe") {
             let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
             if (!pessoas.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
-            let html = `<strong>${pessoas.length} resultado(s)</strong><br><br>`;
-            pessoas.forEach(p => { html += `<div class="card-resultado"><span class="info-item">👤 <strong>${p.nome}</strong></span><span class="info-item">👨💼 Chefe: ${p.chefe}</span></div>`; });
-            return respostaDiv.innerHTML = html;
+            resultadosGlobais = pessoas; 
         }
-        if (tipo === "setor_nome") {
+        else if (tipo === "setor_nome") {
             let pessoas = data.filter(f => f.nome.toLowerCase().includes(termo));
             if (!pessoas.length) return respostaDiv.innerHTML = "Pessoa não encontrada.";
-            let html = "";
-            pessoas.forEach(p => { html += `<div class="card-resultado"><span class="info-item">👤 <strong>${p.nome}</strong></span><span class="info-item">🏢 Setor: <strong>${p.setor}</strong></span></div>`; });
-            return respostaDiv.innerHTML = html;
+            resultadosGlobais = pessoas;
         }
-
-        if (tipo === "equipe") resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
-        else if (tipo === "empresa") resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
-        else if (tipo === "setor") resultados = data.filter(f => f.setor.toLowerCase().includes(termo));
+        else if (tipo === "equipe") resultadosGlobais = data.filter(f => f.chefe.toLowerCase().includes(termo));
+        else if (tipo === "empresa") resultadosGlobais = data.filter(f => f.empresa.toLowerCase().includes(termo));
+        else if (tipo === "setor") resultadosGlobais = data.filter(f => f.setor.toLowerCase().includes(termo));
         else if (tipo === "contagem") {
-            resultados = data.filter(f => f.setor.toLowerCase().includes(termo) || f.empresa.toLowerCase().includes(termo) || f.chefe.toLowerCase().includes(termo));
-            return respostaDiv.innerHTML = `📊 Total encontrado para "<strong>${termo}</strong>": <strong>${resultados.length}</strong>`;
+            let contagem = data.filter(f => f.setor.toLowerCase().includes(termo) || f.empresa.toLowerCase().includes(termo) || f.chefe.toLowerCase().includes(termo));
+            return respostaDiv.innerHTML = `📊 Total encontrado para "<strong>${termo}</strong>": <strong>${contagem.length}</strong>`;
         }
-        else resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
+        else {
+            resultadosGlobais = data.filter(f => f.nome.toLowerCase().includes(termo));
+        }
 
-        if (!resultados.length) return respostaDiv.innerHTML = "Nenhum registro encontrado.";
+        if (!resultadosGlobais.length) return respostaDiv.innerHTML = "Nenhum registro encontrado.";
 
-        resultadosGlobais = resultados;
         paginaAtual = 1;
         renderizarPagina();
 
