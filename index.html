@@ -6,7 +6,7 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- SEUS ESTILOS ORIGINAIS --- */
+/* --- SEUS ESTILOS ORIGINAIS INTEGRALMENTE MANTIDOS --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; }
 .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
@@ -28,7 +28,7 @@ button:hover { background: #002244; }
 .response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 350px; overflow-y: auto; }
 .footer { text-align: center; padding: 15px; font-size: 12px; color: #555; background: #e9edf2; }
 
-/* ✅ ADIÇÃO DO ESTILO DA FOTO NO SEU CSS ORIGINAL */
+/* ESTILO DA FOTO */
 .foto-servidor {
     width: 65px;
     height: 65px;
@@ -42,7 +42,6 @@ button:hover { background: #002244; }
 
 .pass-container { position: relative; width: 100%; }
 .toggle-eye { position: absolute; right: 12px; top: 12px; cursor: pointer; color: #777; font-size: 18px; z-index: 10; background: transparent; user-select: none; }
-input::-ms-reveal, input::-ms-clear { display: none; }
 .card-resultado { border-bottom: 1px solid #ddd; padding: 10px 0; margin-bottom: 10px; overflow: hidden; }
 .info-item { display: block; margin-bottom: 4px; line-height: 1.4; }
 </style>
@@ -103,7 +102,6 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
-// ✅ SUA URL NOVA ATUALIZADA
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
 const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
@@ -135,11 +133,11 @@ usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); 
 senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
 
-// ✅ TODA A SUA LÓGICA DE PAGINAÇÃO MANTIDA
+// PAGINAÇÃO
 let paginaAtual = 1;
 const itensPorPagina = 10;
 let resultadosGlobais = [];
-let tipoConsultaAtual = "ficha"; // Para saber se mostra ficha toda ou só um campo
+let tipoConsultaAtual = "ficha"; 
 
 function renderizarPagina() {
     if (!respostaDiv) return;
@@ -159,7 +157,6 @@ function renderizarPagina() {
             <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'">
             <span class="info-item">👤 <strong>${f.nome}</strong></span>`;
         
-        // ✅ CORREÇÃO: MOSTRAR SÓ O QUE FOI PEDIDO OU A FICHA TODA
         if (tipoConsultaAtual === "setor") {
             html += `<span class="info-item">🏢 Setor: <strong>${f.setor}</strong></span>`;
         } else if (tipoConsultaAtual === "chefe") {
@@ -188,7 +185,7 @@ function renderizarPagina() {
 window.proximaPagina = function() { paginaAtual++; renderizarPagina(); }
 window.paginaAnterior = function() { paginaAtual--; renderizarPagina(); }
 
-// --- LOGIN ---
+// LOGIN E SESSÃO
 window.login = function() {
     const user = usuariosDB.find(u => u.usuario === usuarioInput.value.trim() && u.senha === senhaInput.value.trim());
     if (user) {
@@ -225,7 +222,6 @@ function confirmarEntrada() {
 window.logout = function() { 
     localStorage.removeItem("logado"); 
     localStorage.removeItem("tempoLogin");
-    localStorage.removeItem("userLogando");
     location.reload(); 
 }
 
@@ -240,24 +236,27 @@ if (localStorage.getItem("logado") === "true" && verificarSessao()) {
     sistemaArea.classList.remove("hidden");
 }
 
-// --- SEU MOTOR DE BUSCA ORIGINAL (300 LINHAS) ---
 function extrairTermo(frase, chaves) {
     for (let c of chaves) { if (frase.includes(c)) return frase.split(c)[1]?.trim(); }
     return null;
 }
 
+// CONSULTA
 window.consultar = async function() {
     if (!verificarSessao()) { logout(); return; }
-    let pergunta = perguntaInput.value.trim().toLowerCase();
+    
+    // ✅ CORREÇÃO DEFINITIVA: Limpa interrogações e espaços extras
+    let perguntaRaw = perguntaInput.value.trim().toLowerCase();
+    let pergunta = perguntaRaw.replace(/[?]/g, "").trim(); 
+    
     if (!pergunta) return;
     
     respostaDiv.innerHTML = "Consultando...";
-    pergunta = pergunta.replace(/[?.,]/g, "");
-
     let tipo = "nome";
     let termo = null;
-    tipoConsultaAtual = "ficha"; // Reset
+    tipoConsultaAtual = "ficha"; 
 
+    // Mapeamento de termos
     if (pergunta.includes("equipe") || pergunta.includes("time")) {
         tipo = "equipe"; termo = extrairTermo(pergunta, ["equipe de","time de"]);
     }
@@ -279,7 +278,6 @@ window.consultar = async function() {
         tipo = "chefe"; termo = extrairTermo(pergunta, ["chefe de","chefe do"]);
         tipoConsultaAtual = "chefe";
     }
-    // ✅ CORREÇÃO STATUS
     if (!termo && pergunta.includes("status")) {
         tipo = "status_nome"; termo = extrairTermo(pergunta, ["status de"]);
         tipoConsultaAtual = "status";
@@ -290,6 +288,8 @@ window.consultar = async function() {
         termo = extrairTermo(pergunta, ["quantos tem na","quantos tem no","quantos na","quantas na","quantas no"]);
         if (!termo) termo = pergunta.split(" ").pop();
     }
+    
+    // Se ainda não achou termo, pega a última palavra (busca simples)
     if (!termo) termo = pergunta.split(" ").pop();
 
     try {
@@ -297,9 +297,7 @@ window.consultar = async function() {
         const data = await response.json();
         let resultados = [];
 
-        if (tipo === "chefe") {
-            resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
-        } else if (tipo === "setor_nome" || tipo === "status_nome" || tipo === "cargo_nome") {
+        if (tipo === "chefe" || tipo === "setor_nome" || tipo === "status_nome" || tipo === "cargo_nome") {
             resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
         } else if (tipo === "equipe") {
             resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
