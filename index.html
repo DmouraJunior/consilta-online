@@ -6,7 +6,7 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- SEUS ESTILOS ORIGINAIS INTEGRALMENTE MANTIDOS --- */
+/* --- ESTILOS MANTIDOS --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; }
 .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
@@ -28,7 +28,6 @@ button:hover { background: #002244; }
 .response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 350px; overflow-y: auto; }
 .footer { text-align: center; padding: 15px; font-size: 12px; color: #555; background: #e9edf2; }
 
-/* ESTILO DA FOTO */
 .foto-servidor {
     width: 65px;
     height: 65px;
@@ -37,7 +36,7 @@ button:hover { background: #002244; }
     border: 2px solid #002b5c;
     float: right;
     margin-left: 10px;
-    background: #fff;
+    background: #eee;
 }
 
 .pass-container { position: relative; width: 100%; }
@@ -103,18 +102,30 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 document.addEventListener("DOMContentLoaded", function() {
 
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
+const FOTO_PADRAO = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
 const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
-const usuariosPadrao = [
+// ✅ FUNÇÃO PARA CONVERTER LINK DO DRIVE EM IMAGEM REAL
+function formatarLinkFoto(url) {
+    if (!url || typeof url !== 'string' || url.trim() === "") return FOTO_PADRAO;
+    
+    // Se for o link padrão de compartilhamento ou visualização do Drive
+    if (url.includes("drive.google.com")) {
+        let id = "";
+        if (url.includes("id=")) {
+            id = url.split("id=")[1].split("&")[0];
+        } else if (url.includes("/d/")) {
+            id = url.split("/d/")[1].split("/")[0];
+        }
+        return id ? `https://lh3.googleusercontent.com/u/0/d/${id}` : url;
+    }
+    return url;
+}
+
+let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf")) || [
     { usuario: "admin", senha: "1234", primeiroAcesso: true },
     { usuario: "mauro", senha: "0000", primeiroAcesso: true }
 ];
-
-let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf"));
-if (!usuariosDB) {
-    usuariosDB = usuariosPadrao;
-    localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
-}
 
 const loginArea = document.getElementById("loginArea");
 const sistemaArea = document.getElementById("sistemaArea");
@@ -133,7 +144,6 @@ usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); 
 senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
 
-// PAGINAÇÃO
 let paginaAtual = 1;
 const itensPorPagina = 10;
 let resultadosGlobais = [];
@@ -150,11 +160,11 @@ function renderizarPagina() {
     html += `<small>Página ${paginaAtual} de ${totalPaginas}</small><br><br>`;
 
     pagina.forEach(f => {
-        const fotoPadrao = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-        const imgUrl = f.foto || fotoPadrao;
+        // ✅ USANDO A FUNÇÃO DE FORMATAÇÃO AQUI
+        const imgUrl = formatarLinkFoto(f.foto);
 
         html += `<div class="card-resultado">
-            <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'">
+            <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${FOTO_PADRAO}'">
             <span class="info-item">👤 <strong>${f.nome}</strong></span>`;
         
         if (tipoConsultaAtual === "setor") {
@@ -185,7 +195,6 @@ function renderizarPagina() {
 window.proximaPagina = function() { paginaAtual++; renderizarPagina(); }
 window.paginaAnterior = function() { paginaAtual--; renderizarPagina(); }
 
-// LOGIN E SESSÃO
 window.login = function() {
     const user = usuariosDB.find(u => u.usuario === usuarioInput.value.trim() && u.senha === senhaInput.value.trim());
     if (user) {
@@ -241,22 +250,16 @@ function extrairTermo(frase, chaves) {
     return null;
 }
 
-// CONSULTA
 window.consultar = async function() {
     if (!verificarSessao()) { logout(); return; }
-    
-    // ✅ CORREÇÃO DEFINITIVA: Limpa interrogações e espaços extras
     let perguntaRaw = perguntaInput.value.trim().toLowerCase();
     let pergunta = perguntaRaw.replace(/[?]/g, "").trim(); 
-    
     if (!pergunta) return;
-    
     respostaDiv.innerHTML = "Consultando...";
     let tipo = "nome";
     let termo = null;
     tipoConsultaAtual = "ficha"; 
 
-    // Mapeamento de termos
     if (pergunta.includes("equipe") || pergunta.includes("time")) {
         tipo = "equipe"; termo = extrairTermo(pergunta, ["equipe de","time de"]);
     }
@@ -266,9 +269,6 @@ window.consultar = async function() {
     if (!termo && pergunta.includes("setor")) {
         tipo = "setor_nome"; termo = extrairTermo(pergunta, ["setor de","qual setor","do setor"]);
         if (pergunta.includes("setor de")) tipoConsultaAtual = "setor"; 
-    }
-    if (!termo && pergunta.includes("empresa")) {
-        tipo = "empresa_nome"; termo = extrairTermo(pergunta, ["empresa de","da empresa","trabalha"]);
     }
     if (!termo && pergunta.includes("cargo")) {
         tipo = "cargo_nome"; termo = extrairTermo(pergunta, ["cargo de"]);
@@ -283,39 +283,18 @@ window.consultar = async function() {
         tipoConsultaAtual = "status";
     }
 
-    if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
-        tipo = "contagem";
-        termo = extrairTermo(pergunta, ["quantos tem na","quantos tem no","quantos na","quantas na","quantas no"]);
-        if (!termo) termo = pergunta.split(" ").pop();
-    }
-    
-    // Se ainda não achou termo, pega a última palavra (busca simples)
     if (!termo) termo = pergunta.split(" ").pop();
 
     try {
         const response = await fetch(WEBHOOK_URL);
         const data = await response.json();
-        let resultados = [];
-
-        if (tipo === "chefe" || tipo === "setor_nome" || tipo === "status_nome" || tipo === "cargo_nome") {
-            resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
-        } else if (tipo === "equipe") {
-            resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
-        } else if (tipo === "empresa") {
-            resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
-        } else if (tipo === "contagem") {
-            resultados = data.filter(f => f.setor.toLowerCase().includes(termo) || f.empresa.toLowerCase().includes(termo) || f.chefe.toLowerCase().includes(termo));
-            return respostaDiv.innerHTML = `📊 Total encontrado para "<strong>${termo}</strong>": <strong>${resultados.length}</strong>`;
-        } else {
-            resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
-        }
+        let resultados = data.filter(f => f.nome.toLowerCase().includes(termo) || (f.chefe && f.chefe.toLowerCase().includes(termo)));
 
         if (!resultados.length) return respostaDiv.innerHTML = "Nenhum registro encontrado.";
 
         resultadosGlobais = resultados;
         paginaAtual = 1;
         renderizarPagina();
-
     } catch (e) {
         respostaDiv.innerHTML = "Erro na conexão.";
     }
