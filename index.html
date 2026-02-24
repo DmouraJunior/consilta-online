@@ -45,7 +45,7 @@ button:hover { background: #002244; }
 .legenda-buscas li { margin-bottom: 6px; line-height: 1.4; }
 .legenda-buscas b { color: #003366; }
 
-/* ESTILO DA FOTO - GARANTINDO VISIBILIDADE */
+/* ESTILO DA FOTO */
 .foto-servidor {
     width: 65px;
     height: 65px;
@@ -54,7 +54,7 @@ button:hover { background: #002244; }
     border: 2px solid #002b5c;
     float: right;
     margin-left: 10px;
-    background: #eee; /* Fundo cinza caso a foto demore a carregar */
+    background: #fff;
     display: block;
 }
 
@@ -153,21 +153,23 @@ const senhaInput = document.getElementById("senha");
 const perguntaInput = document.getElementById("pergunta");
 const respostaDiv = document.getElementById("resposta");
 
-// --- FUNÇÃO PARA CORRIGIR LINKS DO GOOGLE DRIVE ---
+// --- FUNÇÃO AJUSTADA PARA O LINK QUE VOCÊ ENVIOU ---
 function gerarLinkDireto(url) {
-    if (!url || url.trim() === "") return null;
+    if (!url || typeof url !== 'string') return null;
+    let driveUrl = url.trim();
     
-    // Se for link do Drive, extrai o ID e gera o link de imagem direta
-    if (url.includes("drive.google.com")) {
+    if (driveUrl.includes("drive.google.com")) {
         let id = "";
-        if (url.includes("id=")) {
-            id = url.split("id=")[1].split("&")[0];
-        } else {
-            id = url.split("/d/")[1].split("/")[0];
-        }
-        return `https://lh3.googleusercontent.com/u/0/d/${id}`;
+        try {
+            if (driveUrl.includes("id=")) {
+                id = driveUrl.split("id=")[1].split("&")[0];
+            } else if (driveUrl.includes("/file/d/")) {
+                id = driveUrl.split("/file/d/")[1].split("/")[0].split("?")[0];
+            }
+            if (id) return `https://lh3.googleusercontent.com/u/0/d/${id}`;
+        } catch (e) { return null; }
     }
-    return url; // Retorna o link original se não for Drive
+    return driveUrl;
 }
 
 window.verSenha = function(id) {
@@ -196,10 +198,7 @@ function renderizarPagina() {
 
     pagina.forEach(f => {
         const fotoPadrao = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-        
-        // CORREÇÃO AQUI: Aplica o tratamento de link antes de exibir
-        const linkTratado = gerarLinkDireto(f.foto);
-        const imgUrl = linkTratado || fotoPadrao;
+        const imgUrl = gerarLinkDireto(f.foto) || fotoPadrao;
 
         html += `<div class="card-resultado">
             <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'">
