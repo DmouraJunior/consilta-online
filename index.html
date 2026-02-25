@@ -1,3 +1,14 @@
+Entendido! Fiz os seguintes ajustes conforme solicitado:
+
+Legenda de Busca: Revi os estilos para garantir que ela volte ao formato original (caixa flutuante à esquerda com borda dourada).
+
+Organograma: Removi os nomes "Assessor Técnico" e "Assessor Administrativo" da lista visual.
+
+Login: Mantive o container estreito (460px) para o login, expandindo apenas após o acesso.
+
+Aqui está o código completo e corrigido:
+
+HTML
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,7 +17,7 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- ESTILOS MANTIDOS --- */
+/* --- ESTILOS ORIGINAIS --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; min-height: 100vh; position: relative; }
 .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
@@ -14,10 +25,8 @@ body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; min-height: 100
 .gold-line { height: 4px; background: #c9a227; }
 .main { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 110px); padding: 20px; }
 
-/* CONTAINER DINÂMICO: Começa pequeno para o login */
-.container { background: white; padding: 40px; border-radius: 12px; width: 460px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); z-index: 2; transition: all 0.4s ease; }
-
-/* Classe para expandir quando logar */
+/* CONTAINER: Começa com a largura de login original */
+.container { background: white; padding: 40px; border-radius: 12px; width: 460px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); z-index: 2; transition: width 0.4s ease; }
 .container.modo-sistema { width: 950px; }
 
 .titulo-area { text-align: center; margin-bottom: 25px; }
@@ -31,25 +40,38 @@ button:hover { background: #002244; }
 .response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 350px; overflow-y: auto; }
 .footer { text-align: center; padding: 15px; font-size: 12px; color: #555; background: #e9edf2; position: fixed; bottom: 0; width: 100%; z-index: 10; }
 
-/* LEGENDA */
-.legenda-buscas { position: fixed; bottom: 65px; left: 20px; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #c9a227; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); font-size: 12px; color: #333; max-width: 240px; z-index: 5; }
+/* LEGENDA VOLTANDO AO ORIGINAL */
+.legenda-buscas {
+    position: fixed;
+    bottom: 65px;
+    left: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #c9a227;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+    font-size: 12px;
+    color: #333;
+    max-width: 240px;
+    z-index: 5;
+}
 .legenda-buscas h4 { color: #002b5c; margin-bottom: 8px; font-size: 13px; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+.legenda-buscas ul { list-style: none; }
+.legenda-buscas li { margin-bottom: 6px; line-height: 1.4; }
+.legenda-buscas b { color: #003366; }
 
 /* FOTO E RESULTADOS */
 .foto-servidor { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 2px solid #002b5c; float: right; margin-left: 10px; background: #fff; }
 .pass-container { position: relative; width: 100%; }
-.toggle-eye { position: absolute; right: 12px; top: 12px; cursor: pointer; color: #777; font-size: 18px; z-index: 10; }
+.toggle-eye { position: absolute; right: 12px; top: 12px; cursor: pointer; color: #777; font-size: 18px; z-index: 10; background: transparent; user-select: none; }
 .card-resultado { border-bottom: 1px solid #ddd; padding: 10px 0; margin-bottom: 10px; overflow: hidden; }
 .info-item { display: block; margin-bottom: 4px; line-height: 1.4; }
 
-/* --- ORGANOGRAMA LADO A LADO --- */
-.flex-sistema { display: flex; gap: 30px; align-items: flex-start; text-align: left; opacity: 0; transition: opacity 0.5s; }
-.container.modo-sistema .flex-sistema { opacity: 1; }
+/* ESTRUTURA SISTEMA + ORGANOGRAMA */
+.flex-sistema { display: flex; gap: 30px; align-items: flex-start; text-align: left; }
 .col-busca { flex: 1.2; }
 .col-organograma { flex: 0.8; background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid #c9a227; }
 .org-titulo { color: #002b5c; font-size: 14px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-.org-instrucao { font-size: 10px; color: #666; margin-bottom: 10px; font-style: italic; }
-
 .org-item { background: white; padding: 10px; border-radius: 6px; margin-bottom: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #002b5c; cursor: pointer; transition: 0.2s; }
 .org-item:hover { background: #edf2f7; transform: translateX(5px); }
 .org-item small { display: block; color: #c9a227; font-size: 10px; font-weight: bold; text-transform: uppercase; }
@@ -71,9 +93,11 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div id="guiaBusca" class="legenda-buscas hidden">
 <h4>💡 Como buscar</h4>
 <ul>
-<li>• <b>Por Nome:</b> Digite o nome.</li>
+<li>• <b>Por Nome:</b> Digite apenas o nome.</li>
 <li>• <b>Por Equipe:</b> "equipe de [nome]"</li>
 <li>• <b>Por Setor:</b> "setor de [nome]"</li>
+<li>• <b>Por Empresa:</b> "funcionários da [empresa]"</li>
+<li>• <b>Contagem:</b> "quantos na [setor]"</li>
 </ul>
 </div>
 
@@ -119,7 +143,6 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 
         <div class="col-organograma">
             <div class="org-titulo">📌 Estrutura DGF</div>
-            <p class="org-instrucao">Clique no cargo para listar os servidores:</p>
             
             <div class="org-item recuo-1" onclick="buscaRapida('Diretor')">
                 <small>Diretoria</small>
@@ -140,16 +163,6 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
                 <small>Coordenação</small>
                 <span>Coordenadores</span>
             </div>
-
-            <div class="org-item recuo-3" onclick="buscaRapida('Assessor Tecnico')">
-                <small>Assessoria</small>
-                <span>Assessor Técnico</span>
-            </div>
-
-            <div class="org-item recuo-3" onclick="buscaRapida('Assessor Administrativo')">
-                <small>Assessoria</small>
-                <span>Assessor Administrativo</span>
-            </div>
         </div>
     </div>
 </div>
@@ -160,11 +173,10 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div class="footer">© 2026 - Diretoria Geral de Finanças (DGF) • Uso interno e restrito</div>
 
 <script>
-// FUNÇÃO PARA O CLIQUE NO ORGANOGRAMA (Nova)
 function buscaRapida(cargo) {
     const input = document.getElementById("pergunta");
     input.value = "cargo de " + cargo;
-    window.consultar(); // Chama a sua função de consulta original
+    window.consultar();
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -297,7 +309,7 @@ confirmarEntrada();
 function confirmarEntrada() {
 localStorage.setItem("logado", "true");
 localStorage.setItem("tempoLogin", Date.now());
-mainContainer.classList.add("modo-sistema"); // EXPANDE O CONTAINER
+mainContainer.classList.add("modo-sistema");
 loginArea.classList.add("hidden");
 trocaSenhaArea.classList.add("hidden");
 sistemaArea.classList.remove("hidden");
@@ -379,7 +391,6 @@ const data = await response.json();
 let resultados = [];
 
 if (tipo === "chefe" || tipo === "setor_nome" || tipo === "status_nome" || tipo === "cargo_nome") {
-// Busca flexível para cargos (ex: buscar "Gerente" trará todos que contém "Gerente" no cargo)
 if(tipo === "cargo_nome") {
     resultados = data.filter(f => f.cargo.toLowerCase().includes(termo));
 } else {
