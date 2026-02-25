@@ -6,7 +6,7 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- ESTILOS MANTIDOS --- */
+/* --- ESTILOS PRESERVADOS --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; min-height: 100vh; position: relative; }
 .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
@@ -28,6 +28,7 @@ button:hover { background: #002244; }
 .response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 350px; overflow-y: auto; }
 .footer { text-align: center; padding: 15px; font-size: 12px; color: #555; background: #e9edf2; position: fixed; bottom: 0; width: 100%; z-index: 10; }
 
+/* LEGENDA ORIGINAL MANTIDA */
 .legenda-buscas { position: fixed; bottom: 65px; left: 20px; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #c9a227; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); font-size: 12px; color: #333; max-width: 240px; z-index: 5; }
 .legenda-buscas h4 { color: #002b5c; margin-bottom: 8px; font-size: 13px; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; }
 .legenda-buscas ul { list-style: none; }
@@ -39,6 +40,7 @@ button:hover { background: #002244; }
 .card-resultado { border-bottom: 1px solid #ddd; padding: 10px 0; margin-bottom: 10px; overflow: hidden; }
 .info-item { display: block; margin-bottom: 4px; line-height: 1.4; }
 
+/* ORGANOGRAMA LIMPO (SEM NOMES DE ASSESSORIA) */
 .flex-sistema { display: flex; gap: 30px; align-items: flex-start; text-align: left; }
 .col-busca { flex: 1.2; }
 .col-organograma { flex: 0.8; background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid #c9a227; }
@@ -65,10 +67,10 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <h4>💡 Como buscar</h4>
 <ul>
 <li>• <b>Por Nome:</b> Digite apenas o nome.</li>
-<li>• <b>Por Equipe:</b> "equipe de [nome]"</li>
-<li>• <b>Por Setor:</b> "setor de [nome]"</li>
-<li>• <b>Por Chefe:</b> "chefe de [nome]"</li>
-<li>• <b>Por Empresa:</b> "empresa de [nome]"</li>
+<li>• <b>Empresa/Status:</b> "RM", "SES-PE", "Comissionados".</li>
+<li>• <b>Específicos:</b> "setor de [nome]", "cargo de [nome]".</li>
+<li>• <b>Equipe:</b> "equipe de [nome do chefe]".</li>
+<li>• <b>Contagem:</b> "quantos na [empresa/setor]".</li>
 </ul>
 </div>
 
@@ -296,63 +298,49 @@ guiaBusca.classList.remove("hidden");
 
 function extrairTermo(frase, chaves) {
     for (let c of chaves) {
-        if (frase.includes(c)) {
-            return frase.split(c)[1].trim();
-        }
+        if (frase.includes(c)) return frase.split(c)[1].trim();
     }
     return null;
 }
 
 window.consultar = async function() {
 if (!verificarSessao()) { logout(); return; }
-let perguntaRaw = perguntaInput.value.trim().toLowerCase();
-let pergunta = perguntaRaw.replace(/[?]/g, "").trim();
+let pergunta = perguntaInput.value.trim().toLowerCase();
 if (!pergunta) return;
 
 respostaDiv.innerHTML = "Consultando base de dados...";
-let tipoBusca = "nome";
-let termo = null;
+let termo = pergunta;
 tipoConsultaAtual = "ficha";
+let tipoBusca = "global";
 
-// DETECÇÃO DE COMANDOS ESPECÍFICOS
-if (pergunta.includes("equipe de")) {
-    tipoBusca = "equipe"; termo = extrairTermo(pergunta, ["equipe de"]);
-} else if (pergunta.includes("setor de")) {
-    tipoBusca = "por_nome"; termo = extrairTermo(pergunta, ["setor de"]);
-    tipoConsultaAtual = "setor";
-} else if (pergunta.includes("chefe de")) {
-    tipoBusca = "por_nome"; termo = extrairTermo(pergunta, ["chefe de"]);
-    tipoConsultaAtual = "chefe";
-} else if (pergunta.includes("cargo de")) {
-    tipoBusca = "por_cargo"; termo = extrairTermo(pergunta, ["cargo de"]);
-    tipoConsultaAtual = "cargo";
-} else if (pergunta.includes("empresa de")) {
-    tipoBusca = "por_nome"; termo = extrairTermo(pergunta, ["empresa de"]);
-    tipoConsultaAtual = "empresa";
-} else if (pergunta.includes("status de")) {
-    tipoBusca = "por_nome"; termo = extrairTermo(pergunta, ["status de"]);
-    tipoConsultaAtual = "status";
-} else if (pergunta.includes("quantos")) {
-    tipoBusca = "contagem"; termo = extrairTermo(pergunta, ["na ", "no ", "da ", "do "]);
-} else {
-    termo = pergunta;
-}
+// FILTROS ESPECÍFICOS PARA EXIBIÇÃO
+if (pergunta.includes("setor de")) { tipoConsultaAtual = "setor"; termo = extrairTermo(pergunta, ["setor de"]); }
+else if (pergunta.includes("chefe de")) { tipoConsultaAtual = "chefe"; termo = extrairTermo(pergunta, ["chefe de"]); }
+else if (pergunta.includes("cargo de")) { tipoConsultaAtual = "cargo"; termo = extrairTermo(pergunta, ["cargo de"]); }
+else if (pergunta.includes("empresa de")) { tipoConsultaAtual = "empresa"; termo = extrairTermo(pergunta, ["empresa de"]); }
+else if (pergunta.includes("status de")) { tipoConsultaAtual = "status"; termo = extrairTermo(pergunta, ["status de"]); }
+else if (pergunta.includes("equipe de")) { tipoBusca = "equipe"; termo = extrairTermo(pergunta, ["equipe de"]); }
+else if (pergunta.includes("quantos")) { tipoBusca = "contagem"; termo = extrairTermo(pergunta, ["na ", "no ", "da ", "do "]); }
 
 try {
     const response = await fetch(WEBHOOK_URL);
     const data = await response.json();
     let resultados = [];
 
-    if (tipoBusca === "por_cargo") {
-        resultados = data.filter(f => f.cargo.toLowerCase().includes(termo));
-    } else if (tipoBusca === "equipe") {
+    if (tipoBusca === "equipe") {
         resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
     } else if (tipoBusca === "contagem") {
         resultados = data.filter(f => f.setor.toLowerCase().includes(termo) || f.empresa.toLowerCase().includes(termo));
         return respostaDiv.innerHTML = `📊 Total encontrado: <strong>${resultados.length}</strong>`;
     } else {
-        // Busca padrão pelo nome do funcionário
-        resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
+        // BUSCA EM TODAS AS COLUNAS (PARA NÃO PERDER RM, SES-PE, COMISSIONADOS)
+        resultados = data.filter(f => 
+            f.nome.toLowerCase().includes(termo) || 
+            f.empresa.toLowerCase().includes(termo) || 
+            f.cargo.toLowerCase().includes(termo) || 
+            f.status.toLowerCase().includes(termo) || 
+            f.setor.toLowerCase().includes(termo)
+        );
     }
 
     if (!resultados.length) return respostaDiv.innerHTML = "Nenhum registro encontrado.";
