@@ -67,8 +67,8 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <li>• <b>Por Nome:</b> Digite apenas o nome.</li>
 <li>• <b>Por Equipe:</b> "equipe de [nome]"</li>
 <li>• <b>Por Setor:</b> "setor de [nome]"</li>
-<li>• <b>Por Empresa:</b> "funcionários da [empresa]"</li>
-<li>• <b>Contagem:</b> "quantos na [setor]"</li>
+<li>• <b>Por Empresa:</b> "empresa de [nome]"</li>
+<li>• <b>Por Status:</b> "status de [nome]"</li>
 </ul>
 </div>
 
@@ -210,33 +210,26 @@ let html = `<strong>${resultadosGlobais.length} resultado(s)</strong><br>`;
 html += `<small>Página ${paginaAtual} de ${totalPaginas}</small><br><br>`;
 
 pagina.forEach(f => {
-const fotoPadrao = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-const imgUrl = gerarLinkDireto(f.foto) || fotoPadrao;
+    const fotoPadrao = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+    const imgUrl = gerarLinkDireto(f.foto) || fotoPadrao;
 
-html += `<div class="card-resultado">
-<img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'">
-<span class="info-item">👤 <strong>${f.nome}</strong></span>`;
+    html += `<div class="card-resultado">
+    <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'">
+    <span class="info-item">👤 <strong>${f.nome}</strong></span>`;
 
-// LÓGICA DE EXIBIÇÃO FILTRADA
-if (tipoConsultaAtual === "setor") {
-    html += `<span class="info-item">🏢 Setor: <strong>${f.setor}</strong></span>`;
-} else if (tipoConsultaAtual === "chefe") {
-    html += `<span class="info-item">👨💼 Chefe: <strong>${f.chefe}</strong></span>`;
-} else if (tipoConsultaAtual === "cargo") {
-    html += `<span class="info-item">💼 Cargo: <strong>${f.cargo}</strong></span>`;
-} else if (tipoConsultaAtual === "empresa") {
-    html += `<span class="info-item">🏬 Empresa: <strong>${f.empresa}</strong></span>`;
-} else if (tipoConsultaAtual === "status") {
-    html += `<span class="info-item">📊 Status: <strong>${f.status}</strong></span>`;
-} else {
-    // Ficha completa para busca por nome
-    html += `<span class="info-item">🏢 Setor: ${f.setor}</span>
-    <span class="info-item">💼 Cargo: ${f.cargo}</span>
-    <span class="info-item">👨💼 Chefe: ${f.chefe}</span>
-    <span class="info-item">🏬 Empresa: ${f.empresa}</span>
-    <span class="info-item">📊 Status: ${f.status}</span>`;
-}
-html += `</div>`;
+    if (tipoConsultaAtual === "setor") html += `<span class="info-item">🏢 Setor: <strong>${f.setor}</strong></span>`;
+    else if (tipoConsultaAtual === "cargo") html += `<span class="info-item">💼 Cargo: <strong>${f.cargo}</strong></span>`;
+    else if (tipoConsultaAtual === "empresa") html += `<span class="info-item">🏬 Empresa: <strong>${f.empresa}</strong></span>`;
+    else if (tipoConsultaAtual === "status") html += `<span class="info-item">📊 Status: <strong>${f.status}</strong></span>`;
+    else if (tipoConsultaAtual === "chefe") html += `<span class="info-item">👨💼 Chefe: <strong>${f.chefe}</strong></span>`;
+    else {
+        html += `<span class="info-item">🏢 Setor: ${f.setor}</span>
+        <span class="info-item">💼 Cargo: ${f.cargo}</span>
+        <span class="info-item">👨💼 Chefe: ${f.chefe}</span>
+        <span class="info-item">🏬 Empresa: ${f.empresa}</span>
+        <span class="info-item">📊 Status: ${f.status}</span>`;
+    }
+    html += `</div>`;
 });
 
 html += `<div style="text-align:center; margin-top:10px;">`;
@@ -302,8 +295,13 @@ guiaBusca.classList.remove("hidden");
 }
 
 function extrairTermo(frase, chaves) {
-for (let c of chaves) { if (frase.includes(c)) return frase.split(c)[1]?.trim(); }
-return null;
+    for (let c of chaves) {
+        if (frase.includes(c)) {
+            let partes = frase.split(c);
+            return partes[partes.length - 1].trim();
+        }
+    }
+    return null;
 }
 
 window.consultar = async function() {
@@ -313,49 +311,46 @@ let pergunta = perguntaRaw.replace(/[?]/g, "").trim();
 if (!pergunta) return;
 
 respostaDiv.innerHTML = "Consultando base de dados...";
-let tipo = "nome";
+let tipoBusca = "nome";
 let termo = null;
 tipoConsultaAtual = "ficha";
 
-// DETECÇÃO DE TIPO DE BUSCA
-if (pergunta.includes("equipe") || pergunta.includes("time")) {
-    tipo = "equipe"; termo = extrairTermo(pergunta, ["equipe de","time de"]);
-} else if (pergunta.includes("setor")) {
-    tipo = "setor_nome"; termo = extrairTermo(pergunta, ["setor de","do setor","qual setor"]);
+// DEFINIÇÃO DO TIPO DE CONSULTA
+if (pergunta.includes("equipe de")) {
+    tipoBusca = "equipe"; termo = extrairTermo(pergunta, ["equipe de"]);
+} else if (pergunta.includes("setor de")) {
+    tipoBusca = "por_nome"; termo = extrairTermo(pergunta, ["setor de"]);
     tipoConsultaAtual = "setor";
-} else if (pergunta.includes("cargo")) {
-    tipo = "cargo_nome"; termo = extrairTermo(pergunta, ["cargo de"]);
+} else if (pergunta.includes("cargo de")) {
+    // Se vier do Organograma ou digitar "cargo de Gerente"
+    tipoBusca = "por_cargo"; termo = extrairTermo(pergunta, ["cargo de"]);
     tipoConsultaAtual = "cargo";
-} else if (pergunta.includes("empresa") || pergunta.includes("funcionários da") || pergunta.includes("funcionarios da")) {
-    tipo = "empresa_nome"; termo = extrairTermo(pergunta, ["empresa de","da empresa","funcionários da","funcionarios da"]);
+} else if (pergunta.includes("empresa de")) {
+    tipoBusca = "por_nome"; termo = extrairTermo(pergunta, ["empresa de"]);
     tipoConsultaAtual = "empresa";
-} else if (pergunta.includes("chefe")) {
-    tipo = "chefe"; termo = extrairTermo(pergunta, ["chefe de","chefe do"]);
-    tipoConsultaAtual = "chefe";
-} else if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
-    tipo = "contagem"; termo = extrairTermo(pergunta, ["quantos tem na","quantos na","quantas no"]);
-    if (!termo) termo = pergunta.split(" ").pop();
+} else if (pergunta.includes("status de")) {
+    tipoBusca = "por_nome"; termo = extrairTermo(pergunta, ["status de"]);
+    tipoConsultaAtual = "status";
+} else if (pergunta.includes("quantos")) {
+    tipoBusca = "contagem"; termo = extrairTermo(pergunta, ["na ", "no "]);
+} else {
+    termo = pergunta;
 }
-
-if (!termo) termo = pergunta.split(" ").pop();
 
 try {
     const response = await fetch(WEBHOOK_URL);
     const data = await response.json();
     let resultados = [];
 
-    if (tipo === "cargo_nome") {
+    if (tipoBusca === "por_cargo") {
         resultados = data.filter(f => f.cargo.toLowerCase().includes(termo));
-    } else if (tipo === "empresa_nome") {
-        resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
-    } else if (tipo === "equipe") {
+    } else if (tipoBusca === "equipe") {
         resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
-    } else if (tipo === "setor_nome") {
-        resultados = data.filter(f => f.setor.toLowerCase().includes(termo));
-    } else if (tipo === "contagem") {
-        resultados = data.filter(f => f.setor.toLowerCase().includes(termo) || f.empresa.toLowerCase().includes(termo) || f.chefe.toLowerCase().includes(termo));
-        return respostaDiv.innerHTML = `📊 Total encontrado: <strong>${resultados.length}</strong>`;
+    } else if (tipoBusca === "contagem") {
+        resultados = data.filter(f => f.setor.toLowerCase().includes(termo) || f.empresa.toLowerCase().includes(termo));
+        return respostaDiv.innerHTML = `📊 Total: <strong>${resultados.length}</strong>`;
     } else {
+        // Busca padrão por NOME (cobre buscas como "Edson" ou "setor de Edson")
         resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
     }
 
