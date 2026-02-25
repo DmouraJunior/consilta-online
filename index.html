@@ -1,75 +1,90 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Integrado de Consulta de Servidores - DGF</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
-<style>
-/* --- ESTILOS MANTIDOS --- */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; min-height: 100vh; position: relative; }
-.topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
-.topbar small { display: block; font-size: 12px; opacity: 0.8; }
-.gold-line { height: 4px; background: #c9a227; }
-.main { display: flex; justify-content: center; align-items: center; height: calc(100vh - 110px); }
-.container { background: white; padding: 40px; border-radius: 12px; width: 460px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); z-index: 2; }
-.titulo-area { text-align: center; margin-bottom: 25px; }
-.logo-titulo { height: 70px; margin-bottom: 10px; }
-h2 { color: #002b5c; font-size: 18px; }
-input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 12px; font-size: 14px; }
-button { width: 100%; padding: 12px; border-radius: 6px; border: none; background: #003366; color: white; font-weight: 600; cursor: pointer; margin-bottom: 8px; transition: 0.2s; }
-button:hover { background: #002244; }
-.logout { background: #8b0000; margin-top: 10px; }
-.logout:hover { background: #6e0000; }
-.hidden { display: none; }
-.response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 350px; overflow-y: auto; }
-.footer { text-align: center; padding: 15px; font-size: 12px; color: #555; background: #e9edf2; position: fixed; bottom: 0; width: 100%; z-index: 10; }
+    <style>
+        /* --- ESTILOS ORIGINAIS MANTIDOS --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; min-height: 100vh; position: relative; }
+        .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
+        .topbar small { display: block; font-size: 12px; opacity: 0.8; }
+        .gold-line { height: 4px; background: #c9a227; }
+        
+        /* AJUSTE NO LAYOUT PARA DUAS COLUNAS */
+        .main { 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; 
+            gap: 20px; 
+            padding: 40px 20px;
+            min-height: calc(100vh - 110px);
+        }
+        
+        .container { background: white; padding: 40px; border-radius: 12px; width: 460px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); z-index: 2; }
+        .titulo-area { text-align: center; margin-bottom: 25px; }
+        .logo-titulo { height: 70px; margin-bottom: 10px; }
+        h2 { color: #002b5c; font-size: 18px; margin-bottom: 15px; }
+        input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 12px; font-size: 14px; }
+        button { width: 100%; padding: 12px; border-radius: 6px; border: none; background: #003366; color: white; font-weight: 600; cursor: pointer; margin-bottom: 8px; transition: 0.2s; }
+        button:hover { background: #002244; }
+        .logout { background: #8b0000; margin-top: 10px; }
+        .logout:hover { background: #6e0000; }
+        .hidden { display: none; }
+        .response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 350px; overflow-y: auto; }
+        .footer { text-align: center; padding: 15px; font-size: 12px; color: #555; background: #e9edf2; position: fixed; bottom: 0; width: 100%; z-index: 10; }
 
-.legenda-buscas {
-    position: fixed;
-    bottom: 65px;
-    left: 20px;
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    border-left: 4px solid #c9a227;
-    box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
-    font-size: 12px;
-    color: #333;
-    max-width: 240px;
-    z-index: 5;
-}
-.legenda-buscas h4 { color: #002b5c; margin-bottom: 8px; font-size: 13px; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-.legenda-buscas ul { list-style: none; }
-.legenda-buscas li { margin-bottom: 6px; line-height: 1.4; }
-.legenda-buscas b { color: #003366; }
+        /* ESTILO DO ORGANOGRAMA */
+        .organograma-container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 320px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            border-top: 4px solid #c9a227;
+        }
+        .organograma-container h3 { color: #002b5c; font-size: 16px; margin-bottom: 20px; text-align: center; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .nivel { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .box-cargo {
+            width: 100%;
+            padding: 12px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-left: 5px solid #002b5c;
+            border-radius: 6px;
+            font-size: 11px;
+            text-align: center;
+            font-weight: 700;
+            color: #002b5c;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+        .box-cargo:hover { background: #002b5c; color: white; transform: scale(1.03); }
+        .seta { color: #ccc; font-size: 14px; margin: 2px 0; }
 
-/* ESTILO DA FOTO */
-.foto-servidor {
-    width: 65px;
-    height: 65px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #002b5c;
-    float: right;
-    margin-left: 10px;
-    background: #fff;
-    display: block;
-}
+        /* --- OUTROS ESTILOS MANTIDOS --- */
+        .legenda-buscas { position: fixed; bottom: 65px; left: 20px; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #c9a227; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); font-size: 12px; color: #333; max-width: 240px; z-index: 5; }
+        .foto-servidor { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 2px solid #002b5c; float: right; margin-left: 10px; background: #fff; }
+        .pass-container { position: relative; width: 100%; }
+        .toggle-eye { position: absolute; right: 12px; top: 12px; cursor: pointer; color: #777; font-size: 18px; z-index: 10; }
+        .card-resultado { border-bottom: 1px solid #ddd; padding: 10px 0; margin-bottom: 10px; overflow: hidden; }
+        .info-item { display: block; margin-bottom: 4px; line-height: 1.4; }
 
-.pass-container { position: relative; width: 100%; }
-.toggle-eye { position: absolute; right: 12px; top: 12px; cursor: pointer; color: #777; font-size: 18px; z-index: 10; background: transparent; user-select: none; }
-.card-resultado { border-bottom: 1px solid #ddd; padding: 10px 0; margin-bottom: 10px; overflow: hidden; }
-.info-item { display: block; margin-bottom: 4px; line-height: 1.4; }
-</style>
+        @media (max-width: 850px) {
+            .main { flex-direction: column; align-items: center; }
+            .organograma-container { width: 460px; order: -1; } /* Organograma sobe no mobile */
+        }
+    </style>
 </head>
 
 <body>
 
 <div class="topbar">
-Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
-<small>Sistema Interno Oficial</small>
+    Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
+    <small>Sistema Interno Oficial</small>
 </div>
 <div class="gold-line"></div>
 
@@ -79,50 +94,63 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
         <li>• <b>Por Nome:</b> Digite apenas o nome.</li>
         <li>• <b>Por Equipe:</b> "equipe de [nome]"</li>
         <li>• <b>Por Setor:</b> "setor de [nome]"</li>
-        <li>• <b>Por Empresa:</b> "funcionários da [empresa]"</li>
         <li>• <b>Contagem:</b> "quantos na [setor]"</li>
     </ul>
 </div>
 
 <div class="main">
-<div class="container">
+    <div class="container">
+        <div id="loginArea">
+            <div class="titulo-area">
+                <img src="brasao-dgf.png" alt="Brasão DGF" class="logo-titulo">
+                <h2>Sistema Integrado de Consulta de Servidores - DGF</h2>
+            </div>
+            <input type="text" id="usuario" placeholder="Usuário institucional">
+            <div class="pass-container">
+                <input type="password" id="senha" placeholder="Senha" style="padding-right: 40px;">
+                <span class="toggle-eye" onclick="verSenha('senha')">👁️</span>
+            </div>
+            <button onclick="login()">Entrar no Sistema</button>
+        </div>
 
-<div id="loginArea">
-    <div class="titulo-area">
-        <img src="brasao-dgf.png" alt="Brasão DGF" class="logo-titulo">
-        <h2>Sistema Integrado de Consulta de Servidores - DGF</h2>
-    </div>
-    <input type="text" id="usuario" placeholder="Usuário institucional">
-    <div class="pass-container">
-        <input type="password" id="senha" placeholder="Senha" style="padding-right: 40px;">
-        <span class="toggle-eye" onclick="verSenha('senha')">👁️</span>
-    </div>
-    <button onclick="login()">Entrar no Sistema</button>
-</div>
+        <div id="trocaSenhaArea" class="hidden">
+            <h2>🔒 Alterar Senha Inicial</h2>
+            <p style="font-size: 12px; margin-bottom: 15px; color: #666;">Primeiro acesso detectado.</p>
+            <div class="pass-container">
+                <input type="password" id="novaSenha" placeholder="Nova senha">
+            </div>
+            <div class="pass-container">
+                <input type="password" id="confirmaSenha" placeholder="Confirme a nova senha">
+            </div>
+            <button onclick="salvarNovaSenha()">Atualizar e Entrar</button>
+        </div>
 
-<div id="trocaSenhaArea" class="hidden">
-    <h2>🔒 Alterar Senha Inicial</h2>
-    <p style="font-size: 12px; margin-bottom: 15px; color: #666;">Primeiro acesso detectado. Por favor, defina uma nova senha.</p>
-    <div class="pass-container">
-        <input type="password" id="novaSenha" placeholder="Nova senha" style="padding-right: 40px;">
-        <span class="toggle-eye" onclick="verSenha('novaSenha')">👁️</span>
+        <div id="sistemaArea" class="hidden">
+            <h2>Assistente de Consulta</h2>
+            <input type="text" id="pergunta" placeholder="O que deseja consultar hoje?">
+            <button onclick="consultar()">Consultar Sistema</button>
+            <button class="logout" onclick="logout()">Encerrar Sessão</button>
+            <div class="response" id="resposta"></div>
+        </div>
     </div>
-    <div class="pass-container">
-        <input type="password" id="confirmaSenha" placeholder="Confirme a nova senha" style="padding-right: 40px;">
-        <span class="toggle-eye" onclick="verSenha('confirmaSenha')">👁️</span>
+
+    <div id="organogramaArea" class="organograma-container hidden">
+        <h3>Estrutura DGF</h3>
+        <div class="nivel">
+            <div class="box-cargo" onclick="buscaRapida('diretor')">Diretor</div>
+            <div class="seta">▼</div>
+            <div class="box-cargo" onclick="buscaRapida('superintendente')">Superintendentes</div>
+            <div class="seta">▼</div>
+            <div class="box-cargo" onclick="buscaRapida('gerente')">Gerentes</div>
+            <div class="seta">▼</div>
+            <div class="box-cargo" onclick="buscaRapida('coordenador')">Coordenadores</div>
+            <div class="seta">▼</div>
+            <div class="box-cargo" onclick="buscaRapida('assessor tecnico')">Assessor Técnico</div>
+            <div class="seta">▼</div>
+            <div class="box-cargo" onclick="buscaRapida('assessor administrativo')">Assessor Administrativo</div>
+        </div>
+        <p style="font-size: 10px; color: #999; text-align: center; margin-top: 15px;">* Clique no cargo para listar servidores</p>
     </div>
-    <button onclick="salvarNovaSenha()">Atualizar e Entrar</button>
-</div>
-
-<div id="sistemaArea" class="hidden">
-    <h2>Assistente de Consulta</h2>
-    <input type="text" id="pergunta" placeholder="O que deseja consultar hoje?">
-    <button onclick="consultar()">Consultar Sistema</button>
-    <button class="logout" onclick="logout()">Encerrar Sessão</button>
-    <div class="response" id="resposta"></div>
-</div>
-
-</div>
 </div>
 
 <div class="footer">© 2026 - Diretoria Geral de Finanças (DGF) • Uso interno e restrito</div>
@@ -130,241 +158,176 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
-const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
-const TEMPO_EXPIRACAO = 30 * 60 * 1000;
+    const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
+    const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
-const usuariosPadrao = [
-    { usuario: "admin", senha: "1234", primeiroAcesso: true },
-    { usuario: "mauro", senha: "0000", primeiroAcesso: true }
-];
+    const usuariosPadrao = [
+        { usuario: "admin", senha: "1234", primeiroAcesso: true },
+        { usuario: "mauro", senha: "0000", primeiroAcesso: true }
+    ];
 
-let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf"));
-if (!usuariosDB) {
-    usuariosDB = usuariosPadrao;
+    let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf")) || usuariosPadrao;
     localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
-}
 
-const loginArea = document.getElementById("loginArea");
-const sistemaArea = document.getElementById("sistemaArea");
-const trocaSenhaArea = document.getElementById("trocaSenhaArea");
-const guiaBusca = document.getElementById("guiaBusca");
-const usuarioInput = document.getElementById("usuario");
-const senhaInput = document.getElementById("senha");
-const perguntaInput = document.getElementById("pergunta");
-const respostaDiv = document.getElementById("resposta");
+    const loginArea = document.getElementById("loginArea");
+    const sistemaArea = document.getElementById("sistemaArea");
+    const trocaSenhaArea = document.getElementById("trocaSenhaArea");
+    const organogramaArea = document.getElementById("organogramaArea");
+    const guiaBusca = document.getElementById("guiaBusca");
+    const usuarioInput = document.getElementById("usuario");
+    const senhaInput = document.getElementById("senha");
+    const perguntaInput = document.getElementById("pergunta");
+    const respostaDiv = document.getElementById("resposta");
 
-// --- FUNÇÃO AJUSTADA PARA O LINK QUE VOCÊ ENVIOU ---
-function gerarLinkDireto(url) {
-    if (!url || typeof url !== 'string') return null;
-    let driveUrl = url.trim();
-    
-    if (driveUrl.includes("drive.google.com")) {
-        let id = "";
-        try {
-            if (driveUrl.includes("id=")) {
-                id = driveUrl.split("id=")[1].split("&")[0];
-            } else if (driveUrl.includes("/file/d/")) {
-                id = driveUrl.split("/file/d/")[1].split("/")[0].split("?")[0];
-            }
-            if (id) return `https://lh3.googleusercontent.com/u/0/d/${id}`;
-        } catch (e) { return null; }
-    }
-    return driveUrl;
-}
-
-window.verSenha = function(id) {
-    const input = document.getElementById(id);
-    input.type = input.type === "password" ? "text" : "password";
-}
-
-usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
-senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
-perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
-
-let paginaAtual = 1;
-const itensPorPagina = 10;
-let resultadosGlobais = [];
-let tipoConsultaAtual = "ficha"; 
-
-function renderizarPagina() {
-    if (!respostaDiv) return;
-    const inicio = (paginaAtual - 1) * itensPorPagina;
-    const fim = inicio + itensPorPagina;
-    const pagina = resultadosGlobais.slice(inicio, fim);
-    const totalPaginas = Math.ceil(resultadosGlobais.length / itensPorPagina);
-
-    let html = `<strong>${resultadosGlobais.length} resultado(s)</strong><br>`;
-    html += `<small>Página ${paginaAtual} de ${totalPaginas}</small><br><br>`;
-
-    pagina.forEach(f => {
-        const fotoPadrao = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-        const imgUrl = gerarLinkDireto(f.foto) || fotoPadrao;
-
-        html += `<div class="card-resultado">
-            <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'">
-            <span class="info-item">👤 <strong>${f.nome}</strong></span>`;
-        
-        if (tipoConsultaAtual === "setor") {
-            html += `<span class="info-item">🏢 Setor: <strong>${f.setor}</strong></span>`;
-        } else if (tipoConsultaAtual === "chefe") {
-            html += `<span class="info-item">👨💼 Chefe: <strong>${f.chefe}</strong></span>`;
-        } else if (tipoConsultaAtual === "cargo") {
-            html += `<span class="info-item">💼 Cargo: <strong>${f.cargo}</strong></span>`;
-        } else if (tipoConsultaAtual === "status") {
-            html += `<span class="info-item">📊 Status: <strong>${f.status}</strong></span>`;
-        } else {
-            html += `<span class="info-item">🏢 Setor: ${f.setor}</span>
-                     <span class="info-item">💼 Cargo: ${f.cargo}</span>
-                     <span class="info-item">👨💼 Chefe: ${f.chefe}</span>
-                     <span class="info-item">🏬 Empresa: ${f.empresa}</span>
-                     <span class="info-item">📊 Status: ${f.status}</span>`;
+    function gerarLinkDireto(url) {
+        if (!url || typeof url !== 'string') return null;
+        let driveUrl = url.trim();
+        if (driveUrl.includes("drive.google.com")) {
+            let id = "";
+            if (driveUrl.includes("id=")) id = driveUrl.split("id=")[1].split("&")[0];
+            else if (driveUrl.includes("/file/d/")) id = driveUrl.split("/file/d/")[1].split("/")[0];
+            if (id) return `https://lh3.googleusercontent.com/d/${id}`;
         }
+        return driveUrl;
+    }
+
+    window.verSenha = function(id) {
+        const input = document.getElementById(id);
+        input.type = input.type === "password" ? "text" : "password";
+    }
+
+    // NOVA FUNÇÃO: Busca pelo Organograma
+    window.buscaRapida = function(cargo) {
+        if (!verificarSessao()) return logout();
+        perguntaInput.value = `cargo de ${cargo}`;
+        window.consultar();
+    }
+
+    let paginaAtual = 1;
+    const itensPorPagina = 10;
+    let resultadosGlobais = [];
+    let tipoConsultaAtual = "ficha";
+
+    function renderizarPagina() {
+        if (!respostaDiv) return;
+        const inicio = (paginaAtual - 1) * itensPorPagina;
+        const fim = inicio + itensPorPagina;
+        const pagina = resultadosGlobais.slice(inicio, fim);
+        const totalPaginas = Math.ceil(resultadosGlobais.length / itensPorPagina);
+
+        let html = `<strong>${resultadosGlobais.length} resultado(s)</strong><br><small>Página ${paginaAtual} de ${totalPaginas}</small><br><br>`;
+
+        pagina.forEach(f => {
+            const fotoPadrao = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+            const imgUrl = gerarLinkDireto(f.foto) || fotoPadrao;
+            html += `<div class="card-resultado">
+                <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'">
+                <span class="info-item">👤 <strong>${f.nome}</strong></span>
+                <span class="info-item">🏢 Setor: ${f.setor}</span>
+                <span class="info-item">💼 Cargo: <strong>${f.cargo}</strong></span>
+                <span class="info-item">👨‍💼 Chefe: ${f.chefe}</span>
+                <span class="info-item">📊 Status: ${f.status}</span>
+            </div>`;
+        });
+
+        html += `<div style="text-align:center; margin-top:10px;">`;
+        if (paginaAtual > 1) html += `<button style="width:60px; display:inline-block;" onclick="paginaAnterior()">⬅️</button> `;
+        if (fim < resultadosGlobais.length) html += `<button style="width:60px; display:inline-block;" onclick="proximaPagina()">➡️</button>`;
         html += `</div>`;
-    });
+        respostaDiv.innerHTML = html;
+    }
 
-    html += `<div style="text-align:center; margin-top:10px;">`;
-    if (paginaAtual > 1) html += `<button style="width:60px; display:inline-block; margin: 0 5px;" onclick="paginaAnterior()">⬅️</button> `;
-    if (fim < resultadosGlobais.length) html += `<button style="width:60px; display:inline-block; margin: 0 5px;" onclick="proximaPagina()">➡️</button>`;
-    html += `</div>`;
-    respostaDiv.innerHTML = html;
-}
+    window.proximaPagina = () => { paginaAtual++; renderizarPagina(); }
+    window.paginaAnterior = () => { paginaAtual--; renderizarPagina(); }
 
-window.proximaPagina = function() { paginaAtual++; renderizarPagina(); }
-window.paginaAnterior = function() { paginaAtual--; renderizarPagina(); }
+    window.login = function() {
+        const user = usuariosDB.find(u => u.usuario === usuarioInput.value.trim() && u.senha === senhaInput.value.trim());
+        if (user) {
+            localStorage.setItem("userLogando", user.usuario);
+            if (user.primeiroAcesso) {
+                loginArea.classList.add("hidden");
+                trocaSenhaArea.classList.remove("hidden");
+            } else {
+                confirmarEntrada();
+            }
+        } else alert("Dados inválidos.");
+    }
 
-window.login = function() {
-    const user = usuariosDB.find(u => u.usuario === usuarioInput.value.trim() && u.senha === senhaInput.value.trim());
-    if (user) {
-        localStorage.setItem("userLogando", user.usuario);
-        if (user.primeiroAcesso) {
-            loginArea.classList.add("hidden");
-            trocaSenhaArea.classList.remove("hidden");
+    window.salvarNovaSenha = function() {
+        const n = document.getElementById("novaSenha").value;
+        const c = document.getElementById("confirmaSenha").value;
+        if (n.length < 4 || n !== c) return alert("Verifique as senhas.");
+        const loginUser = localStorage.getItem("userLogando");
+        usuariosDB = usuariosDB.map(u => u.usuario === loginUser ? {...u, senha: n, primeiroAcesso: false} : u);
+        localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
+        confirmarEntrada();
+    }
+
+    function confirmarEntrada() {
+        localStorage.setItem("logado", "true");
+        localStorage.setItem("tempoLogin", Date.now());
+        loginArea.classList.add("hidden");
+        trocaSenhaArea.classList.add("hidden");
+        sistemaArea.classList.remove("hidden");
+        guiaBusca.classList.remove("hidden");
+        organogramaArea.classList.remove("hidden");
+        perguntaInput.focus();
+    }
+
+    window.logout = () => { localStorage.clear(); location.reload(); }
+
+    function verificarSessao() {
+        const tempo = localStorage.getItem("tempoLogin");
+        return tempo && (Date.now() - parseInt(tempo)) <= TEMPO_EXPIRACAO;
+    }
+
+    if (localStorage.getItem("logado") === "true" && verificarSessao()) {
+        confirmarEntrada();
+    }
+
+    window.consultar = async function() {
+        if (!verificarSessao()) { logout(); return; }
+        let pergunta = perguntaInput.value.trim().toLowerCase().replace(/[?]/g, "");
+        if (!pergunta) return;
+        
+        respostaDiv.innerHTML = "Acessando planilha DGF...";
+        let tipo = "nome";
+        let termo = null;
+
+        if (pergunta.includes("cargo de")) {
+            tipo = "cargo"; 
+            termo = pergunta.split("cargo de")[1].trim();
+        } else if (pergunta.includes("setor de")) {
+            tipo = "setor"; 
+            termo = pergunta.split("setor de")[1].trim();
         } else {
-            confirmarEntrada();
-        }
-    } else alert("Usuário ou senha inválidos.");
-}
-
-window.salvarNovaSenha = function() {
-    const n = document.getElementById("novaSenha").value;
-    const c = document.getElementById("confirmaSenha").value;
-    if (n.length < 4) return alert("A senha deve ter no mínimo 4 caracteres.");
-    if (n !== c) return alert("As senhas não coincidem.");
-    const loginUser = localStorage.getItem("userLogando");
-    usuariosDB = usuariosDB.map(u => u.usuario === loginUser ? {...u, senha: n, primeiroAcesso: false} : u);
-    localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
-    confirmarEntrada();
-}
-
-function confirmarEntrada() {
-    localStorage.setItem("logado", "true");
-    localStorage.setItem("tempoLogin", Date.now());
-    loginArea.classList.add("hidden");
-    trocaSenhaArea.classList.add("hidden");
-    sistemaArea.classList.remove("hidden");
-    guiaBusca.classList.remove("hidden");
-    perguntaInput.focus();
-}
-
-window.logout = function() { 
-    localStorage.removeItem("logado"); 
-    localStorage.removeItem("tempoLogin");
-    location.reload(); 
-}
-
-function verificarSessao() {
-    const tempo = localStorage.getItem("tempoLogin");
-    if (!tempo) return false;
-    return (Date.now() - parseInt(tempo)) <= TEMPO_EXPIRACAO;
-}
-
-if (localStorage.getItem("logado") === "true" && verificarSessao()) {
-    loginArea.classList.add("hidden");
-    sistemaArea.classList.remove("hidden");
-    guiaBusca.classList.remove("hidden");
-}
-
-function extrairTermo(frase, chaves) {
-    for (let c of chaves) { if (frase.includes(c)) return frase.split(c)[1]?.trim(); }
-    return null;
-}
-
-window.consultar = async function() {
-    if (!verificarSessao()) { logout(); return; }
-    
-    let perguntaRaw = perguntaInput.value.trim().toLowerCase();
-    let pergunta = perguntaRaw.replace(/[?]/g, "").trim(); 
-    
-    if (!pergunta) return;
-    
-    respostaDiv.innerHTML = "Consultando base de dados...";
-    let tipo = "nome";
-    let termo = null;
-    tipoConsultaAtual = "ficha"; 
-
-    if (pergunta.includes("equipe") || pergunta.includes("time")) {
-        tipo = "equipe"; termo = extrairTermo(pergunta, ["equipe de","time de"]);
-    }
-    if (!termo && (pergunta.includes("funcionarios") || pergunta.includes("funcionários"))) {
-        tipo = "empresa"; termo = extrairTermo(pergunta, ["funcionarios da","funcionários da"]);
-    }
-    if (!termo && pergunta.includes("setor")) {
-        tipo = "setor_nome"; termo = extrairTermo(pergunta, ["setor de","qual setor","do setor"]);
-        if (pergunta.includes("setor de")) tipoConsultaAtual = "setor"; 
-    }
-    if (!termo && pergunta.includes("empresa")) {
-        tipo = "empresa_nome"; termo = extrairTermo(pergunta, ["empresa de","da empresa","trabalha"]);
-    }
-    if (!termo && pergunta.includes("cargo")) {
-        tipo = "cargo_nome"; termo = extrairTermo(pergunta, ["cargo de"]);
-        tipoConsultaAtual = "cargo";
-    }
-    if (!termo && pergunta.includes("chefe")) {
-        tipo = "chefe"; termo = extrairTermo(pergunta, ["chefe de","chefe do"]);
-        tipoConsultaAtual = "chefe";
-    }
-    if (!termo && pergunta.includes("status")) {
-        tipo = "status_nome"; termo = extrairTermo(pergunta, ["status de"]);
-        tipoConsultaAtual = "status";
-    }
-
-    if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
-        tipo = "contagem";
-        termo = extrairTermo(pergunta, ["quantos tem na","quantos tem no","quantos na","quantas na","quantas no"]);
-        if (!termo) termo = pergunta.split(" ").pop();
-    }
-    
-    if (!termo) termo = pergunta.split(" ").pop();
-
-    try {
-        const response = await fetch(WEBHOOK_URL);
-        const data = await response.json();
-        let resultados = [];
-
-        if (tipo === "chefe" || tipo === "setor_nome" || tipo === "status_nome" || tipo === "cargo_nome") {
-            resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
-        } else if (tipo === "equipe") {
-            resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
-        } else if (tipo === "empresa") {
-            resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
-        } else if (tipo === "contagem") {
-            resultados = data.filter(f => f.setor.toLowerCase().includes(termo) || f.empresa.toLowerCase().includes(termo) || f.chefe.toLowerCase().includes(termo));
-            return respostaDiv.innerHTML = `📊 Total encontrado para "<strong>${termo}</strong>": <strong>${resultados.length}</strong>`;
-        } else {
-            resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
+            termo = pergunta;
         }
 
-        if (!resultados.length) return respostaDiv.innerHTML = "Nenhum registro encontrado.";
+        try {
+            const response = await fetch(WEBHOOK_URL);
+            const data = await response.json();
+            
+            let resultados = data.filter(f => {
+                if (tipo === "cargo") return f.cargo.toLowerCase().includes(termo);
+                if (tipo === "setor") return f.setor.toLowerCase().includes(termo);
+                return f.nome.toLowerCase().includes(termo);
+            });
 
-        resultadosGlobais = resultados;
-        paginaAtual = 1;
-        renderizarPagina();
+            if (!resultados.length) {
+                respostaDiv.innerHTML = "Nenhum registro encontrado na planilha.";
+                return;
+            }
 
-    } catch (e) {
-        respostaDiv.innerHTML = "Erro na conexão.";
+            resultadosGlobais = resultados;
+            paginaAtual = 1;
+            renderizarPagina();
+        } catch (e) {
+            respostaDiv.innerHTML = "Erro ao conectar com o Google Drive.";
+        }
     }
-}
 
+    perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
 });
 </script>
 </body>
