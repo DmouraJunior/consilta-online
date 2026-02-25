@@ -67,8 +67,8 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <li>• <b>Por Nome:</b> Digite apenas o nome.</li>
 <li>• <b>Por Equipe:</b> "equipe de [nome]"</li>
 <li>• <b>Por Setor:</b> "setor de [nome]"</li>
+<li>• <b>Por Chefe:</b> "chefe de [nome]"</li>
 <li>• <b>Por Empresa:</b> "empresa de [nome]"</li>
-<li>• <b>Por Status:</b> "status de [nome]"</li>
 </ul>
 </div>
 
@@ -297,8 +297,7 @@ guiaBusca.classList.remove("hidden");
 function extrairTermo(frase, chaves) {
     for (let c of chaves) {
         if (frase.includes(c)) {
-            let partes = frase.split(c);
-            return partes[partes.length - 1].trim();
+            return frase.split(c)[1].trim();
         }
     }
     return null;
@@ -315,14 +314,16 @@ let tipoBusca = "nome";
 let termo = null;
 tipoConsultaAtual = "ficha";
 
-// DEFINIÇÃO DO TIPO DE CONSULTA
+// DETECÇÃO DE COMANDOS ESPECÍFICOS
 if (pergunta.includes("equipe de")) {
     tipoBusca = "equipe"; termo = extrairTermo(pergunta, ["equipe de"]);
 } else if (pergunta.includes("setor de")) {
     tipoBusca = "por_nome"; termo = extrairTermo(pergunta, ["setor de"]);
     tipoConsultaAtual = "setor";
+} else if (pergunta.includes("chefe de")) {
+    tipoBusca = "por_nome"; termo = extrairTermo(pergunta, ["chefe de"]);
+    tipoConsultaAtual = "chefe";
 } else if (pergunta.includes("cargo de")) {
-    // Se vier do Organograma ou digitar "cargo de Gerente"
     tipoBusca = "por_cargo"; termo = extrairTermo(pergunta, ["cargo de"]);
     tipoConsultaAtual = "cargo";
 } else if (pergunta.includes("empresa de")) {
@@ -332,7 +333,7 @@ if (pergunta.includes("equipe de")) {
     tipoBusca = "por_nome"; termo = extrairTermo(pergunta, ["status de"]);
     tipoConsultaAtual = "status";
 } else if (pergunta.includes("quantos")) {
-    tipoBusca = "contagem"; termo = extrairTermo(pergunta, ["na ", "no "]);
+    tipoBusca = "contagem"; termo = extrairTermo(pergunta, ["na ", "no ", "da ", "do "]);
 } else {
     termo = pergunta;
 }
@@ -348,9 +349,9 @@ try {
         resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
     } else if (tipoBusca === "contagem") {
         resultados = data.filter(f => f.setor.toLowerCase().includes(termo) || f.empresa.toLowerCase().includes(termo));
-        return respostaDiv.innerHTML = `📊 Total: <strong>${resultados.length}</strong>`;
+        return respostaDiv.innerHTML = `📊 Total encontrado: <strong>${resultados.length}</strong>`;
     } else {
-        // Busca padrão por NOME (cobre buscas como "Edson" ou "setor de Edson")
+        // Busca padrão pelo nome do funcionário
         resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
     }
 
