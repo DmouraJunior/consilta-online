@@ -6,7 +6,7 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- ESTILOS GERAIS --- */
+/* --- ESTILOS MANTIDOS --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; min-height: 100vh; position: relative; }
 .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
@@ -26,7 +26,6 @@ button:hover { background: #002244; }
 .response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 350px; overflow-y: auto; }
 .footer { text-align: center; padding: 15px; font-size: 12px; color: #555; background: #e9edf2; position: fixed; bottom: 0; width: 100%; z-index: 10; }
 
-/* LEGENDA INFERIOR ESQUERDA */
 .legenda-buscas {
     position: fixed;
     bottom: 65px;
@@ -48,8 +47,8 @@ button:hover { background: #002244; }
 
 /* ESTILO DA FOTO */
 .foto-servidor {
-    width: 75px;
-    height: 75px;
+    width: 65px;
+    height: 65px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #002b5c;
@@ -77,10 +76,11 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div id="guiaBusca" class="legenda-buscas hidden">
     <h4>💡 Como buscar</h4>
     <ul>
-        <li>• <b>Nome:</b> "Edson"</li>
-        <li>• <b>Info Única:</b> "empresa de Edson"</li>
+        <li>• <b>Por Nome:</b> Digite apenas o nome.</li>
+        <li>• <b>Por Equipe:</b> "equipe de [nome]"</li>
         <li>• <b>Por Setor:</b> "setor de [nome]"</li>
-        <li>• <b>Equipe:</b> "equipe de [chefe]"</li>
+        <li>• <b>Por Empresa:</b> "funcionários da [empresa]"</li>
+        <li>• <b>Contagem:</b> "quantos na [setor]"</li>
     </ul>
 </div>
 
@@ -98,6 +98,20 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
         <span class="toggle-eye" onclick="verSenha('senha')">👁️</span>
     </div>
     <button onclick="login()">Entrar no Sistema</button>
+</div>
+
+<div id="trocaSenhaArea" class="hidden">
+    <h2>🔒 Alterar Senha Inicial</h2>
+    <p style="font-size: 12px; margin-bottom: 15px; color: #666;">Primeiro acesso detectado. Por favor, defina uma nova senha.</p>
+    <div class="pass-container">
+        <input type="password" id="novaSenha" placeholder="Nova senha" style="padding-right: 40px;">
+        <span class="toggle-eye" onclick="verSenha('novaSenha')">👁️</span>
+    </div>
+    <div class="pass-container">
+        <input type="password" id="confirmaSenha" placeholder="Confirme a nova senha" style="padding-right: 40px;">
+        <span class="toggle-eye" onclick="verSenha('confirmaSenha')">👁️</span>
+    </div>
+    <button onclick="salvarNovaSenha()">Atualizar e Entrar</button>
 </div>
 
 <div id="sistemaArea" class="hidden">
@@ -119,86 +133,43 @@ document.addEventListener("DOMContentLoaded", function() {
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
 const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
-let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf")) || [{ usuario: "admin", senha: "1234" }];
+const usuariosPadrao = [
+    { usuario: "admin", senha: "1234", primeiroAcesso: true },
+    { usuario: "mauro", senha: "0000", primeiroAcesso: true }
+];
+
+let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf"));
+if (!usuariosDB) {
+    usuariosDB = usuariosPadrao;
+    localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
+}
 
 const loginArea = document.getElementById("loginArea");
 const sistemaArea = document.getElementById("sistemaArea");
+const trocaSenhaArea = document.getElementById("trocaSenhaArea");
 const guiaBusca = document.getElementById("guiaBusca");
 const usuarioInput = document.getElementById("usuario");
 const senhaInput = document.getElementById("senha");
 const perguntaInput = document.getElementById("pergunta");
 const respostaDiv = document.getElementById("resposta");
 
-// Variáveis para paginação
-let resultadosGlobais = [];
-let paginaAtual = 1;
-const itensPorPagina = 5;
-let filtroAtivo = "completo"; // empresa, setor, cargo, chefe, status ou completo
-
+// --- FUNÇÃO AJUSTADA PARA O LINK QUE VOCÊ ENVIOU ---
 function gerarLinkDireto(url) {
-    if (!url || typeof url !== 'string' || url.trim() === "") return null;
+    if (!url || typeof url !== 'string') return null;
     let driveUrl = url.trim();
+    
     if (driveUrl.includes("drive.google.com")) {
         let id = "";
         try {
-            if (driveUrl.includes("id=")) id = driveUrl.split("id=")[1].split("&")[0];
-            else {
-                let partes = driveUrl.split("/d/");
-                if (partes.length > 1) id = partes[1].split("/")[0].split("?")[0];
+            if (driveUrl.includes("id=")) {
+                id = driveUrl.split("id=")[1].split("&")[0];
+            } else if (driveUrl.includes("/file/d/")) {
+                id = driveUrl.split("/file/d/")[1].split("/")[0].split("?")[0];
             }
-            if (id) return `https://docs.google.com/uc?export=view&id=${id}`;
+            if (id) return `https://lh3.googleusercontent.com/u/0/d/${id}`;
         } catch (e) { return null; }
     }
     return driveUrl;
-}
-
-function renderizarResultados() {
-    const inicio = (paginaAtual - 1) * itensPorPagina;
-    const fim = inicio + itensPorPagina;
-    const lista = resultadosGlobais.slice(inicio, fim);
-    const totalPaginas = Math.ceil(resultadosGlobais.length / itensPorPagina);
-
-    let html = `<strong>${resultadosGlobais.length} registro(s) encontrado(s)</strong><br><br>`;
-
-    lista.forEach(f => {
-        const fotoPadrao = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-        const imgUrl = gerarLinkDireto(f.foto) || fotoPadrao;
-
-        html += `<div class="card-resultado">`;
-        
-        // Se for filtro de campo único, não mostra a foto para ficar limpo, a menos que seja a ficha completa
-        if(filtroAtivo === "completo") {
-            html += `<img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'">`;
-        }
-
-        html += `<span class="info-item">👤 <strong>${f.nome}</strong></span>`;
-
-        // Lógica de exibição filtrada
-        if (filtroAtivo === "empresa" || filtroAtivo === "completo") html += `<span class="info-item">🏢 Empresa: ${f.empresa}</span>`;
-        if (filtroAtivo === "setor" || filtroAtivo === "completo") html += `<span class="info-item">📂 Setor: ${f.setor}</span>`;
-        if (filtroAtivo === "cargo" || filtroAtivo === "completo") html += `<span class="info-item">💼 Cargo: ${f.cargo}</span>`;
-        if (filtroAtivo === "chefe" || filtroAtivo === "completo") html += `<span class="info-item">👨💼 Chefe: ${f.chefe}</span>`;
-        if (filtroAtivo === "status" || filtroAtivo === "completo") html += `<span class="info-item">📊 Status: ${f.status}</span>`;
-
-        html += `</div>`;
-    });
-
-    // Controles de Paginação
-    if (totalPaginas > 1) {
-        html += `<div style="text-align:center; margin-top:10px;">`;
-        if (paginaAtual > 1) html += `<button onclick="mudarPagina(-1)" style="width:50px; display:inline;">⬅️</button> `;
-        html += `<span> ${paginaAtual} / ${totalPaginas} </span>`;
-        if (paginaAtual < totalPaginas) html += `<button onclick="mudarPagina(1)" style="width:50px; display:inline;">➡️</button>`;
-        html += `</div>`;
-    }
-
-    respostaDiv.innerHTML = html;
-}
-
-window.mudarPagina = function(n) {
-    paginaAtual += n;
-    renderizarResultados();
-    respostaDiv.scrollTop = 0;
 }
 
 window.verSenha = function(id) {
@@ -210,16 +181,89 @@ usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); 
 senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
 
+let paginaAtual = 1;
+const itensPorPagina = 10;
+let resultadosGlobais = [];
+let tipoConsultaAtual = "ficha"; 
+
+function renderizarPagina() {
+    if (!respostaDiv) return;
+    const inicio = (paginaAtual - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    const pagina = resultadosGlobais.slice(inicio, fim);
+    const totalPaginas = Math.ceil(resultadosGlobais.length / itensPorPagina);
+
+    let html = `<strong>${resultadosGlobais.length} resultado(s)</strong><br>`;
+    html += `<small>Página ${paginaAtual} de ${totalPaginas}</small><br><br>`;
+
+    pagina.forEach(f => {
+        const fotoPadrao = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+        const imgUrl = gerarLinkDireto(f.foto) || fotoPadrao;
+
+        html += `<div class="card-resultado">
+            <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'">
+            <span class="info-item">👤 <strong>${f.nome}</strong></span>`;
+        
+        if (tipoConsultaAtual === "setor") {
+            html += `<span class="info-item">🏢 Setor: <strong>${f.setor}</strong></span>`;
+        } else if (tipoConsultaAtual === "chefe") {
+            html += `<span class="info-item">👨💼 Chefe: <strong>${f.chefe}</strong></span>`;
+        } else if (tipoConsultaAtual === "cargo") {
+            html += `<span class="info-item">💼 Cargo: <strong>${f.cargo}</strong></span>`;
+        } else if (tipoConsultaAtual === "status") {
+            html += `<span class="info-item">📊 Status: <strong>${f.status}</strong></span>`;
+        } else {
+            html += `<span class="info-item">🏢 Setor: ${f.setor}</span>
+                     <span class="info-item">💼 Cargo: ${f.cargo}</span>
+                     <span class="info-item">👨💼 Chefe: ${f.chefe}</span>
+                     <span class="info-item">🏬 Empresa: ${f.empresa}</span>
+                     <span class="info-item">📊 Status: ${f.status}</span>`;
+        }
+        html += `</div>`;
+    });
+
+    html += `<div style="text-align:center; margin-top:10px;">`;
+    if (paginaAtual > 1) html += `<button style="width:60px; display:inline-block; margin: 0 5px;" onclick="paginaAnterior()">⬅️</button> `;
+    if (fim < resultadosGlobais.length) html += `<button style="width:60px; display:inline-block; margin: 0 5px;" onclick="proximaPagina()">➡️</button>`;
+    html += `</div>`;
+    respostaDiv.innerHTML = html;
+}
+
+window.proximaPagina = function() { paginaAtual++; renderizarPagina(); }
+window.paginaAnterior = function() { paginaAtual--; renderizarPagina(); }
+
 window.login = function() {
     const user = usuariosDB.find(u => u.usuario === usuarioInput.value.trim() && u.senha === senhaInput.value.trim());
     if (user) {
-        localStorage.setItem("logado", "true");
-        localStorage.setItem("tempoLogin", Date.now());
-        loginArea.classList.add("hidden");
-        sistemaArea.classList.remove("hidden");
-        guiaBusca.classList.remove("hidden");
-        perguntaInput.focus();
+        localStorage.setItem("userLogando", user.usuario);
+        if (user.primeiroAcesso) {
+            loginArea.classList.add("hidden");
+            trocaSenhaArea.classList.remove("hidden");
+        } else {
+            confirmarEntrada();
+        }
     } else alert("Usuário ou senha inválidos.");
+}
+
+window.salvarNovaSenha = function() {
+    const n = document.getElementById("novaSenha").value;
+    const c = document.getElementById("confirmaSenha").value;
+    if (n.length < 4) return alert("A senha deve ter no mínimo 4 caracteres.");
+    if (n !== c) return alert("As senhas não coincidem.");
+    const loginUser = localStorage.getItem("userLogando");
+    usuariosDB = usuariosDB.map(u => u.usuario === loginUser ? {...u, senha: n, primeiroAcesso: false} : u);
+    localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
+    confirmarEntrada();
+}
+
+function confirmarEntrada() {
+    localStorage.setItem("logado", "true");
+    localStorage.setItem("tempoLogin", Date.now());
+    loginArea.classList.add("hidden");
+    trocaSenhaArea.classList.add("hidden");
+    sistemaArea.classList.remove("hidden");
+    guiaBusca.classList.remove("hidden");
+    perguntaInput.focus();
 }
 
 window.logout = function() { 
@@ -228,69 +272,97 @@ window.logout = function() {
     location.reload(); 
 }
 
+function verificarSessao() {
+    const tempo = localStorage.getItem("tempoLogin");
+    if (!tempo) return false;
+    return (Date.now() - parseInt(tempo)) <= TEMPO_EXPIRACAO;
+}
+
+if (localStorage.getItem("logado") === "true" && verificarSessao()) {
+    loginArea.classList.add("hidden");
+    sistemaArea.classList.remove("hidden");
+    guiaBusca.classList.remove("hidden");
+}
+
 function extrairTermo(frase, chaves) {
     for (let c of chaves) { if (frase.includes(c)) return frase.split(c)[1]?.trim(); }
     return null;
 }
 
 window.consultar = async function() {
-    let raw = perguntaInput.value.trim().toLowerCase();
-    let pergunta = raw.replace(/[?]/g, "");
+    if (!verificarSessao()) { logout(); return; }
+    
+    let perguntaRaw = perguntaInput.value.trim().toLowerCase();
+    let pergunta = perguntaRaw.replace(/[?]/g, "").trim(); 
+    
     if (!pergunta) return;
     
-    respostaDiv.innerHTML = "Processando consulta...";
-    
-    // Identificar intenção do usuário
-    filtroAtivo = "completo";
-    let termoBusca = pergunta;
+    respostaDiv.innerHTML = "Consultando base de dados...";
+    let tipo = "nome";
+    let termo = null;
+    tipoConsultaAtual = "ficha"; 
 
-    if (pergunta.includes("empresa")) {
-        filtroAtivo = "empresa";
-        termoBusca = extrairTermo(pergunta, ["empresa de", "empresa do", "trabalha na", "trabalha no", "trabalha"]);
-    } else if (pergunta.includes("setor")) {
-        filtroAtivo = "setor";
-        termoBusca = extrairTermo(pergunta, ["setor de", "setor do", "no setor"]);
-    } else if (pergunta.includes("cargo") || pergunta.includes("função")) {
-        filtroAtivo = "cargo";
-        termoBusca = extrairTermo(pergunta, ["cargo de", "cargo do", "função de"]);
-    } else if (pergunta.includes("chefe") || pergunta.includes("equipe")) {
-        filtroAtivo = "chefe";
-        termoBusca = extrairTermo(pergunta, ["chefe de", "chefe do", "equipe de"]);
-    } else if (pergunta.includes("status") || pergunta.includes("situação")) {
-        filtroAtivo = "status";
-        termoBusca = extrairTermo(pergunta, ["status de", "situação de"]);
+    if (pergunta.includes("equipe") || pergunta.includes("time")) {
+        tipo = "equipe"; termo = extrairTermo(pergunta, ["equipe de","time de"]);
+    }
+    if (!termo && (pergunta.includes("funcionarios") || pergunta.includes("funcionários"))) {
+        tipo = "empresa"; termo = extrairTermo(pergunta, ["funcionarios da","funcionários da"]);
+    }
+    if (!termo && pergunta.includes("setor")) {
+        tipo = "setor_nome"; termo = extrairTermo(pergunta, ["setor de","qual setor","do setor"]);
+        if (pergunta.includes("setor de")) tipoConsultaAtual = "setor"; 
+    }
+    if (!termo && pergunta.includes("empresa")) {
+        tipo = "empresa_nome"; termo = extrairTermo(pergunta, ["empresa de","da empresa","trabalha"]);
+    }
+    if (!termo && pergunta.includes("cargo")) {
+        tipo = "cargo_nome"; termo = extrairTermo(pergunta, ["cargo de"]);
+        tipoConsultaAtual = "cargo";
+    }
+    if (!termo && pergunta.includes("chefe")) {
+        tipo = "chefe"; termo = extrairTermo(pergunta, ["chefe de","chefe do"]);
+        tipoConsultaAtual = "chefe";
+    }
+    if (!termo && pergunta.includes("status")) {
+        tipo = "status_nome"; termo = extrairTermo(pergunta, ["status de"]);
+        tipoConsultaAtual = "status";
     }
 
-    if (!termoBusca) termoBusca = pergunta.split(" ").pop();
+    if (pergunta.includes("quantos") || pergunta.includes("quantas")) {
+        tipo = "contagem";
+        termo = extrairTermo(pergunta, ["quantos tem na","quantos tem no","quantos na","quantas na","quantas no"]);
+        if (!termo) termo = pergunta.split(" ").pop();
+    }
+    
+    if (!termo) termo = pergunta.split(" ").pop();
 
     try {
         const response = await fetch(WEBHOOK_URL);
         const data = await response.json();
-        
-        // Busca flexível: olha no nome, mas também pode olhar no chefe se for busca por equipe
-        let resultados = data.filter(f => 
-            f.nome.toLowerCase().includes(termoBusca) || 
-            (filtroAtivo === "chefe" && f.chefe.toLowerCase().includes(termoBusca))
-        );
+        let resultados = [];
 
-        if (resultados.length === 0) {
-            respostaDiv.innerHTML = "Nenhum servidor encontrado com este termo.";
-            return;
+        if (tipo === "chefe" || tipo === "setor_nome" || tipo === "status_nome" || tipo === "cargo_nome") {
+            resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
+        } else if (tipo === "equipe") {
+            resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
+        } else if (tipo === "empresa") {
+            resultados = data.filter(f => f.empresa.toLowerCase().includes(termo));
+        } else if (tipo === "contagem") {
+            resultados = data.filter(f => f.setor.toLowerCase().includes(termo) || f.empresa.toLowerCase().includes(termo) || f.chefe.toLowerCase().includes(termo));
+            return respostaDiv.innerHTML = `📊 Total encontrado para "<strong>${termo}</strong>": <strong>${resultados.length}</strong>`;
+        } else {
+            resultados = data.filter(f => f.nome.toLowerCase().includes(termo));
         }
+
+        if (!resultados.length) return respostaDiv.innerHTML = "Nenhum registro encontrado.";
 
         resultadosGlobais = resultados;
         paginaAtual = 1;
-        renderizarResultados();
+        renderizarPagina();
 
     } catch (e) {
-        respostaDiv.innerHTML = "Erro ao acessar base de dados.";
+        respostaDiv.innerHTML = "Erro na conexão.";
     }
-}
-
-if (localStorage.getItem("logado") === "true") {
-    loginArea.classList.add("hidden");
-    sistemaArea.classList.remove("hidden");
-    guiaBusca.classList.remove("hidden");
 }
 
 });
