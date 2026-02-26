@@ -6,20 +6,13 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- ESTILOS ORIGINAIS --- */
+/* --- ESTILOS PRESERVADOS --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; min-height: 100vh; position: relative; }
 .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
 .topbar small { display: block; font-size: 12px; opacity: 0.8; }
 .gold-line { height: 4px; background: #c9a227; }
-
-/* BARRA DE ÚLTIMAS ALTERAÇÕES */
-.feed-alteracoes { background: #ffffff; border-bottom: 1px solid #d1d9e6; padding: 8px 30px; display: flex; align-items: center; gap: 15px; font-size: 13px; color: #333; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-.feed-label { background: #ffcc00; color: #002b5c; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; white-space: nowrap; }
-.feed-lista { display: flex; gap: 20px; list-style: none; font-style: italic; overflow: hidden; }
-.feed-item { color: #555; border-right: 1px solid #ddd; padding-right: 20px; white-space: nowrap; }
-
-.main { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 160px); padding: 20px; }
+.main { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 110px); padding: 20px; }
 .container { background: white; padding: 40px; border-radius: 12px; width: 460px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); z-index: 2; transition: width 0.4s ease; }
 .container.modo-sistema { width: 950px; }
 .titulo-area { text-align: center; margin-bottom: 25px; }
@@ -62,11 +55,6 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <small>Sistema Interno Oficial</small>
 </div>
 <div class="gold-line"></div>
-
-<div id="areaFeed" class="feed-alteracoes hidden">
-    <div class="feed-label">⚠️ ÚLTIMAS ALTERAÇÕES:</div>
-    <ul id="feedLista" class="feed-lista"><li>Buscando atualizações na planilha...</li></ul>
-</div>
 
 <div id="guiaBusca" class="legenda-buscas hidden">
 <h4>💡 Como buscar</h4>
@@ -147,180 +135,224 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div class="footer">© 2026 - Diretoria Geral de Finanças (DGF) • Uso interno e restrito</div>
 
 <script>
-// --- CONFIGURAÇÃO ---
-const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby9p69B_KzF496hY2e7Fk0A1X4z5A1pD2y3D4E5F6G/exec"; // SUBSTITUA PELO SEU LINK
-const TEMPO_EXPIRACAO = 30 * 60 * 1000;
-
-async function atualizarFeed() {
-    try {
-        const res = await fetch(WEBHOOK_URL + "?getLogs=true");
-        const logs = await res.json();
-        const lista = document.getElementById("feedLista");
-        lista.innerHTML = "";
-        if(!logs || logs.length === 0) { lista.innerHTML = "<li>Sem alterações recentes.</li>"; return; }
-        logs.forEach(l => {
-            const li = document.createElement("li");
-            li.className = "feed-item";
-            li.textContent = `• ${l.texto}`;
-            lista.appendChild(li);
-        });
-    } catch(e) { console.log("Feed offline"); }
-}
-
 function buscaRapida(cargo) {
-    document.getElementById("pergunta").value = "cargo de " + cargo;
+    const input = document.getElementById("pergunta");
+    input.value = "cargo de " + cargo;
     window.consultar();
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-    const usuariosPadrao = [
-        { usuario: "admin", senha: "1234", primeiroAcesso: true },
-        { usuario: "mauro", senha: "0000", primeiroAcesso: true }
-    ];
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
+const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
-    let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf")) || usuariosPadrao;
-    const mainContainer = document.getElementById("mainContainer");
-    const loginArea = document.getElementById("loginArea");
-    const sistemaArea = document.getElementById("sistemaArea");
-    const trocaSenhaArea = document.getElementById("trocaSenhaArea");
-    const guiaBusca = document.getElementById("guiaBusca");
-    const areaFeed = document.getElementById("areaFeed");
-    const perguntaInput = document.getElementById("pergunta");
-    const respostaDiv = document.getElementById("resposta");
+const usuariosPadrao = [
+{ usuario: "admin", senha: "1234", primeiroAcesso: true },
+{ usuario: "mauro", senha: "0000", primeiroAcesso: true }
+];
 
-    function gerarLinkDireto(url) {
-        if (!url || typeof url !== 'string') return null;
-        let driveUrl = url.trim();
-        if (driveUrl.includes("drive.google.com")) {
-            let id = "";
-            try {
-                if (driveUrl.includes("id=")) id = driveUrl.split("id=")[1].split("&")[0];
-                else if (driveUrl.includes("/file/d/")) id = driveUrl.split("/file/d/")[1].split("/")[0].split("?")[0];
-                if (id) return `https://docs.google.com/uc?export=view&id=${id}`;
-            } catch (e) { return null; }
-        }
-        return driveUrl;
+let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf"));
+if (!usuariosDB) {
+usuariosDB = usuariosPadrao;
+localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
+}
+
+const mainContainer = document.getElementById("mainContainer");
+const loginArea = document.getElementById("loginArea");
+const sistemaArea = document.getElementById("sistemaArea");
+const trocaSenhaArea = document.getElementById("trocaSenhaArea");
+const guiaBusca = document.getElementById("guiaBusca");
+const usuarioInput = document.getElementById("usuario");
+const senhaInput = document.getElementById("senha");
+const perguntaInput = document.getElementById("pergunta");
+const respostaDiv = document.getElementById("resposta");
+
+function gerarLinkDireto(url) {
+if (!url || typeof url !== 'string') return null;
+let driveUrl = url.trim();
+if (driveUrl.includes("drive.google.com")) {
+let id = "";
+try {
+if (driveUrl.includes("id=")) id = driveUrl.split("id=")[1].split("&")[0];
+else if (driveUrl.includes("/file/d/")) id = driveUrl.split("/file/d/")[1].split("/")[0].split("?")[0];
+if (id) return `https://docs.google.com/uc?export=view&id=${id}`;
+} catch (e) { return null; }
+}
+return driveUrl;
+}
+
+window.verSenha = function(id) {
+const input = document.getElementById(id);
+input.type = input.type === "password" ? "text" : "password";
+}
+
+usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
+
+let paginaAtual = 1;
+const itensPorPagina = 10;
+let resultadosGlobais = [];
+let tipoConsultaAtual = "ficha";
+
+function renderizarPagina() {
+if (!respostaDiv) return;
+const inicio = (paginaAtual - 1) * itensPorPagina;
+const fim = inicio + itensPorPagina;
+const pagina = resultadosGlobais.slice(inicio, fim);
+const totalPaginas = Math.ceil(resultadosGlobais.length / itensPorPagina);
+
+let html = `<strong>${resultadosGlobais.length} resultado(s)</strong><br>`;
+html += `<small>Página ${paginaAtual} de ${totalPaginas}</small><br><br>`;
+
+pagina.forEach(f => {
+    const fotoPadrao = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+    const imgUrl = gerarLinkDireto(f.foto) || fotoPadrao;
+
+    html += `<div class="card-resultado">
+    <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'">
+    <span class="info-item">👤 <strong>${f.nome}</strong></span>`;
+
+    if (tipoConsultaAtual === "setor") html += `<span class="info-item">🏢 Setor: <strong>${f.setor}</strong></span>`;
+    else if (tipoConsultaAtual === "cargo") html += `<span class="info-item">💼 Cargo: <strong>${f.cargo}</strong></span>`;
+    else if (tipoConsultaAtual === "empresa") html += `<span class="info-item">🏬 Empresa: <strong>${f.empresa}</strong></span>`;
+    else if (tipoConsultaAtual === "status") html += `<span class="info-item">📊 Status: <strong>${f.status}</strong></span>`;
+    else if (tipoConsultaAtual === "chefe") html += `<span class="info-item">👨💼 Chefe: <strong>${f.chefe}</strong></span>`;
+    else {
+        html += `<span class="info-item">🏢 Setor: ${f.setor}</span>
+        <span class="info-item">💼 Cargo: ${f.cargo}</span>
+        <span class="info-item">👨💼 Chefe: ${f.chefe}</span>
+        <span class="info-item">🏬 Empresa: ${f.empresa}</span>
+        <span class="info-item">📊 Status: ${f.status}</span>`;
     }
+    html += `</div>`;
+});
 
-    window.verSenha = function(id) {
-        const input = document.getElementById(id);
-        input.type = input.type === "password" ? "text" : "password";
+html += `<div style="text-align:center; margin-top:10px;">`;
+if (paginaAtual > 1) html += `<button style="width:60px; display:inline-block; margin: 0 5px;" onclick="paginaAnterior()">⬅️</button> `;
+if (fim < resultadosGlobais.length) html += `<button style="width:60px; display:inline-block; margin: 0 5px;" onclick="proximaPagina()">➡️</button>`;
+html += `</div>`;
+respostaDiv.innerHTML = html;
+}
+
+window.proximaPagina = function() { paginaAtual++; renderizarPagina(); }
+window.paginaAnterior = function() { paginaAtual--; renderizarPagina(); }
+
+window.login = function() {
+const user = usuariosDB.find(u => u.usuario === usuarioInput.value.trim() && u.senha === senhaInput.value.trim());
+if (user) {
+localStorage.setItem("userLogando", user.usuario);
+if (user.primeiroAcesso) {
+loginArea.classList.add("hidden");
+trocaSenhaArea.classList.remove("hidden");
+} else { confirmarEntrada(); }
+} else alert("Usuário ou senha inválidos.");
+}
+
+window.salvarNovaSenha = function() {
+const n = document.getElementById("novaSenha").value;
+const c = document.getElementById("confirmaSenha").value;
+if (n.length < 4) return alert("A senha deve ter no mínimo 4 caracteres.");
+if (n !== c) return alert("As senhas não coincidem.");
+const loginUser = localStorage.getItem("userLogando");
+usuariosDB = usuariosDB.map(u => u.usuario === loginUser ? {...u, senha: n, primeiroAcesso: false} : u);
+localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
+confirmarEntrada();
+}
+
+function confirmarEntrada() {
+localStorage.setItem("logado", "true");
+localStorage.setItem("tempoLogin", Date.now());
+mainContainer.classList.add("modo-sistema");
+loginArea.classList.add("hidden");
+trocaSenhaArea.classList.add("hidden");
+sistemaArea.classList.remove("hidden");
+guiaBusca.classList.remove("hidden");
+perguntaInput.focus();
+}
+
+window.logout = function() {
+localStorage.removeItem("logado");
+localStorage.removeItem("tempoLogin");
+location.reload();
+}
+
+function verificarSessao() {
+const tempo = localStorage.getItem("tempoLogin");
+if (!tempo) return false;
+return (Date.now() - parseInt(tempo)) <= TEMPO_EXPIRACAO;
+}
+
+if (localStorage.getItem("logado") === "true" && verificarSessao()) {
+mainContainer.classList.add("modo-sistema");
+loginArea.classList.add("hidden");
+sistemaArea.classList.remove("hidden");
+guiaBusca.classList.remove("hidden");
+}
+
+function extrairTermo(frase, chaves) {
+    for (let c of chaves) {
+        if (frase.includes(c)) return frase.split(c)[1].trim();
     }
+    return null;
+}
 
-    let paginaAtual = 1;
-    const itensPorPagina = 10;
-    let resultadosGlobais = [];
-    let tipoConsultaAtual = "ficha";
+window.consultar = async function() {
+if (!verificarSessao()) { logout(); return; }
+let pergunta = perguntaInput.value.trim().toLowerCase();
+if (!pergunta) return;
 
-    function renderizarPagina() {
-        if (!respostaDiv) return;
-        const inicio = (paginaAtual - 1) * itensPorPagina;
-        const fim = inicio + itensPorPagina;
-        const pagina = resultadosGlobais.slice(inicio, fim);
-        const totalPaginas = Math.ceil(resultadosGlobais.length / itensPorPagina);
+respostaDiv.innerHTML = "Consultando base de dados...";
+let termo = pergunta;
+tipoConsultaAtual = "ficha";
+let tipoBusca = "global";
 
-        let html = `<strong>${resultadosGlobais.length} resultado(s)</strong><br>`;
-        html += `<small>Página ${paginaAtual} de ${totalPaginas}</small><br><br>`;
+// FILTROS ESPECÍFICOS
+if (pergunta.includes("setor de")) { tipoConsultaAtual = "setor"; termo = extrairTermo(pergunta, ["setor de"]); }
+else if (pergunta.includes("chefe de")) { tipoConsultaAtual = "chefe"; termo = extrairTermo(pergunta, ["chefe de"]); }
+else if (pergunta.includes("cargo de")) { tipoConsultaAtual = "cargo"; termo = extrairTermo(pergunta, ["cargo de"]); }
+else if (pergunta.includes("empresa de")) { tipoConsultaAtual = "empresa"; termo = extrairTermo(pergunta, ["empresa de"]); }
+else if (pergunta.includes("status de")) { tipoConsultaAtual = "status"; termo = extrairTermo(pergunta, ["status de"]); }
+else if (pergunta.includes("equipe de")) { tipoBusca = "equipe"; termo = extrairTermo(pergunta, ["equipe de"]); }
+else if (pergunta.includes("quantos")) { tipoBusca = "contagem"; termo = extrairTermo(pergunta, ["na ", "no ", "da ", "do "]); }
 
-        pagina.forEach(f => {
-            const fotoPadrao = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-            const imgUrl = gerarLinkDireto(f.foto) || fotoPadrao;
+try {
+    const response = await fetch(WEBHOOK_URL);
+    const data = await response.json();
+    let resultados = [];
 
-            html += `<div class="card-resultado">
-            <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'">
-            <span class="info-item">👤 <strong>${f.nome}</strong></span>`;
-            
-            html += `<span class="info-item">🏢 Setor: ${f.setor || '---'}</span>
-                     <span class="info-item">💼 Cargo: ${f.cargo || '---'}</span>
-                     <span class="info-item">👨💼 Chefe: ${f.chefe || '---'}</span>
-                     <span class="info-item">🏬 Empresa: ${f.empresa || '---'}</span>
-                     <span class="info-item">📊 Status: ${f.status || '---'}</span>
-            </div>`;
-        });
+    if (tipoBusca === "equipe") {
+        resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
+    } else if (tipoBusca === "contagem") {
+        resultados = data.filter(f => f.setor.toLowerCase().includes(termo) || f.empresa.toLowerCase().includes(termo));
+        return respostaDiv.innerHTML = `📊 Total encontrado: <strong>${resultados.length}</strong>`;
+    } else {
+        // BUSCA INTELIGENTE
+        resultados = data.filter(f => {
+            let n = f.nome.toLowerCase();
+            let e = f.empresa.toLowerCase();
+            let c = f.cargo.toLowerCase();
+            let s = f.status.toLowerCase();
+            let st = f.setor.toLowerCase();
 
-        html += `<div style="text-align:center; margin-top:10px;">`;
-        if (paginaAtual > 1) html += `<button style="width:60px; display:inline-block; margin: 0 5px;" onclick="window.paginaAnterior()">⬅️</button> `;
-        if (fim < resultadosGlobais.length) html += `<button style="width:60px; display:inline-block; margin: 0 5px;" onclick="window.proximaPagina()">➡️</button>`;
-        html += `</div>`;
-        respostaDiv.innerHTML = html;
-    }
-
-    window.proximaPagina = function() { paginaAtual++; renderizarPagina(); }
-    window.paginaAnterior = function() { paginaAtual--; renderizarPagina(); }
-
-    window.login = function() {
-        const uVal = document.getElementById("usuario").value.trim();
-        const sVal = document.getElementById("senha").value.trim();
-        const user = usuariosDB.find(u => u.usuario === uVal && u.senha === sVal);
-        if (user) {
-            localStorage.setItem("userLogando", user.usuario);
-            if (user.primeiroAcesso) {
-                loginArea.classList.add("hidden");
-                trocaSenhaArea.classList.remove("hidden");
-            } else { confirmarEntrada(); }
-        } else alert("Acesso negado.");
-    }
-
-    window.salvarNovaSenha = function() {
-        const n = document.getElementById("novaSenha").value;
-        const c = document.getElementById("confirmaSenha").value;
-        if (n.length < 4 || n !== c) return alert("Erro na senha.");
-        const loginUser = localStorage.getItem("userLogando");
-        usuariosDB = usuariosDB.map(u => u.usuario === loginUser ? {...u, senha: n, primeiroAcesso: false} : u);
-        localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
-        confirmarEntrada();
-    }
-
-    function confirmarEntrada() {
-        localStorage.setItem("logado", "true");
-        localStorage.setItem("tempoLogin", Date.now());
-        mainContainer.classList.add("modo-sistema");
-        loginArea.classList.add("hidden");
-        trocaSenhaArea.classList.add("hidden");
-        sistemaArea.classList.remove("hidden");
-        guiaBusca.classList.remove("hidden");
-        areaFeed.classList.remove("hidden");
-        atualizarFeed();
-    }
-
-    window.logout = function() { localStorage.removeItem("logado"); location.reload(); }
-
-    window.consultar = async function() {
-        let pergunta = perguntaInput.value.trim().toLowerCase();
-        if (!pergunta) return;
-        respostaDiv.innerHTML = "Consultando base de dados...";
-        
-        try {
-            const response = await fetch(WEBHOOK_URL);
-            const data = await response.json();
-            
-            // Lógica de busca completa preservada
-            let resultados = data.filter(f => {
-                let n = (f.nome||"").toLowerCase();
-                let e = (f.empresa||"").toLowerCase();
-                let c = (f.cargo||"").toLowerCase();
-                let s = (f.status||"").toLowerCase();
-                let st = (f.setor||"").toLowerCase();
-                let ch = (f.chefe||"").toLowerCase();
-
-                if (pergunta.includes("equipe de")) return ch.includes(pergunta.replace("equipe de","").trim());
-                if (pergunta.includes("setor de")) return st.includes(pergunta.replace("setor de","").trim());
-                if (pergunta.includes("cargo de")) return c.includes(pergunta.replace("cargo de","").trim());
-                
-                return n.includes(pergunta) || e.includes(pergunta) || c.includes(pergunta) || s.includes(pergunta) || st.includes(pergunta);
-            });
-
-            if (pergunta.includes("quantos")) {
-                respostaDiv.innerHTML = `📊 Encontrados: <strong>${resultados.length}</strong>`;
-                return;
+            // Se o termo for curto (como RM, SES, PE), buscamos match exato na empresa/status
+            // para evitar que puxe nomes como "Zé do Carmo" na busca por "RM"
+            if (termo.length <= 3) {
+                return (e === termo) || (s === termo) || (n.startsWith(termo + " ")) || (n === termo);
             }
 
-            if (!resultados.length) { respostaDiv.innerHTML = "Nada encontrado."; return; }
-            resultadosGlobais = resultados;
-            paginaAtual = 1;
-            renderizarPagina();
-        } catch (e) { respostaDiv.innerHTML = "Erro na conexão."; }
+            // Para nomes normais ou termos longos, busca geral
+            return n.includes(termo) || e.includes(termo) || c.includes(termo) || s.includes(termo) || st.includes(termo);
+        });
     }
+
+    if (!resultados.length) return respostaDiv.innerHTML = "Nenhum registro encontrado.";
+    resultadosGlobais = resultados;
+    paginaAtual = 1;
+    renderizarPagina();
+} catch (e) {
+    respostaDiv.innerHTML = "Erro na conexão.";
+}
+}
 });
 </script>
 </body>
