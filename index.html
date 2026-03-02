@@ -350,7 +350,8 @@ loginArea.classList.add("hidden");
 sistemaArea.classList.remove("hidden");
 guiaBusca.classList.remove("hidden");
 painelLogs.classList.remove("hidden");
-
+carregarLogs();
+setInterval(carregarLogs, 60000);
 }
 
 function extrairTermo(frase, chaves) {
