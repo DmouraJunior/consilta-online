@@ -155,7 +155,8 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div class="footer">© 2026 - Diretoria Geral de Finanças (DGF) • Uso interno e restrito</div>
 
 <script>
-const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
+// --- ATUALIZADO COM SEU NOVO LINK ---
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbz6hHK2liVd8K7m0uiOTc-LQz_9AHB6MOp2iyQUvRzkWhUhbd8lVx9DCPdC9C2iK6px/exec";
 const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 
 function toggleLogs() {
@@ -171,7 +172,6 @@ function buscaRapida(cargo) {
 async function carregarLogs() {
     if (localStorage.getItem("logado") !== "true") return;
     try {
-        // Adicionamos um timestamp para evitar cache do navegador
         const response = await fetch(WEBHOOK_URL + "?getLogs=true&t=" + Date.now());
         const logs = await response.json();
         const lista = document.getElementById("listaLogs");
@@ -181,27 +181,14 @@ async function carregarLogs() {
             return;
         }
 
-        // Pega os 5 itens e garante que se vierem fichas completas, mostre apenas o nome.
         const ultimosCinco = logs.slice(0, 5);
 
         lista.innerHTML = ultimosCinco.map(log => {
             let textoExibir = "";
-            
-            // Se o log for um objeto (ficha completa do funcionário)
-            if (log && typeof log === 'object' && log.nome) {
-                textoExibir = `Cadastro de <b>${log.nome}</b> (${log.setor || 'DGF'}) atualizado.`;
-            } 
-            // Se for o formato de log esperado (com a chave .texto)
-            else if (log.texto) {
-                textoExibir = log.texto;
-            }
-            // Se vier como string pura
-            else if (typeof log === 'string') {
-                textoExibir = log;
-            }
-            else {
-                textoExibir = "Alteração processada no sistema.";
-            }
+            if (log && typeof log === 'object' && log.texto) { textoExibir = log.texto; }
+            else if (log && typeof log === 'object' && log.nome) { textoExibir = `Cadastro de <b>${log.nome}</b> atualizado.`; }
+            else if (typeof log === 'string') { textoExibir = log; }
+            else { textoExibir = "Alteração registrada no servidor."; }
 
             return `
                 <div class="update-item">
