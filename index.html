@@ -22,7 +22,7 @@ input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #ccc; 
 button { width: 100%; padding: 12px; border-radius: 6px; border: none; background: #003366; color: white; font-weight: 600; cursor: pointer; margin-bottom: 8px; transition: 0.2s; }
 button:hover { background: #002244; }
 .logout { background: #8b0000; margin-top: 10px; }
-.hidden { display: none !important; }
+.hidden { display: none; }
 .response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 350px; overflow-y: auto; }
 .footer { text-align: center; padding: 15px; font-size: 12px; color: #555; background: #e9edf2; position: fixed; bottom: 0; width: 100%; z-index: 10; }
 .legenda-buscas { position: fixed; bottom: 65px; left: 20px; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #c9a227; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); font-size: 12px; color: #333; max-width: 240px; z-index: 5; }
@@ -45,17 +45,6 @@ button:hover { background: #002244; }
 .recuo-1 { margin-left: 0; }
 .recuo-2 { margin-left: 15px; }
 .recuo-3 { margin-left: 30px; }
-
-/* --- PAINEL DE ALTERAÇÕES RETRÁTIL --- */
-.updates-panel { position: fixed; top: 65px; right: 20px; width: 280px; background: white; border-radius: 8px; border-top: 4px solid #c9a227; box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 100; }
-.updates-header { background: #f8f9fa; padding: 12px; font-weight: bold; color: #002b5c; font-size: 10px; text-transform: uppercase; text-align: center; cursor: pointer; transition: background 0.2s; border-radius: 8px 8px 0 0; display: flex; justify-content: center; align-items: center; gap: 8px; }
-.updates-header:hover { background: #eef2f7; }
-.updates-header::after { content: ' ▼'; font-size: 8px; }
-.updates-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: white; border-radius: 0 0 8px 8px; }
-.updates-content.open { max-height: 400px; border-top: 1px solid #eee; }
-.update-item { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; font-size: 11px; color: #444; line-height: 1.4; display: flex; align-items: flex-start; gap: 8px; }
-.update-item:last-child { border-bottom: none; }
-.update-icon { font-size: 12px; color: #c9a227; flex-shrink: 0; }
 </style>
 </head>
 
@@ -66,15 +55,6 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <small>Sistema Interno Oficial</small>
 </div>
 <div class="gold-line"></div>
-
-<div id="painelAtualizacoes" class="updates-panel hidden">
-    <div class="updates-header" onclick="toggleLogs()">Últimas alterações dos servidores na DGF</div>
-    <div id="updatesContent" class="updates-content">
-        <div id="listaLogs">
-            <div class="update-item">Carregando logs...</div>
-        </div>
-    </div>
-</div>
 
 <div id="guiaBusca" class="legenda-buscas hidden">
 <h4>💡 Como buscar</h4>
@@ -155,54 +135,16 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div class="footer">© 2026 - Diretoria Geral de Finanças (DGF) • Uso interno e restrito</div>
 
 <script>
-// --- ATUALIZADO COM SEU NOVO LINK ---
-const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbz6hHK2liVd8K7m0uiOTc-LQz_9AHB6MOp2iyQUvRzkWhUhbd8lVx9DCPdC9C2iK6px/exec";
-const TEMPO_EXPIRACAO = 30 * 60 * 1000;
-
-function toggleLogs() {
-    document.getElementById("updatesContent").classList.toggle("open");
-}
-
 function buscaRapida(cargo) {
     const input = document.getElementById("pergunta");
     input.value = "cargo de " + cargo;
     window.consultar();
 }
 
-async function carregarLogs() {
-    if (localStorage.getItem("logado") !== "true") return;
-    try {
-        const response = await fetch(WEBHOOK_URL + "?getLogs=true&t=" + Date.now());
-        const logs = await response.json();
-        const lista = document.getElementById("listaLogs");
-        
-        if (!logs || logs.length === 0) {
-            lista.innerHTML = '<div class="update-item">Nenhuma alteração recente.</div>';
-            return;
-        }
-
-        const ultimosCinco = logs.slice(0, 5);
-
-        lista.innerHTML = ultimosCinco.map(log => {
-            let textoExibir = "";
-            if (log && typeof log === 'object' && log.texto) { textoExibir = log.texto; }
-            else if (log && typeof log === 'object' && log.nome) { textoExibir = `Cadastro de <b>${log.nome}</b> atualizado.`; }
-            else if (typeof log === 'string') { textoExibir = log; }
-            else { textoExibir = "Alteração registrada no servidor."; }
-
-            return `
-                <div class="update-item">
-                    <span class="update-icon">●</span>
-                    <span>${textoExibir}</span>
-                </div>
-            `;
-        }).join('');
-    } catch (e) {
-        console.error("Erro ao buscar logs:", e);
-    }
-}
-
 document.addEventListener("DOMContentLoaded", function() {
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyA3fOOroxsfCTt1Ar_II3SZn_hHv-CLeP5Voiv5FPKOuGS4n330_f48A43lECINVc/exec";
+const TEMPO_EXPIRACAO = 30 * 60 * 1000;
+
 const usuariosPadrao = [
 { usuario: "admin", senha: "1234", primeiroAcesso: true },
 { usuario: "mauro", senha: "0000", primeiroAcesso: true }
@@ -219,7 +161,6 @@ const loginArea = document.getElementById("loginArea");
 const sistemaArea = document.getElementById("sistemaArea");
 const trocaSenhaArea = document.getElementById("trocaSenhaArea");
 const guiaBusca = document.getElementById("guiaBusca");
-const painelLogs = document.getElementById("painelAtualizacoes");
 const usuarioInput = document.getElementById("usuario");
 const senhaInput = document.getElementById("senha");
 const perguntaInput = document.getElementById("pergunta");
@@ -326,10 +267,7 @@ loginArea.classList.add("hidden");
 trocaSenhaArea.classList.add("hidden");
 sistemaArea.classList.remove("hidden");
 guiaBusca.classList.remove("hidden");
-painelLogs.classList.remove("hidden"); 
 perguntaInput.focus();
-carregarLogs();
-setInterval(carregarLogs, 60000); 
 }
 
 window.logout = function() {
@@ -349,9 +287,6 @@ mainContainer.classList.add("modo-sistema");
 loginArea.classList.add("hidden");
 sistemaArea.classList.remove("hidden");
 guiaBusca.classList.remove("hidden");
-painelLogs.classList.remove("hidden");
-carregarLogs();
-setInterval(carregarLogs, 60000);
 }
 
 function extrairTermo(frase, chaves) {
@@ -371,6 +306,7 @@ let termo = pergunta;
 tipoConsultaAtual = "ficha";
 let tipoBusca = "global";
 
+// FILTROS ESPECÍFICOS
 if (pergunta.includes("setor de")) { tipoConsultaAtual = "setor"; termo = extrairTermo(pergunta, ["setor de"]); }
 else if (pergunta.includes("chefe de")) { tipoConsultaAtual = "chefe"; termo = extrairTermo(pergunta, ["chefe de"]); }
 else if (pergunta.includes("cargo de")) { tipoConsultaAtual = "cargo"; termo = extrairTermo(pergunta, ["cargo de"]); }
@@ -390,15 +326,21 @@ try {
         resultados = data.filter(f => f.setor.toLowerCase().includes(termo) || f.empresa.toLowerCase().includes(termo));
         return respostaDiv.innerHTML = `📊 Total encontrado: <strong>${resultados.length}</strong>`;
     } else {
+        // BUSCA INTELIGENTE
         resultados = data.filter(f => {
             let n = f.nome.toLowerCase();
             let e = f.empresa.toLowerCase();
             let c = f.cargo.toLowerCase();
             let s = f.status.toLowerCase();
             let st = f.setor.toLowerCase();
+
+            // Se o termo for curto (como RM, SES, PE), buscamos match exato na empresa/status
+            // para evitar que puxe nomes como "Zé do Carmo" na busca por "RM"
             if (termo.length <= 3) {
                 return (e === termo) || (s === termo) || (n.startsWith(termo + " ")) || (n === termo);
             }
+
+            // Para nomes normais ou termos longos, busca geral
             return n.includes(termo) || e.includes(termo) || c.includes(termo) || s.includes(termo) || st.includes(termo);
         });
     }
@@ -415,3 +357,4 @@ try {
 </script>
 </body>
 </html>
+
