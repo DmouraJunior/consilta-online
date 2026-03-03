@@ -6,7 +6,7 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- ESTILOS VISUAIS PRESERVADOS --- */
+/* --- ESTILOS PRESERVADOS --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; min-height: 100vh; position: relative; }
 .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
@@ -25,28 +25,40 @@ button:hover { background: #002244; }
 .hidden { display: none !important; }
 .response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 350px; overflow-y: auto; }
 .footer { text-align: center; padding: 15px; font-size: 12px; color: #555; background: #e9edf2; position: fixed; bottom: 0; width: 100%; z-index: 10; }
-
-/* --- PAINEL DE ALTERAÇÕES RETRÁTIL --- */
-.updates-panel { position: fixed; top: 65px; right: 20px; width: 320px; background: white; border-radius: 8px; border-top: 4px solid #c9a227; box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 100; }
-.updates-header { background: #f8f9fa; padding: 12px; font-weight: bold; color: #002b5c; font-size: 10px; text-transform: uppercase; text-align: center; cursor: pointer; border-radius: 8px 8px 0 0; display: flex; justify-content: center; align-items: center; gap: 8px; }
-.updates-header:hover { background: #eef2f7; }
-.updates-header::after { content: ' ▼'; font-size: 8px; }
-.updates-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: white; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
-.updates-content.open { max-height: 550px; border-top: 1px solid #eee; overflow-y: auto; }
-.update-item { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; font-size: 11px; color: #444; line-height: 1.4; display: flex; align-items: flex-start; gap: 8px; }
-.update-icon { font-size: 12px; color: #c9a227; flex-shrink: 0; }
-.btn-ver-mais { display: none; text-align: center; padding: 12px; font-size: 10px; color: #002b5c; cursor: pointer; background: #fdfdfd; font-weight: bold; border-top: 1px solid #eee; transition: 0.2s; }
-.btn-ver-mais:hover { background: #f0f4f8; color: #c9a227; }
-
-/* --- GRID DO SISTEMA --- */
-.flex-sistema { display: flex; gap: 30px; text-align: left; }
+.legenda-buscas { position: fixed; bottom: 65px; left: 20px; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #c9a227; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); font-size: 12px; color: #333; max-width: 240px; z-index: 5; }
+.legenda-buscas h4 { color: #002b5c; margin-bottom: 8px; font-size: 13px; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+.legenda-buscas ul { list-style: none; }
+.legenda-buscas li { margin-bottom: 6px; line-height: 1.4; }
+.foto-servidor { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 2px solid #002b5c; float: right; margin-left: 10px; background: #fff; }
+.pass-container { position: relative; width: 100%; }
+.toggle-eye { position: absolute; right: 12px; top: 12px; cursor: pointer; color: #777; font-size: 18px; z-index: 10; background: transparent; user-select: none; }
+.card-resultado { border-bottom: 1px solid #ddd; padding: 10px 0; margin-bottom: 10px; overflow: hidden; }
+.info-item { display: block; margin-bottom: 4px; line-height: 1.4; }
+.flex-sistema { display: flex; gap: 30px; align-items: flex-start; text-align: left; }
 .col-busca { flex: 1.2; }
 .col-organograma { flex: 0.8; background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid #c9a227; }
+.org-titulo { color: #002b5c; font-size: 14px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
 .org-item { background: white; padding: 10px; border-radius: 6px; margin-bottom: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #002b5c; cursor: pointer; transition: 0.2s; }
-.org-item:hover { transform: translateX(5px); background: #fcfcfc; }
-.org-item span { font-size: 13px; font-weight: 600; display: block; }
-.org-item small { color: #c9a227; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-.card-resultado { border-bottom: 1px solid #ddd; padding: 12px 0; margin-bottom: 10px; }
+.org-item:hover { background: #edf2f7; transform: translateX(5px); }
+.org-item small { display: block; color: #c9a227; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+.org-item span { font-size: 13px; color: #333; font-weight: 600; }
+.recuo-1 { margin-left: 0; }
+.recuo-2 { margin-left: 15px; }
+.recuo-3 { margin-left: 30px; }
+
+/* --- PAINEL DE ALTERAÇÕES RETRÁTIL --- */
+.updates-panel { position: fixed; top: 65px; right: 20px; width: 280px; background: white; border-radius: 8px; border-top: 4px solid #c9a227; box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 100; }
+.updates-header { background: #f8f9fa; padding: 12px; font-weight: bold; color: #002b5c; font-size: 10px; text-transform: uppercase; text-align: center; cursor: pointer; transition: background 0.2s; border-radius: 8px 8px 0 0; display: flex; justify-content: center; align-items: center; gap: 8px; }
+.updates-header:hover { background: #eef2f7; }
+.updates-header::after { content: ' ▼'; font-size: 8px; }
+.updates-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: white; border-radius: 0 0 8px 8px; }
+.updates-content.open { max-height: 500px; border-top: 1px solid #eee; overflow-y: auto; }
+.update-item { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; font-size: 11px; color: #444; line-height: 1.4; display: flex; align-items: flex-start; gap: 8px; }
+.update-item:last-child { border-bottom: none; }
+.update-icon { font-size: 12px; color: #c9a227; flex-shrink: 0; }
+/* Estilo do botão ver mais dentro do painel */
+.btn-ver-mais-logs { display: none; text-align: center; padding: 10px; font-size: 9px; color: #002b5c; cursor: pointer; background: #f9f9f9; font-weight: bold; border-top: 1px solid #eee; border-radius: 0 0 8px 8px; }
+.btn-ver-mais-logs:hover { background: #f0f0f0; }
 </style>
 </head>
 
@@ -61,161 +73,371 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div id="painelAtualizacoes" class="updates-panel hidden">
     <div class="updates-header" onclick="toggleLogs()">Últimas alterações dos servidores na DGF</div>
     <div id="updatesContent" class="updates-content">
-        <div id="listaLogs"></div>
-        <div id="btnVerMais" class="btn-ver-mais" onclick="expandirLogs()">MOSTRAR MAIS ATUALIZAÇÕES (+)</div>
+        <div id="listaLogs">
+            <div class="update-item">Carregando logs...</div>
+        </div>
+        <div id="btnVerMaisLogs" class="btn-ver-mais-logs" onclick="expandirLogs()">MOSTRAR MAIS ATUALIZAÇÕES (+)</div>
     </div>
 </div>
 
+<div id="guiaBusca" class="legenda-buscas hidden">
+<h4>💡 Como buscar</h4>
+<ul>
+<li>• <b>Por Nome:</b> Digite apenas o nome.</li>
+<li>• <b>Empresa/Status:</b> "RM", "SES-PE", "Comissionados".</li>
+<li>• <b>Específicos:</b> "setor de [nome]", "cargo de [nome]".</li>
+<li>• <b>Equipe:</b> "equipe de [nome do chefe]".</li>
+<li>• <b>Contagem:</b> "quantos na [empresa/setor]".</li>
+</ul>
+</div>
+
 <div class="main">
-    <div id="mainContainer" class="container">
-        
-        <div id="loginArea">
-            <div class="titulo-area">
-                <img src="brasao-dgf.png" alt="Brasão" class="logo-titulo">
-                <h2>Sistema Integrado de Consulta - DGF</h2>
-            </div>
-            <input type="text" id="usuario" placeholder="Usuário institucional">
-            <input type="password" id="senha" placeholder="Senha">
-            <button onclick="login()">Entrar no Sistema</button>
+<div id="mainContainer" class="container">
+
+<div id="loginArea">
+<div class="titulo-area">
+<img src="brasao-dgf.png" alt="Brasão DGF" class="logo-titulo">
+<h2>Sistema Integrado de Consulta de Servidores - DGF</h2>
+</div>
+<input type="text" id="usuario" placeholder="Usuário institucional">
+<div class="pass-container">
+<input type="password" id="senha" placeholder="Senha" style="padding-right: 40px;">
+<span class="toggle-eye" onclick="verSenha('senha')">👁️</span>
+</div>
+<button onclick="login()">Entrar no Sistema</button>
+</div>
+
+<div id="trocaSenhaArea" class="hidden">
+<h2>🔒 Alterar Senha Inicial</h2>
+<p style="font-size: 12px; margin-bottom: 15px; color: #666;">Primeiro acesso detectado.</p>
+<div class="pass-container">
+<input type="password" id="novaSenha" placeholder="Nova senha">
+<span class="toggle-eye" onclick="verSenha('novaSenha')">👁️</span>
+</div>
+<div class="pass-container">
+<input type="password" id="confirmaSenha" placeholder="Confirme a nova senha">
+<span class="toggle-eye" onclick="verSenha('confirmaSenha')">👁️</span>
+</div>
+<button onclick="salvarNovaSenha()">Atualizar e Entrar</button>
+</div>
+
+<div id="sistemaArea" class="hidden">
+    <div class="flex-sistema">
+        <div class="col-busca">
+            <h2>Assistente de Consulta</h2>
+            <input type="text" id="pergunta" placeholder="O que deseja consultar hoje?">
+            <button onclick="consultar()">Consultar Sistema</button>
+            <button class="logout" onclick="logout()">Encerrar Sessão</button>
+            <div class="response" id="resposta"></div>
         </div>
 
-        <div id="sistemaArea" class="hidden">
-            <div class="flex-sistema">
-                <div class="col-busca">
-                    <h2>Assistente de Consulta</h2>
-                    <input type="text" id="pergunta" placeholder="O que deseja consultar hoje?">
-                    <button onclick="consultar()">Consultar Sistema</button>
-                    <div class="response" id="resposta">Aguardando comando de busca...</div>
-                    <button class="logout" onclick="logout()">Encerrar Sessão</button>
-                </div>
-
-                <div class="col-organograma">
-                    <h3 style="font-size: 12px; margin-bottom:12px; color:#002b5c; text-transform: uppercase; letter-spacing: 1px;">Estrutura DGF</h3>
-                    <div class="org-item" onclick="buscaRapida('Diretor')"><small>Diretoria</small><span>Diretor Geral</span></div>
-                    <div class="org-item" onclick="buscaRapida('Superintendente')"><small>Superintendência</small><span>Superintendentes</span></div>
-                    <div class="org-item" onclick="buscaRapida('Gerente')"><small>Gerência</small><span>Gerentes</span></div>
-                    <div class="org-item" onclick="buscaRapida('Coordenador')"><small>Coordenação</small><span>Coordenadores</span></div>
-                </div>
+        <div class="col-organograma">
+            <div class="org-titulo">📌 Estrutura DGF</div>
+            <div class="org-item recuo-1" onclick="buscaRapida('Diretor')">
+                <small>Diretoria</small>
+                <span>Diretor Geral</span>
+            </div>
+            <div class="org-item recuo-2" onclick="buscaRapida('Superintendente')">
+                <small>Superintendência</small>
+                <span>Superintendentes</span>
+            </div>
+            <div class="org-item recuo-3" onclick="buscaRapida('Gerente')">
+                <small>Gerência</small>
+                <span>Gerentes</span>
+            </div>
+            <div class="org-item recuo-3" onclick="buscaRapida('Coordenador')">
+                <small>Coordenação</small>
+                <span>Coordenadores</span>
             </div>
         </div>
-
     </div>
+</div>
+
+</div>
 </div>
 
 <div class="footer">© 2026 - Diretoria Geral de Finanças (DGF) • Uso interno e restrito</div>
 
 <script>
-// --- CONFIGURAÇÃO DO WEBHOOK ---
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbz6hHK2liVd8K7m0uiOTc-LQz_9AHB6MOp2iyQUvRzkWhUhbd8lVx9DCPdC9C2iK6px/exec";
-let logsCompletos = [];
+const TEMPO_EXPIRACAO = 30 * 60 * 1000;
+let logsMemoria = []; // Variável para guardar os 15 logs recebidos
 
-// --- LOGICA DOS LOGS (5 INICIAIS, EXPANSÃO PARA 15) ---
 function toggleLogs() {
     const content = document.getElementById("updatesContent");
     content.classList.toggle("open");
     if (!content.classList.contains("open")) {
-        renderizarLogs(false); // Reseta para 5 ao fechar o painel
+        renderizarLogs(false); // Reseta para 5 ao fechar
     }
 }
 
+function expandirLogs() {
+    renderizarLogs(true); // Mostra os 15
+}
+
+function buscaRapida(cargo) {
+    const input = document.getElementById("pergunta");
+    input.value = "cargo de " + cargo;
+    window.consultar();
+}
+
 async function carregarLogs() {
-    if (localStorage.getItem("dgf_session") !== "active") return;
+    if (localStorage.getItem("logado") !== "true") return;
     try {
         const response = await fetch(WEBHOOK_URL + "?getLogs=true&t=" + Date.now());
-        logsCompletos = await response.json();
-        renderizarLogs(false); // Mostra os 5 primeiros por padrão
-    } catch (e) { console.error("Erro ao carregar logs"); }
+        logsMemoria = await response.json();
+        renderizarLogs(false); // Inicia mostrando 5
+    } catch (e) {
+        console.error("Erro ao buscar logs:", e);
+    }
 }
 
 function renderizarLogs(mostrarTudo) {
     const lista = document.getElementById("listaLogs");
-    const btn = document.getElementById("btnVerMais");
+    const btn = document.getElementById("btnVerMaisLogs");
     
-    if (!logsCompletos || logsCompletos.length === 0) {
-        lista.innerHTML = '<div class="update-item">Sem alterações recentes registradas.</div>';
+    if (!logsMemoria || logsMemoria.length === 0) {
+        lista.innerHTML = '<div class="update-item">Nenhuma alteração recente.</div>';
         btn.style.display = "none";
         return;
     }
 
     const limite = mostrarTudo ? 15 : 5;
-    const logsExibir = logsCompletos.slice(0, limite);
+    const logsExibir = logsMemoria.slice(0, limite);
 
-    lista.innerHTML = logsExibir.map(log => `
-        <div class="update-item">
-            <span class="update-icon">●</span>
-            <span>${log.texto}</span>
-        </div>
-    `).join('');
+    lista.innerHTML = logsExibir.map(log => {
+        let textoExibir = "";
+        if (log && typeof log === 'object' && log.texto) { textoExibir = log.texto; }
+        else if (log && typeof log === 'object' && log.nome) { textoExibir = `Cadastro de <b>${log.nome}</b> atualizado.`; }
+        else if (typeof log === 'string') { textoExibir = log; }
+        else { textoExibir = "Alteração registrada no servidor."; }
 
-    // Botão aparece se houver mais de 5 logs e não estivermos vendo todos
-    btn.style.display = (logsCompletos.length > 5 && !mostrarTudo) ? "block" : "none";
+        return `
+            <div class="update-item">
+                <span class="update-icon">●</span>
+                <span>${textoExibir}</span>
+            </div>
+        `;
+    }).join('');
+
+    // Mostra o botão se houver mais de 5 logs e não estivermos mostrando tudo
+    if (logsMemoria.length > 5 && !mostrarTudo) {
+        btn.style.display = "block";
+    } else {
+        btn.style.display = "none";
+    }
 }
 
-function expandirLogs() {
-    renderizarLogs(true);
+document.addEventListener("DOMContentLoaded", function() {
+const usuariosPadrao = [
+{ usuario: "admin", senha: "1234", primeiroAcesso: true },
+{ usuario: "mauro", senha: "0000", primeiroAcesso: true }
+];
+
+let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf"));
+if (!usuariosDB) {
+usuariosDB = usuariosPadrao;
+localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
 }
 
-// --- FUNÇÕES DE LOGIN ---
-function login() {
-    const u = document.getElementById("usuario").value.trim();
-    const s = document.getElementById("senha").value.trim();
-    if ((u === "admin" && s === "1234") || (u === "mauro" && s === "0000")) {
-        localStorage.setItem("dgf_session", "active");
-        confirmarEntrada();
-    } else { alert("Acesso negado: Usuário ou senha incorretos."); }
+const mainContainer = document.getElementById("mainContainer");
+const loginArea = document.getElementById("loginArea");
+const sistemaArea = document.getElementById("sistemaArea");
+const trocaSenhaArea = document.getElementById("trocaSenhaArea");
+const guiaBusca = document.getElementById("guiaBusca");
+const painelLogs = document.getElementById("painelAtualizacoes");
+const usuarioInput = document.getElementById("usuario");
+const senhaInput = document.getElementById("senha");
+const perguntaInput = document.getElementById("pergunta");
+const respostaDiv = document.getElementById("resposta");
+
+function gerarLinkDireto(url) {
+if (!url || typeof url !== 'string') return null;
+let driveUrl = url.trim();
+if (driveUrl.includes("drive.google.com")) {
+let id = "";
+try {
+if (driveUrl.includes("id=")) id = driveUrl.split("id=")[1].split("&")[0];
+else if (driveUrl.includes("/file/d/")) id = driveUrl.split("/file/d/")[1].split("/")[0].split("?")[0];
+if (id) return `https://docs.google.com/uc?export=view&id=${id}`;
+} catch (e) { return null; }
+}
+return driveUrl;
+}
+
+window.verSenha = function(id) {
+const input = document.getElementById(id);
+input.type = input.type === "password" ? "text" : "password";
+}
+
+usuarioInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+senhaInput.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+perguntaInput.addEventListener("keydown", e => { if (e.key === "Enter") consultar(); });
+
+let paginaAtual = 1;
+const itensPorPagina = 10;
+let resultadosGlobais = [];
+let tipoConsultaAtual = "ficha";
+
+function renderizarPagina() {
+if (!respostaDiv) return;
+const inicio = (paginaAtual - 1) * itensPorPagina;
+const fim = inicio + itensPorPagina;
+const pagina = resultadosGlobais.slice(inicio, fim);
+const totalPaginas = Math.ceil(resultadosGlobais.length / itensPorPagina);
+
+let html = `<strong>${resultadosGlobais.length} resultado(s)</strong><br>`;
+html += `<small>Página ${paginaAtual} de ${totalPaginas}</small><br><br>`;
+
+pagina.forEach(f => {
+    const fotoPadrao = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+    const imgUrl = gerarLinkDireto(f.foto) || fotoPadrao;
+
+    html += `<div class="card-resultado">
+    <img src="${imgUrl}" class="foto-servidor" onerror="this.src='${fotoPadrao}'">
+    <span class="info-item">👤 <strong>${f.nome}</strong></span>`;
+
+    if (tipoConsultaAtual === "setor") html += `<span class="info-item">🏢 Setor: <strong>${f.setor}</strong></span>`;
+    else if (tipoConsultaAtual === "cargo") html += `<span class="info-item">💼 Cargo: <strong>${f.cargo}</strong></span>`;
+    else if (tipoConsultaAtual === "empresa") html += `<span class="info-item">🏬 Empresa: <strong>${f.empresa}</strong></span>`;
+    else if (tipoConsultaAtual === "status") html += `<span class="info-item">📊 Status: <strong>${f.status}</strong></span>`;
+    else if (tipoConsultaAtual === "chefe") html += `<span class="info-item">👨💼 Chefe: <strong>${f.chefe}</strong></span>`;
+    else {
+        html += `<span class="info-item">🏢 Setor: ${f.setor}</span>
+        <span class="info-item">💼 Cargo: ${f.cargo}</span>
+        <span class="info-item">👨💼 Chefe: ${f.chefe}</span>
+        <span class="info-item">🏬 Empresa: ${f.empresa}</span>
+        <span class="info-item">📊 Status: ${f.status}</span>`;
+    }
+    html += `</div>`;
+});
+
+html += `<div style="text-align:center; margin-top:10px;">`;
+if (paginaAtual > 1) html += `<button style="width:60px; display:inline-block; margin: 0 5px;" onclick="paginaAnterior()">⬅️</button> `;
+if (fim < resultadosGlobais.length) html += `<button style="width:60px; display:inline-block; margin: 0 5px;" onclick="proximaPagina()">➡️</button>`;
+html += `</div>`;
+respostaDiv.innerHTML = html;
+}
+
+window.proximaPagina = function() { paginaAtual++; renderizarPagina(); }
+window.paginaAnterior = function() { paginaAtual--; renderizarPagina(); }
+
+window.login = function() {
+const user = usuariosDB.find(u => u.usuario === usuarioInput.value.trim() && u.senha === senhaInput.value.trim());
+if (user) {
+localStorage.setItem("userLogando", user.usuario);
+if (user.primeiroAcesso) {
+loginArea.classList.add("hidden");
+trocaSenhaArea.classList.remove("hidden");
+} else { confirmarEntrada(); }
+} else alert("Usuário ou senha inválidos.");
+}
+
+window.salvarNovaSenha = function() {
+const n = document.getElementById("novaSenha").value;
+const c = document.getElementById("confirmaSenha").value;
+if (n.length < 4) return alert("A senha deve ter no mínimo 4 caracteres.");
+if (n !== c) return alert("As senhas não coincidem.");
+const loginUser = localStorage.getItem("userLogando");
+usuariosDB = usuariosDB.map(u => u.usuario === loginUser ? {...u, senha: n, primeiroAcesso: false} : u);
+localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
+confirmarEntrada();
 }
 
 function confirmarEntrada() {
-    document.getElementById("mainContainer").classList.add("modo-sistema");
-    document.getElementById("loginArea").classList.add("hidden");
-    document.getElementById("sistemaArea").classList.remove("hidden");
-    document.getElementById("painelAtualizacoes").classList.remove("hidden");
-    carregarLogs();
-    setInterval(carregarLogs, 60000); // Atualiza logs a cada minuto
+localStorage.setItem("logado", "true");
+localStorage.setItem("tempoLogin", Date.now());
+mainContainer.classList.add("modo-sistema");
+loginArea.classList.add("hidden");
+trocaSenhaArea.classList.add("hidden");
+sistemaArea.classList.remove("hidden");
+guiaBusca.classList.remove("hidden");
+painelLogs.classList.remove("hidden"); 
+perguntaInput.focus();
+carregarLogs();
+setInterval(carregarLogs, 60000); 
 }
 
-function logout() { localStorage.clear(); location.reload(); }
-
-// --- FUNÇÕES DE BUSCA ---
-async function consultar() {
-    const p = document.getElementById("pergunta").value.trim().toLowerCase();
-    if (!p) return;
-    const respDiv = document.getElementById("resposta");
-    respDiv.innerHTML = "Processando consulta na base de dados...";
-
-    try {
-        const res = await fetch(WEBHOOK_URL);
-        const data = await res.json();
-        const filtrados = data.filter(f => 
-            f.nome.toLowerCase().includes(p) || 
-            f.setor.toLowerCase().includes(p) || 
-            f.cargo.toLowerCase().includes(p) ||
-            f.empresa.toLowerCase().includes(p)
-        );
-
-        if (filtrados.length === 0) {
-            respDiv.innerHTML = "Nenhum servidor encontrado com este termo.";
-            return;
-        }
-
-        respDiv.innerHTML = filtrados.map(f => `
-            <div class="card-resultado">
-                <strong>👤 ${f.nome}</strong><br>
-                <small>🏢 Setor: ${f.setor} | 💼 Cargo: ${f.cargo}</small><br>
-                <small>🏬 Empresa: ${f.empresa} | 📊 Status: ${f.status}</small><br>
-                <small>👨‍💼 Chefe: ${f.chefe}</small>
-            </div>
-        `).join('');
-    } catch (e) { respDiv.innerHTML = "Erro de conexão com o servidor de dados."; }
+window.logout = function() {
+localStorage.removeItem("logado");
+localStorage.removeItem("tempoLogin");
+location.reload();
 }
 
-function buscaRapida(c) {
-    document.getElementById("pergunta").value = c;
-    consultar();
+function verificarSessao() {
+const tempo = localStorage.getItem("tempoLogin");
+if (!tempo) return false;
+return (Date.now() - parseInt(tempo)) <= TEMPO_EXPIRACAO;
 }
 
-// MANTÉM LOGADO AO RECARREGAR
-if (localStorage.getItem("dgf_session") === "active") { confirmarEntrada(); }
+if (localStorage.getItem("logado") === "true" && verificarSessao()) {
+mainContainer.classList.add("modo-sistema");
+loginArea.classList.add("hidden");
+sistemaArea.classList.remove("hidden");
+guiaBusca.classList.remove("hidden");
+painelLogs.classList.remove("hidden");
+carregarLogs();
+setInterval(carregarLogs, 60000);
+}
+
+function extrairTermo(frase, chaves) {
+    for (let c of chaves) {
+        if (frase.includes(c)) return frase.split(c)[1].trim();
+    }
+    return null;
+}
+
+window.consultar = async function() {
+if (!verificarSessao()) { logout(); return; }
+let pergunta = perguntaInput.value.trim().toLowerCase();
+if (!pergunta) return;
+
+respostaDiv.innerHTML = "Consultando base de dados...";
+let termo = pergunta;
+tipoConsultaAtual = "ficha";
+let tipoBusca = "global";
+
+if (pergunta.includes("setor de")) { tipoConsultaAtual = "setor"; termo = extrairTermo(pergunta, ["setor de"]); }
+else if (pergunta.includes("chefe de")) { tipoConsultaAtual = "chefe"; termo = extrairTermo(pergunta, ["chefe de"]); }
+else if (pergunta.includes("cargo de")) { tipoConsultaAtual = "cargo"; termo = extrairTermo(pergunta, ["cargo de"]); }
+else if (pergunta.includes("empresa de")) { tipoConsultaAtual = "empresa"; termo = extrairTermo(pergunta, ["empresa de"]); }
+else if (pergunta.includes("status de")) { tipoConsultaAtual = "status"; termo = extrairTermo(pergunta, ["status de"]); }
+else if (pergunta.includes("equipe de")) { tipoBusca = "equipe"; termo = extrairTermo(pergunta, ["equipe de"]); }
+else if (pergunta.includes("quantos")) { tipoBusca = "contagem"; termo = extrairTermo(pergunta, ["na ", "no ", "da ", "do "]); }
+
+try {
+    const response = await fetch(WEBHOOK_URL);
+    const data = await response.json();
+    let resultados = [];
+
+    if (tipoBusca === "equipe") {
+        resultados = data.filter(f => f.chefe.toLowerCase().includes(termo));
+    } else if (tipoBusca === "contagem") {
+        resultados = data.filter(f => f.setor.toLowerCase().includes(termo) || f.empresa.toLowerCase().includes(termo));
+        return respostaDiv.innerHTML = `📊 Total encontrado: <strong>${resultados.length}</strong>`;
+    } else {
+        resultados = data.filter(f => {
+            let n = f.nome.toLowerCase();
+            let e = f.empresa.toLowerCase();
+            let c = f.cargo.toLowerCase();
+            let s = f.status.toLowerCase();
+            let st = f.setor.toLowerCase();
+            if (termo.length <= 3) {
+                return (e === termo) || (s === termo) || (n.startsWith(termo + " ")) || (n === termo);
+            }
+            return n.includes(termo) || e.includes(termo) || c.includes(termo) || s.includes(termo) || st.includes(termo);
+        });
+    }
+
+    if (!resultados.length) return respostaDiv.innerHTML = "Nenhum registro encontrado.";
+    resultadosGlobais = resultados;
+    paginaAtual = 1;
+    renderizarPagina();
+} catch (e) {
+    respostaDiv.innerHTML = "Erro na conexão.";
+}
+}
+});
 </script>
 </body>
 </html>
