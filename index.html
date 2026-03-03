@@ -56,9 +56,10 @@ button:hover { background: #002244; }
 .update-item { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; font-size: 11px; color: #444; line-height: 1.4; display: flex; align-items: flex-start; gap: 8px; }
 .update-item:last-child { border-bottom: none; }
 .update-icon { font-size: 12px; color: #c9a227; flex-shrink: 0; }
-/* Estilo do botão ver mais dentro do painel */
-.btn-ver-mais-logs { display: none; text-align: center; padding: 10px; font-size: 9px; color: #002b5c; cursor: pointer; background: #f9f9f9; font-weight: bold; border-top: 1px solid #eee; border-radius: 0 0 8px 8px; }
-.btn-ver-mais-logs:hover { background: #f0f0f0; }
+
+/* Botão "Ver Mais" estilizado para ficar abaixo da 5ª atualização */
+.btn-mais-logs { width: 100%; padding: 10px; background: #f9f9f9; color: #002b5c; border: none; border-top: 1px solid #eee; font-size: 10px; font-weight: bold; cursor: pointer; text-align: center; display: none; transition: 0.2s; }
+.btn-mais-logs:hover { background: #eef2f7; color: #c9a227; }
 </style>
 </head>
 
@@ -71,12 +72,12 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div class="gold-line"></div>
 
 <div id="painelAtualizacoes" class="updates-panel hidden">
-    <div class="updates-header" onclick="toggleLogs()">Últimas alterações dos servidores na DGF</div>
+    <div class="updates-header" onclick="toggleLogs()">Últimas alterações na DGF</div>
     <div id="updatesContent" class="updates-content">
         <div id="listaLogs">
             <div class="update-item">Carregando logs...</div>
         </div>
-        <div id="btnVerMaisLogs" class="btn-ver-mais-logs" onclick="expandirLogs()">MOSTRAR MAIS ATUALIZAÇÕES (+)</div>
+        <button id="btnVerMaisLogs" class="btn-mais-logs" onclick="expandirLogs()">+ ATUALIZAÇÕES</button>
     </div>
 </div>
 
@@ -161,18 +162,14 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <script>
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbz6hHK2liVd8K7m0uiOTc-LQz_9AHB6MOp2iyQUvRzkWhUhbd8lVx9DCPdC9C2iK6px/exec";
 const TEMPO_EXPIRACAO = 30 * 60 * 1000;
-let logsMemoria = []; // Variável para guardar os 15 logs recebidos
+let cacheLogs = []; // Armazena os logs brutos da planilha
 
 function toggleLogs() {
-    const content = document.getElementById("updatesContent");
-    content.classList.toggle("open");
-    if (!content.classList.contains("open")) {
-        renderizarLogs(false); // Reseta para 5 ao fechar
-    }
+    document.getElementById("updatesContent").classList.toggle("open");
 }
 
 function expandirLogs() {
-    renderizarLogs(true); // Mostra os 15
+    renderizarInterfaceLogs(true);
 }
 
 function buscaRapida(cargo) {
@@ -185,43 +182,40 @@ async function carregarLogs() {
     if (localStorage.getItem("logado") !== "true") return;
     try {
         const response = await fetch(WEBHOOK_URL + "?getLogs=true&t=" + Date.now());
-        logsMemoria = await response.json();
-        renderizarLogs(false); // Inicia mostrando 5
+        const logs = await response.json();
+        // Inverte para que a última linha da planilha seja a primeira da lista
+        cacheLogs = logs.reverse(); 
+        renderizarInterfaceLogs(false);
     } catch (e) {
         console.error("Erro ao buscar logs:", e);
     }
 }
 
-function renderizarLogs(mostrarTudo) {
+function renderizarInterfaceLogs(mostrarTudo) {
     const lista = document.getElementById("listaLogs");
     const btn = document.getElementById("btnVerMaisLogs");
     
-    if (!logsMemoria || logsMemoria.length === 0) {
+    if (!cacheLogs || cacheLogs.length === 0) {
         lista.innerHTML = '<div class="update-item">Nenhuma alteração recente.</div>';
         btn.style.display = "none";
         return;
     }
 
     const limite = mostrarTudo ? 15 : 5;
-    const logsExibir = logsMemoria.slice(0, limite);
+    const logsParaExibir = cacheLogs.slice(0, limite);
 
-    lista.innerHTML = logsExibir.map(log => {
-        let textoExibir = "";
-        if (log && typeof log === 'object' && log.texto) { textoExibir = log.texto; }
-        else if (log && typeof log === 'object' && log.nome) { textoExibir = `Cadastro de <b>${log.nome}</b> atualizado.`; }
-        else if (typeof log === 'string') { textoExibir = log; }
-        else { textoExibir = "Alteração registrada no servidor."; }
-
+    lista.innerHTML = logsParaExibir.map(log => {
+        let texto = (log && log.texto) ? log.texto : (typeof log === 'string' ? log : "Alteração registrada.");
         return `
             <div class="update-item">
                 <span class="update-icon">●</span>
-                <span>${textoExibir}</span>
+                <span>${texto}</span>
             </div>
         `;
     }).join('');
 
-    // Mostra o botão se houver mais de 5 logs e não estivermos mostrando tudo
-    if (logsMemoria.length > 5 && !mostrarTudo) {
+    // Mostra o botão somente se houver mais de 5 logs e não estivermos exibindo tudo
+    if (cacheLogs.length > 5 && !mostrarTudo) {
         btn.style.display = "block";
     } else {
         btn.style.display = "none";
