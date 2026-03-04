@@ -6,7 +6,26 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- ESTILOS ORIGINAIS (MANTIDOS E REFORÇADOS) --- */
+/* --- ESTILO DA LOGO DO GOVERNO (MARCA D'ÁGUA) --- */
+body::before {
+    content: "";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    /* Link alternativo direto para a logo oficial */
+    background-image: url('https://logos-download.com/wp-content/uploads/2017/02/Governo_do_Estado_de_Pernambuco_logo.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 500px; /* Ajuste o tamanho aqui se achar necessário */
+    opacity: 0.08; /* Sutil, mas visível */
+    z-index: -1; /* Garante que fique atrás de tudo */
+    pointer-events: none;
+}
+
+/* --- SEUS ESTILOS ORIGINAIS (MANTIDOS INTEGRALMENTE) --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { 
     font-family: 'Segoe UI', sans-serif; 
@@ -14,25 +33,6 @@ body {
     background-attachment: fixed;
     min-height: 100vh; position: relative; 
 }
-
-/* --- ADIÇÃO DA LOGO DO GOVERNO NO FUNDO (ESTILO MARCA D'ÁGUA) --- */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    /* Link da Logo Oficial do Governo de PE */
-    background-image: url('https://upload.wikimedia.org/wikipedia/pt/thumb/2/25/Governo_de_Pernambuco.png/1200px-Governo_de_Pernambuco.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 600px; /* Tamanho da logo no fundo */
-    opacity: 0.06; /* Intensidade da marca d'água (6%) */
-    z-index: 0;
-    pointer-events: none;
-}
-
 .topbar { background: #002b5c; color: white; padding: 18px 30px; font-size: 18px; font-weight: 600; }
 .topbar small { display: block; font-size: 12px; opacity: 0.8; }
 .gold-line { height: 4px; background: #c9a227; }
