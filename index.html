@@ -19,61 +19,91 @@ body {
 .topbar small { display: block; font-size: 12px; opacity: 0.8; }
 .gold-line { height: 4px; background: #c9a227; }
 .main { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 110px); padding: 20px; }
-/* ADIÇÃO: Glassmorphism leve no container */
-.container { background: rgba(255, 255, 255, 0.97); padding: 40px; border-radius: 12px; width: 460px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); z-index: 2; transition: width 0.4s ease; }
-.container.modo-sistema { width: 950px; }
+
+/* AJUSTE PROFISSIONAL: Glassmorphism e Sombra Suave */
+.container { 
+    background: rgba(255, 255, 255, 0.98); 
+    padding: 40px; 
+    border-radius: 16px; 
+    width: 460px; 
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12); 
+    border: 1px solid rgba(255,255,255,0.5);
+    z-index: 2; 
+    transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+}
+.container.modo-sistema { width: 1000px; }
+
 .titulo-area { text-align: center; margin-bottom: 25px; }
-.logo-titulo { height: 70px; margin-bottom: 10px; }
-h2 { color: #002b5c; font-size: 18px; }
-input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 12px; font-size: 14px; }
-button { width: 100%; padding: 12px; border-radius: 6px; border: none; background: #003366; color: white; font-weight: 600; cursor: pointer; margin-bottom: 8px; transition: 0.2s; }
-button:hover { background: #002244; }
-.logout { background: #8b0000; margin-top: 10px; }
+.logo-titulo { height: 70px; margin-bottom: 10px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+h2 { color: #002b5c; font-size: 18px; letter-spacing: -0.5px; }
+
+/* AJUSTE PROFISSIONAL: Inputs e Botões */
+input { 
+    width: 100%; padding: 14px; border-radius: 8px; border: 1px solid #d1d9e6; 
+    margin-bottom: 15px; font-size: 14px; transition: 0.3s; background: #fdfdfd;
+}
+input:focus { border-color: #002b5c; box-shadow: 0 0 0 3px rgba(0,43,92,0.1); outline: none; }
+
+button { 
+    width: 100%; padding: 14px; border-radius: 8px; border: none; 
+    background: #002b5c; color: white; font-weight: 600; cursor: pointer; 
+    margin-bottom: 8px; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,43,92,0.2);
+}
+button:hover { background: #001a38; transform: translateY(-1px); box-shadow: 0 6px 15px rgba(0,43,92,0.3); }
+
+.logout { background: #d32f2f; margin-top: 15px; }
+.logout:hover { background: #b71c1c; }
+
 .hidden { display: none !important; }
-.response { margin-top: 15px; background: #f1f3f6; padding: 15px; border-radius: 8px; min-height: 60px; font-size: 14px; border-left: 4px solid #002b5c; height: 350px; overflow-y: auto; }
-.footer { text-align: center; padding: 15px; font-size: 12px; color: #555; background: #e9edf2; position: fixed; bottom: 0; width: 100%; z-index: 10; }
-.legenda-buscas { position: fixed; bottom: 65px; left: 20px; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #c9a227; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); font-size: 12px; color: #333; max-width: 240px; z-index: 5; }
-.legenda-buscas h4 { color: #002b5c; margin-bottom: 8px; font-size: 13px; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-.legenda-buscas ul { list-style: none; }
-.legenda-buscas li { margin-bottom: 6px; line-height: 1.4; }
-.foto-servidor { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 2px solid #002b5c; float: right; margin-left: 10px; background: #fff; }
-.pass-container { position: relative; width: 100%; }
-.toggle-eye { position: absolute; right: 12px; top: 12px; cursor: pointer; color: #777; font-size: 18px; z-index: 10; background: transparent; user-select: none; }
-.card-resultado { border-bottom: 1px solid #ddd; padding: 10px 0; margin-bottom: 10px; overflow: hidden; }
-.info-item { display: block; margin-bottom: 4px; line-height: 1.4; }
-.flex-sistema { display: flex; gap: 30px; align-items: flex-start; text-align: left; }
-.col-busca { flex: 1.2; }
-.col-organograma { flex: 0.8; background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid #c9a227; }
-.org-titulo { color: #002b5c; font-size: 14px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-.org-item { background: white; padding: 10px; border-radius: 6px; margin-bottom: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #002b5c; cursor: pointer; transition: 0.2s; }
-.org-item:hover { background: #edf2f7; transform: translateX(5px); }
-.org-item small { display: block; color: #c9a227; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-.org-item span { font-size: 13px; color: #333; font-weight: 600; }
-.recuo-1 { margin-left: 0; }
-.recuo-2 { margin-left: 15px; }
-.recuo-3 { margin-left: 30px; }
+
+/* AJUSTE PROFISSIONAL: Área de Resposta */
+.response { 
+    margin-top: 20px; background: #f8fafc; padding: 20px; border-radius: 12px; 
+    min-height: 60px; font-size: 14px; border: 1px solid #e2e8f0; border-left: 5px solid #002b5c; 
+    height: 400px; overflow-y: auto; scrollbar-width: thin;
+}
+
+.footer { 
+    text-align: center; padding: 15px; font-size: 11px; color: #64748b; 
+    background: rgba(233, 237, 242, 0.9); backdrop-filter: blur(5px);
+    position: fixed; bottom: 0; width: 100%; z-index: 10; border-top: 1px solid #d1d9e6;
+}
+
+/* AJUSTE PROFISSIONAL: Legendas e Painéis */
+.legenda-buscas { 
+    position: fixed; bottom: 80px; left: 25px; background: white; padding: 20px; 
+    border-radius: 12px; border-left: 5px solid #c9a227; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+    font-size: 12px; color: #334155; max-width: 260px; z-index: 5; 
+}
+
+.foto-servidor { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #e2e8f0; float: right; margin-left: 15px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+.card-resultado { border-bottom: 1px solid #edf2f7; padding: 15px 0; margin-bottom: 10px; transition: 0.2s; }
+.card-resultado:hover { background: rgba(0,43,92,0.01); }
+
+.col-organograma { background: #f1f5f9; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; }
+.org-item { 
+    background: white; padding: 12px 16px; border-radius: 8px; margin-bottom: 10px; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04); border-left: 4px solid #002b5c; 
+    cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+.org-item:hover { background: #fff; transform: translateX(8px); box-shadow: 0 4px 12px rgba(0,43,92,0.1); border-left-color: #c9a227; }
 
 /* PAINEL DE ALTERAÇÕES */
-.updates-panel { position: fixed; top: 65px; right: 20px; width: 280px; background: white; border-radius: 8px; border-top: 4px solid #c9a227; box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 100; }
-.updates-header { background: #f8f9fa; padding: 12px; font-weight: bold; color: #002b5c; font-size: 10px; text-transform: uppercase; text-align: center; cursor: pointer; transition: background 0.2s; border-radius: 8px 8px 0 0; display: flex; justify-content: center; align-items: center; gap: 8px; }
-.updates-header:hover { background: #eef2f7; }
-.updates-header::after { content: ' ▼'; font-size: 8px; }
-.updates-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: white; border-radius: 0 0 8px 8px; }
-.updates-content.open { max-height: 500px; border-top: 1px solid #eee; overflow-y: auto; }
-.update-item { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; font-size: 11px; color: #444; line-height: 1.4; display: flex; align-items: flex-start; gap: 8px; }
-.update-icon { font-size: 12px; color: #c9a227; flex-shrink: 0; }
-.btn-mais-logs { width: 100%; padding: 10px; background: #f9f9f9; color: #002b5c; border: none; border-top: 1px solid #eee; font-size: 10px; font-weight: bold; cursor: pointer; text-align: center; display: none; transition: 0.2s; }
+.updates-panel { position: fixed; top: 80px; right: 25px; width: 300px; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 100; overflow: hidden; border: 1px solid #e2e8f0; }
+.updates-header { background: #002b5c; padding: 14px; font-weight: bold; color: white; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; text-align: center; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
+.updates-header::after { content: '▾'; font-size: 12px; margin-left: 5px; }
 
-/* --- NOVOS ESTILOS ADICIONAIS --- */
-.status-dashboard { position: fixed; top: 65px; left: 20px; width: 220px; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #002b5c; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 10; }
-.status-dashboard h3 { font-size: 20px; color: #002b5c; margin-bottom: 2px; }
-.status-dashboard p { font-size: 10px; color: #c9a227; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
-.info-stats { border-top: 1px solid #eee; padding-top: 10px; font-size: 11px; color: #555; }
+/* --- NOVOS ESTILOS ADICIONAIS (LAYOUT DASHBOARD) --- */
+.status-dashboard { position: fixed; top: 80px; left: 25px; width: 240px; background: white; padding: 20px; border-radius: 12px; border-top: 5px solid #002b5c; box-shadow: 0 10px 30px rgba(0,0,0,0.08); z-index: 10; }
+.status-dashboard h3 { font-size: 24px; color: #002b5c; margin-bottom: 2px; font-variant-numeric: tabular-nums; }
+.status-dashboard p { font-size: 10px; color: #c9a227; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px; }
 
-.links-uteis { position: fixed; bottom: 65px; right: 20px; width: 220px; background: white; padding: 15px; border-radius: 8px; border-right: 4px solid #c9a227; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); z-index: 10; }
-.links-uteis h4 { font-size: 11px; color: #002b5c; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-.btn-link { display: block; width: 100%; padding: 8px; margin-bottom: 5px; background: #f8f9fa; border: 1px solid #eee; border-radius: 4px; color: #444; text-decoration: none; font-size: 11px; font-weight: 600; text-align: center; transition: 0.2s; }
-.btn-link:hover { background: #002b5c; color: white; }
+.links-uteis { position: fixed; bottom: 80px; right: 25px; width: 240px; background: white; padding: 20px; border-radius: 12px; border-top: 5px solid #c9a227; box-shadow: 0 10px 30px rgba(0,0,0,0.08); z-index: 10; }
+.btn-link { 
+    display: block; width: 100%; padding: 10px; margin-bottom: 8px; background: #f8fafc; border: 1px solid #e2e8f0; 
+    border-radius: 6px; color: #475569; text-decoration: none; font-size: 11px; font-weight: 700; text-align: center; transition: 0.3s; 
+}
+.btn-link:hover { background: #002b5c; color: white; border-color: #002b5c; transform: translateY(-2px); }
 </style>
 </head>
 
@@ -81,44 +111,43 @@ button:hover { background: #002244; }
 
 <div class="topbar">
 Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
-<small>Sistema Interno Oficial</small>
+<small>Sistema Interno de Gestão de Dados</small>
 </div>
 <div class="gold-line"></div>
 
 <div id="statusDashboard" class="status-dashboard hidden">
     <h3 id="relogio">00:00:00</h3>
-    <p>Acesso Autorizado</p>
-    <div class="info-stats">
-        <div>📍 Unidade: <strong>DGF-REC</strong></div>
-        <div style="margin-top: 5px;">👥 Base: <strong id="countServidores">...</strong> servidores</div>
+    <p>● Sessão Ativa</p>
+    <div class="info-stats" style="border-top: 1px solid #f1f5f9; padding-top: 15px; font-size: 11px; color: #64748b;">
+        <div style="margin-bottom: 8px;">📍 Unidade: <strong style="color:#002b5c">DGF - SEDE</strong></div>
+        <div>👥 Base Online: <strong id="countServidores" style="color:#002b5c">...</strong> registros</div>
     </div>
 </div>
 
 <div id="linksDashboard" class="links-uteis hidden">
-    <h4>Acessos Rápidos</h4>
+    <h4 style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px;">Sistemas Integrados</h4>
     <a href="https://portaldoservidor.pe.gov.br/" target="_blank" class="btn-link">Portal do Servidor</a>
-    <a href="https://efisco.sefaz.pe.gov.br/" target="_blank" class="btn-link">E-Fisco</a>
+    <a href="https://efisco.sefaz.pe.gov.br/" target="_blank" class="btn-link">E-Fisco Pernambuco</a>
     <a href="https://www.sefaz.pe.gov.br/" target="_blank" class="btn-link">SEFAZ-PE</a>
 </div>
 
 <div id="painelAtualizacoes" class="updates-panel hidden">
-    <div class="updates-header" onclick="toggleLogs()">Últimas alterações na DGF</div>
+    <div class="updates-header" onclick="toggleLogs()">Log de Alterações</div>
     <div id="updatesContent" class="updates-content">
         <div id="listaLogs">
-            <div class="update-item">Carregando logs...</div>
+            <div class="update-item">Carregando dados...</div>
         </div>
-        <button id="btnVerMaisLogs" class="btn-mais-logs" onclick="expandirLogs()">+ ATUALIZAÇÕES</button>
+        <button id="btnVerMaisLogs" class="btn-mais-logs" onclick="expandirLogs()">VER HISTÓRICO COMPLETO</button>
     </div>
 </div>
 
 <div id="guiaBusca" class="legenda-buscas hidden">
-<h4>💡 Como buscar</h4>
-<ul>
-<li>• <b>Por Nome:</b> Digite apenas o nome.</li>
-<li>• <b>Empresa/Status:</b> "RM", "SES-PE", "Comissionados".</li>
-<li>• <b>Específicos:</b> "setor de [nome]", "cargo de [nome]".</li>
-<li>• <b>Equipe:</b> "equipe de [nome do chefe]".</li>
-<li>• <b>Contagem:</b> "quantos na [empresa/setor]".</li>
+<h4 style="color:#002b5c; font-size: 12px; margin-bottom: 12px;">🔍 AJUDA DE BUSCA</h4>
+<ul style="list-style: none; color: #475569; line-height: 1.6;">
+<li style="margin-bottom: 8px;">• <b>Nome:</b> Digite o nome completo ou parte dele.</li>
+<li style="margin-bottom: 8px;">• <b>Setor:</b> Use "setor de [nome]".</li>
+<li style="margin-bottom: 8px;">• <b>Gestão:</b> Use "equipe de [chefe]".</li>
+<li>• <b>Total:</b> Use "quantos na [empresa]".</li>
 </ul>
 </div>
 
@@ -128,14 +157,15 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div id="loginArea">
 <div class="titulo-area">
 <img src="brasao-dgf.png" alt="Brasão DGF" class="logo-titulo">
-<h2>Sistema Integrado de Consulta de Servidores - DGF</h2>
+<h2 style="margin-top: 10px; font-weight: 700;">Acesso Institucional</h2>
+<p style="font-size: 13px; color: #64748b; margin-top: 5px;">Portal Restrito de Consulta DGF</p>
 </div>
-<input type="text" id="usuario" placeholder="Usuário institucional">
+<input type="text" id="usuario" placeholder="CPF ou Usuário">
 <div class="pass-container">
-<input type="password" id="senha" placeholder="Senha" style="padding-right: 40px;">
+<input type="password" id="senha" placeholder="Senha de acesso" style="padding-right: 40px;">
 <span class="toggle-eye" onclick="verSenha('senha')">👁️</span>
 </div>
-<button onclick="login()">Entrar no Sistema</button>
+<button onclick="login()">Autenticar Usuário</button>
 </div>
 
 <div id="trocaSenhaArea" class="hidden">
@@ -155,7 +185,8 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div id="sistemaArea" class="hidden">
     <div class="flex-sistema">
         <div class="col-busca">
-            <h2>Assistente de Consulta</h2>
+            <h2 style="margin-bottom: 5px;">Assistente de Consulta</h2>
+            <p style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Digite sua pesquisa abaixo para filtrar a base de dados.</p>
             <input type="text" id="pergunta" placeholder="O que deseja consultar hoje?">
             <button onclick="consultar()">Consultar Sistema</button>
             <button class="logout" onclick="logout()">Encerrar Sessão</button>
@@ -187,15 +218,14 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 </div>
 </div>
 
-<div class="footer">© 2026 - Diretoria Geral de Finanças (DGF) • Uso interno e restrito</div>
+<div class="footer">© 2026 - DIRETORIA GERAL DE FINANÇAS (DGF) • Ambientes de Segurança Nível 2</div>
 
 <script>
-// --- TODA A SUA LÓGICA ORIGINAL PRESERVADA ---
+/* SUA LÓGICA ORIGINAL (SEM ALTERAÇÃO) */
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby_2RVDaGqMWGs_Ybd2sftswVU2EF4YYa5Qv3mXiLKidMnNKRhDSmRis0zbSmB6NWT2/exec";
 const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 let cacheLogs = []; 
 
-// NOVO: Função Relógio
 function atualizarRelogio() {
     const agora = new Date();
     document.getElementById("relogio").innerText = agora.toLocaleTimeString('pt-BR');
@@ -252,7 +282,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const trocaSenhaArea = document.getElementById("trocaSenhaArea");
     const guiaBusca = document.getElementById("guiaBusca");
     const painelLogs = document.getElementById("painelAtualizacoes");
-    // ADIÇÃO: Seleção dos novos painéis
     const statusDashboard = document.getElementById("statusDashboard");
     const linksDashboard = document.getElementById("linksDashboard");
 
@@ -358,17 +387,14 @@ document.addEventListener("DOMContentLoaded", function() {
         sistemaArea.classList.remove("hidden");
         guiaBusca.classList.remove("hidden");
         painelLogs.classList.remove("hidden"); 
-        // NOVO: Mostrar painéis adicionais
         statusDashboard.classList.remove("hidden");
         linksDashboard.classList.remove("hidden");
         perguntaInput.focus();
         carregarLogs();
         setInterval(carregarLogs, 60000); 
-        // NOVO: Buscar contagem inicial
         carregarContagemServidores();
     }
 
-    // NOVO: Função para o contador do painel esquerdo
     async function carregarContagemServidores() {
         try {
             const res = await fetch(WEBHOOK_URL);
@@ -412,7 +438,7 @@ document.addEventListener("DOMContentLoaded", function() {
         try {
             const response = await fetch(WEBHOOK_URL);
             const data = await response.json();
-            document.getElementById("countServidores").innerText = data.length; // Atualiza contador na busca
+            document.getElementById("countServidores").innerText = data.length; 
             let resultados = [];
             if (tipoBusca === "equipe") { resultados = data.filter(f => f.chefe.toLowerCase().includes(termo)); } 
             else if (tipoBusca === "contagem") {
