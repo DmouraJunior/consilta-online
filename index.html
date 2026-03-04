@@ -6,11 +6,15 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- ESTILOS ORIGINAIS (MANTIDOS E REFORÇADOS) --- */
+/* --- ESTILOS ORIGINAIS PRESERVADOS --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { 
     font-family: 'Segoe UI', sans-serif; 
-    background: radial-gradient(circle at top left, #f0f4f8 0%, #d9e2ec 100%);
+    /* AJUSTE: Fundo com Gradiente original + Logo do Governo (Marca d'água) */
+    background: 
+        linear-gradient(rgba(240, 244, 248, 0.95), rgba(217, 226, 236, 0.95)), /* Gradiente suave sobre o logo */
+        url('https://images.seeklogo.com/logo-png/48/1/governo-de-pernambuco-logo-png_seeklogo-481035.png') no-repeat center center; /* Caminho para o logo */
+    background-size: cover, 40%; /* Gradiente cobre tudo; Logo ajustado para 40% da tela */
     background-attachment: fixed;
     min-height: 100vh; position: relative; 
 }
@@ -66,24 +70,6 @@ button { width: 100%; padding: 14px; border-radius: 8px; border: none; backgroun
 
 .footer { text-align: center; padding: 15px; font-size: 11px; color: #64748b; background: rgba(233, 237, 242, 0.9); position: fixed; bottom: 0; width: 100%; border-top: 1px solid #d1d9e6; }
 .hidden { display: none !important; }
-
-/* ADIÇÃO DA MARCA D'ÁGUA DO GOVERNO (SEM ALTERAR AS LINHAS ACIMA) */
-body::before {
-    content: "";
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 600px;
-    height: 600px;
-    background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Bandeira_de_Pernambuco.svg/800px-Bandeira_de_Pernambuco.svg.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
-    opacity: 0.05; /* Bem sutil para não atrapalhar a leitura */
-    z-index: 0;
-    pointer-events: none;
-}
 </style>
 </head>
 
@@ -104,7 +90,7 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 </div>
 
 <div id="linksDashboard" class="links-uteis hidden">
-    <h4 style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 12px;">Sistemas Integrados</h4>
+    <h4 style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px;">Sistemas Integrados</h4>
     <a href="https://share.google/hQLWcsVQCgSu0bL1C" target="_blank" style="text-decoration:none; color:#475569; font-size:11px; font-weight:700; display:block; padding: 8px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:5px; text-align:center;">Portal do Servidor</a>
     <a href="https://efisco.sefaz.pe.gov.br/" target="_blank" style="text-decoration:none; color:#475569; font-size:11px; font-weight:700; display:block; padding: 8px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:5px; text-align:center;">E-Fisco Pernambuco</a>
     <a href="https://www.sefaz.pe.gov.br/" target="_blank" style="text-decoration:none; color:#475569; font-size:11px; font-weight:700; display:block; padding: 8px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; text-align:center;">SEFAZ-PE</a>
