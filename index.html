@@ -6,7 +6,7 @@
 <title>Sistema Integrado de Consulta de Servidores - DGF</title>
 
 <style>
-/* --- ESTILOS ORIGINAIS (MANTIDOS E REFORÇADOS) --- */
+/* --- ESTILOS GERAIS (MANTIDOS) --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { 
     font-family: 'Segoe UI', sans-serif; 
@@ -29,39 +29,78 @@ body {
 }
 .container.modo-sistema { width: 1050px; }
 
-/* LAYOUT DO SISTEMA */
+/* LAYOUT DO SISTEMA - NOVA ESTRUTURA */
 .flex-sistema { display: flex; gap: 30px; align-items: flex-start; }
-.col-busca { flex: 1.3; }
+
+/* Coluna da Busca - Enquadrada totalmente à esquerda */
+.col-busca { flex: 1; display: flex; flex-direction: column; align-items: flex-start; }
+.col-busca h2, .col-busca p, .col-busca input, .col-busca button { width: 100%; text-align: left; }
+
+/* Coluna do Organograma - Movida para a direita */
 .col-organograma { flex: 0.7; background: #f1f5f9; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; }
 
-/* LISTA DE RESULTADOS VERTICAL */
-.response { 
-    margin-top: 20px; background: #f8fafc; padding: 20px; border-radius: 12px; 
-    min-height: 60px; font-size: 14px; border: 1px solid #e2e8f0; border-left: 5px solid #002b5c; 
-    height: 450px; overflow-y: auto; 
+/* EFEITO SANFONA NA RESPOSTA DA BUSCA */
+.response-container {
+    width: 100%;
+    margin-top: 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    border-left: 5px solid #002b5c;
+    overflow: hidden; /* Necessário para o efeito */
 }
+
+.response-header {
+    background: #f1f5f9;
+    padding: 10px 20px;
+    font-weight: bold;
+    color: #002b5c;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.response-content {
+    max-height: 0; /* Começa fechado */
+    overflow-y: auto;
+    transition: max-height 0.4s ease-out;
+    padding: 0 20px; /* Padding vertical zerado quando fechado */
+}
+
+/* Classe para abrir a sanfona da resposta */
+.response-content.open {
+    max-height: 400px; /* Altura máxima quando aberto */
+    padding: 20px;
+}
+
 .card-resultado { border-bottom: 1px solid #edf2f7; padding: 15px 0; display: block; clear: both; width: 100%; }
 .info-item { display: block; margin-bottom: 4px; line-height: 1.4; }
 
 /* COMPONENTES LATERAIS */
-.status-dashboard { position: fixed; top: 80px; left: 25px; width: 240px; background: white; padding: 20px; border-radius: 12px; border-top: 5px solid #002b5c; box-shadow: 0 10px 30px rgba(0,0,0,0.08); z-index: 10; }
+.status-dashboard { position: fixed; top: 80px; left: 25px; width: 240px; background: white; padding: 20px; border-radius: 12px; border-top: 5px solid #002b5c; box-shadow: 0 10px 30px rgba(0,0,0,0.08); z-index: 10; display: flex; flex-direction: column; align-items: flex-start;}
+
+/* ESTILO DO RELÓGIO NO TOPO DO DASHBOARD */
+#relogio { font-size: 24px; color: #002b5c; margin-bottom: 5px; order: -1; } /* order: -1 coloca no topo */
+
 .links-uteis { position: fixed; bottom: 80px; right: 25px; width: 240px; background: white; padding: 20px; border-radius: 12px; border-top: 5px solid #c9a227; box-shadow: 0 10px 30px rgba(0,0,0,0.08); z-index: 10; }
 .legenda-buscas { position: fixed; bottom: 80px; left: 25px; background: white; padding: 20px; border-radius: 12px; border-left: 5px solid #c9a227; box-shadow: 0 10px 30px rgba(0,0,0,0.08); font-size: 12px; width: 260px; }
 
-/* LOGS */
+/* LOGS (MANTIDOS) */
 .updates-panel { position: fixed; top: 80px; right: 25px; width: 300px; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 100; overflow: hidden; border: 1px solid #e2e8f0; }
 .updates-header { background: #002b5c; padding: 14px; font-weight: bold; color: white; font-size: 10px; text-transform: uppercase; text-align: center; cursor: pointer; }
 .updates-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
 .updates-content.open { max-height: 400px; border-top: 1px solid #eee; overflow-y: auto; }
 .update-item { padding: 10px; border-bottom: 1px solid #f0f0f0; font-size: 11px; display: flex; gap: 8px; }
 
-/* INPUTS E ORGANOGRAMA */
+/* INPUTS E ORGANOGRAMA (MANTIDOS) */
 input { width: 100%; padding: 14px; border-radius: 8px; border: 1px solid #d1d9e6; margin-bottom: 15px; }
 button { width: 100%; padding: 14px; border-radius: 8px; border: none; background: #002b5c; color: white; font-weight: 600; cursor: pointer; margin-bottom: 8px; }
-.logout { background: #d32f2f; margin-top: 15px; }
+.logout { background: #d32f2f; margin-top: 15px; width: auto; padding: 10px 20px; align-self: flex-start;}
 .org-item { background: white; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #002b5c; cursor: pointer; transition: 0.3s; }
 .org-item span { display: flex; align-items: center; gap: 8px; font-weight: 600; }
-.pass-container { position: relative; }
+.pass-container { position: relative; width: 100%;}
 .toggle-eye { position: absolute; right: 15px; top: 14px; cursor: pointer; opacity: 0.5; }
 
 .footer { text-align: center; padding: 15px; font-size: 11px; color: #64748b; background: rgba(233, 237, 242, 0.9); position: fixed; bottom: 0; width: 100%; border-top: 1px solid #d1d9e6; }
@@ -78,11 +117,8 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
 <div class="gold-line"></div>
 
 <div id="statusDashboard" class="status-dashboard hidden">
-    <h3 id="relogio" style="font-size: 24px; color: #002b5c;">00:00:00</h3>
+    <h3 id="relogio">00:00:00</h3>
     <p style="font-size: 10px; color: #c9a227; font-weight: 800;">● Sessão Ativa</p>
-    <div style="border-top: 1px solid #f1f5f9; padding-top: 10px; font-size: 11px; color: #64748b;">
-        👥 Base Online: <strong id="countServidores" style="color:#002b5c">...</strong> registros
-    </div>
 </div>
 
 <div id="linksDashboard" class="links-uteis hidden">
@@ -147,7 +183,16 @@ Secretaria Estadual de Pernambuco - Diretoria Geral de Finanças
                     <p style="font-size: 12px; color: #64748b; margin-bottom: 15px;">Filtre a base de dados da DGF abaixo.</p>
                     <input type="text" id="pergunta" placeholder="O que deseja consultar hoje?">
                     <button onclick="consultar()">Consultar Sistema</button>
-                    <div class="response" id="resposta"></div>
+                    
+                    <div class="response-container">
+                        <div class="response-header" onclick="toggleResponse()">
+                            <span>Resultados da Consulta</span>
+                            <span id="response-icon">▼</span>
+                        </div>
+                        <div class="response-content" id="resposta">
+                            </div>
+                    </div>
+
                     <button class="logout" onclick="logout()">Encerrar Sessão</button>
                 </div>
 
@@ -191,6 +236,21 @@ setInterval(atualizarRelogio, 1000);
 
 function toggleLogs() { document.getElementById("updatesContent").classList.toggle("open"); }
 function expandirLogs() { renderizarInterfaceLogs(true); }
+
+/* NOVA FUNÇÃO PARA EFEITO SANFONA NA RESPOSTA */
+function toggleResponse(forceOpen = false) {
+    const content = document.getElementById("updatesContent"); // ID incorreto no original? Ajustado para 'resposta'
+    const responseContent = document.getElementById("resposta");
+    const icon = document.getElementById("response-icon");
+    
+    if (forceOpen || !responseContent.classList.contains("open")) {
+        responseContent.classList.add("open");
+        icon.innerText = "▲";
+    } else {
+        responseContent.classList.remove("open");
+        icon.innerText = "▼";
+    }
+}
 
 function buscaRapida(cargo) {
     const input = document.getElementById("pergunta");
@@ -307,6 +367,9 @@ document.addEventListener("DOMContentLoaded", function() {
         if (fim < resultadosGlobais.length) html += `<button style="width:60px; display:inline-block; margin: 0 5px;" onclick="proximaPagina()">➡️</button>`;
         html += `</div>`;
         respostaDiv.innerHTML = html;
+        
+        /* AJUSTE: Abre a sanfona automaticamente ao renderizar resultados */
+        toggleResponse(true); 
     }
 
     window.proximaPagina = function() { paginaAtual++; renderizarPagina(); }
@@ -346,15 +409,6 @@ document.addEventListener("DOMContentLoaded", function() {
         perguntaInput.focus();
         carregarLogs();
         setInterval(carregarLogs, 60000); 
-        carregarContagemServidores();
-    }
-
-    async function carregarContagemServidores() {
-        try {
-            const res = await fetch(WEBHOOK_URL);
-            const data = await res.json();
-            document.getElementById("countServidores").innerText = data.length;
-        } catch(e) {}
     }
 
     window.logout = function() { localStorage.removeItem("logado"); localStorage.removeItem("tempoLogin"); location.reload(); }
@@ -377,6 +431,10 @@ document.addEventListener("DOMContentLoaded", function() {
         let pergunta = perguntaInput.value.trim().toLowerCase();
         if (!pergunta) return;
         respostaDiv.innerHTML = "Consultando base de dados...";
+        
+        /* AJUSTE: Garante que a sanfona abra para mostrar "Consultando..." */
+        toggleResponse(true);
+
         let termo = pergunta;
         tipoConsultaAtual = "ficha";
         let tipoBusca = "global";
@@ -392,7 +450,6 @@ document.addEventListener("DOMContentLoaded", function() {
         try {
             const response = await fetch(WEBHOOK_URL);
             const data = await response.json();
-            document.getElementById("countServidores").innerText = data.length; 
             let resultados = [];
             if (tipoBusca === "equipe") { resultados = data.filter(f => f.chefe.toLowerCase().includes(termo)); } 
             else if (tipoBusca === "contagem") {
