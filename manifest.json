@@ -1,0 +1,17 @@
+{
+  "name": "Sistema DGF - Consulta",
+  "short_name": "DGF",
+  "description": "Sistema Integrado de Consulta de Servidores - DGF",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#002b5c",
+  "theme_color": "#002b5c",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1087/1087080.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
