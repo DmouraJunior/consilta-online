@@ -7,6 +7,19 @@
 
 <style>
 /* --- ESTILOS AJUSTADOS PARA ENCAIXE NA TELA --- */
+    /* Forçar empilhamento em telas pequenas */
+@media screen and (max-width: 600px) {
+    .container.modo-sistema {
+        display: block !important; /* Força o fim das colunas lado a lado */
+        width: 95% !important;
+        margin: 10px auto !important;
+    }
+    .col-sistema-principal, .col-dashboard-lateral {
+        width: 100% !important;
+        display: block !important;
+        margin-bottom: 20px !important;
+    }
+}
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { 
     font-family: 'Segoe UI', sans-serif; 
