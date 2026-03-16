@@ -79,11 +79,11 @@ body::before {
     background: rgba(255,255,255,0.1); 
     border: 1px solid rgba(255,255,255,0.2); 
     color: white; 
-    padding: 5px 0; /* Remove padding lateral, mantém vertical */
-    width: 40px; /* Largura fixa e pequena */
+    padding: 5px 0; 
+    width: 40px; 
     border-radius: 4px; 
     cursor: pointer; 
-    font-size: 12px; /* Mantém o tamanho do emoji */
+    font-size: 12px; 
     font-weight: 400;
     display: flex;
     justify-content: center;
@@ -173,7 +173,7 @@ button { width: 100%; padding: 14px; border-radius: 8px; border: none; backgroun
         
         <div id="loginArea">
             <div style="text-align: center; margin-bottom: 25px;">
-                <img src="brasao-dgf.png" alt="DGF" style="height: 70px;">
+                <img src="brasao-gov.png" alt="DGF" style="height: 70px;">
                 <h2 style="margin-top: 10px;">Acesso Institucional</h2>
             </div>
             <input type="text" id="usuario" placeholder="CPF ou Usuário">
@@ -464,7 +464,6 @@ document.addEventListener("DOMContentLoaded", function() {
         let pergunta = perguntaInput.value.trim().toLowerCase();
         if (!pergunta) return;
         
-        // MOSTRAR SPINNER E LIMPAR RESPOSTA
         document.getElementById("spinner").style.display = "block";
         respostaDiv.innerHTML = "";
 
@@ -484,7 +483,6 @@ document.addEventListener("DOMContentLoaded", function() {
             const response = await fetch(WEBHOOK_URL);
             const data = await response.json();
             
-            // ESCONDER SPINNER APÓS RECEBER DADOS
             document.getElementById("spinner").style.display = "none";
 
             let resultados = [];
