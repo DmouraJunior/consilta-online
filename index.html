@@ -69,25 +69,29 @@ body::before {
     z-index: 0;
 }
 
-.topbar { background: var(--topbar); color: white; padding: 8px 30px; font-size: 15px; font-weight: 600; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
-.topbar .titulo-repo { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar { background: var(--topbar); color: white; padding: 12px 30px; font-size: 15px; font-weight: 600; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+.topbar .titulo-repo { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; }
 .topbar small { display: inline; font-size: 11px; opacity: 0.7; margin-left: 8px; font-weight: 400; }
 .gold-line { height: 4px; background: #c9a227; flex-shrink: 0; z-index: 10; }
 
-/* BOTÃO DARK MODE ULTRA REDUZIDO */
+/* BOTÃO DARK MODE MENOR EM LARGURA, MAS COM ALTURA ORIGINAL */
 .theme-toggle { 
-    background: transparent; 
+    background: rgba(255,255,255,0.1); 
     border: 1px solid rgba(255,255,255,0.2); 
     color: white; 
-    padding: 2px 6px; 
-    border-radius: 3px; 
+    padding: 5px 0; /* Remove padding lateral, mantém vertical */
+    width: 40px; /* Largura fixa e pequena */
+    border-radius: 4px; 
     cursor: pointer; 
-    font-size: 9px; 
+    font-size: 12px; /* Mantém o tamanho do emoji */
     font-weight: 400;
-    opacity: 0.6;
-    transition: opacity 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.8;
+    transition: opacity 0.2s, background 0.2s;
 }
-.theme-toggle:hover { opacity: 1; background: rgba(255,255,255,0.05); }
+.theme-toggle:hover { opacity: 1; background: rgba(255,255,255,0.15); }
 
 /* SPINNER */
 #spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(0,43,92,0.1); border-top: 3px solid #c9a227; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 10px auto; }
@@ -160,7 +164,7 @@ button { width: 100%; padding: 14px; border-radius: 8px; border: none; backgroun
     <div class="titulo-repo">
         Secretaria Estadual de Pernambuco - DGF <small>| Sistema Interno de Gestão de Dados</small>
     </div>
-    <button class="theme-toggle" onclick="toggleDarkMode()">🌓 TEMA</button>
+    <button class="theme-toggle" onclick="toggleDarkMode()" title="Alternar Tema">🌓</button>
 </div>
 <div class="gold-line"></div>
 
@@ -496,7 +500,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     return n.includes(termo) || e.includes(termo) || c.includes(termo) || s.includes(termo) || st.includes(termo);
                 });
             }
-            if (!resultados.length) return responseDiv.innerHTML = "Nenhum registro encontrado.";
+            if (!resultados.length) return respostaDiv.innerHTML = "Nenhum registro encontrado.";
             resultadosGlobais = resultados; paginaAtual = 1; renderizarPagina();
         } catch (e) { 
             document.getElementById("spinner").style.display = "none";
