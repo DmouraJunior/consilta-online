@@ -93,7 +93,32 @@ body {
 }
 
 .col-sistema-principal { flex: 1; display: flex; gap: 20px; min-width: 0; }
-.col-busca { flex: 1.2; min-width: 0; }
+
+/* AJUSTE NA COLUNA DE BUSCA PARA A LOGO */
+.col-busca { 
+    flex: 1.2; 
+    min-width: 0; 
+    position: relative; 
+    z-index: 1;
+}
+
+.col-busca::before {
+    content: "";
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 280px;
+    height: 280px;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Bras%C3%A3o_de_Pernambuco.svg/1024px-Bras%C3%A3o_de_Pernambuco.svg.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.08;
+    z-index: -1;
+    pointer-events: none;
+}
+
 .col-organograma { flex: 0.8; background: var(--bg-org); padding: 25px; border-radius: 12px; border: 1px solid var(--border); }
 .col-dashboard-lateral { width: 300px; display: flex; flex-direction: column; gap: 15px; flex-shrink: 0; }
 
@@ -107,8 +132,9 @@ body {
 .response { 
     margin-top: 20px; background: var(--bg-card); padding: 20px; border-radius: 12px; 
     border-left: 5px solid #002b5c; height: 420px; overflow-y: auto; 
+    position: relative;
 }
-.card-resultado { border-bottom: 1px solid var(--border); padding: 15px 0; width: 100%; }
+.card-resultado { border-bottom: 1px solid var(--border); padding: 15px 0; width: 100%; background: transparent; }
 .info-item { display: block; margin-bottom: 4px; line-height: 1.4; font-size: 13px; }
 
 input { width: 100%; padding: 14px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; background: var(--bg-container); color: var(--text-main); }
