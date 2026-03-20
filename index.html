@@ -56,16 +56,15 @@ body {
     position: relative;
 }
 
-/* MARCA D'ÁGUA DO GOVERNO - AGORA SEMPRE VISÍVEL E MAIS ACESA */
 body::before {
     content: "";
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
     background-image: url('brasao-gov.png');
-    background-repeat: repeat; /* Preenche toda a página */
+    background-repeat: repeat;
     background-position: center;
-    background-size: 250px; /* Tamanho dos brasões repetidos */
-    opacity: 0.12;  /* Valor aumentado para ficar mais "acesa" */
+    background-size: 250px;
+    opacity: 0.12; 
     pointer-events: none;
     z-index: 0;
 }
@@ -231,9 +230,9 @@ button { width: 100%; padding: 14px; border-radius: 8px; border: none; backgroun
 
         <div id="dashboardDireito" class="col-dashboard-lateral hidden">
             <div class="status-box">
-                <h3 id="relogio" style="font-size: 28px; color: #002b5c;">00:00:00</h3>
-                <p style="font-size: 10px; color: #c9a227; font-weight: 800;">● Sessão Ativa</p>
-                </div>
+                <div id="relogio"></div>
+                <p style="font-size: 10px; color: #c9a227; font-weight: 800; margin-top: 10px;">● Sessão Ativa</p>
+            </div>
 
             <div class="sanfona-item">
                 <div class="sanfona-header" onclick="tglS('accLogs')">Log de Alterações</div>
@@ -271,10 +270,16 @@ button { width: 100%; padding: 14px; border-radius: 8px; border: none; backgroun
 <div class="footer">© 2026 - DIRETORIA GERAL DE FINANÇAS (DGF)</div>
 
 <script>
-/* Lógica mantida conforme código fornecido */
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby_2RVDaGqMWGs_Ybd2sftswVU2EF4YYa5Qv3mXiLKidMnNKRhDSmRis0zbSmB6NWT2/exec";
 const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 let cacheLogs = []; 
+
+// LISTA DE USUÁRIOS ATUALIZADA
+const usuariosDB = [
+    { usuario: "admin", senha: "1234", primeiroAcesso: true, cargo: "Administrador" },
+    { usuario: "mauro", senha: "1234", primeiroAcesso: true, cargo: "Diretor Geral de Finanças" },
+    { usuario: "gabrielcosta", senha: "1234", primeiroAcesso: true, cargo: "Coordenador de Análise de Prestação de Contas - UPAE" }
+];
 
 function toggleDarkMode() {
     const body = document.body;
@@ -284,12 +289,6 @@ function toggleDarkMode() {
 }
 
 if(localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
-
-function atualizarRelogio() {
-    const agora = new Date();
-    document.getElementById("relogio").innerText = agora.toLocaleTimeString('pt-BR');
-}
-setInterval(atualizarRelogio, 1000);
 
 function tglS(id) { document.getElementById(id).classList.toggle("open"); }
 function expandirLogs() { renderizarInterfaceLogs(true); }
@@ -324,13 +323,6 @@ function renderizarInterfaceLogs(mostrarTudo) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-    const usuariosPadrao = [
-        { usuario: "admin", senha: "1234", primeiroAcesso: true },
-        { usuario: "mauro", senha: "0000", primeiroAcesso: true }
-    ];
-    let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf")) || usuariosPadrao;
-    if (!localStorage.getItem("usuarios_dgf")) localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
-
     const mainContainer = document.getElementById("mainContainer");
     const loginArea = document.getElementById("loginArea");
     const sistemaArea = document.getElementById("sistemaArea");
@@ -390,11 +382,11 @@ document.addEventListener("DOMContentLoaded", function() {
             else if (tipoConsultaAtual === "cargo") html += `<span class="info-item">💼 Cargo: <strong>${f.cargo}</strong></span>`;
             else if (tipoConsultaAtual === "empresa") html += `<span class="info-item">🏬 Empresa: <strong>${f.empresa}</strong></span>`;
             else if (tipoConsultaAtual === "status") html += `<span class="info-item">📊 Status: <strong>${f.status}</strong></span>`;
-            else if (tipoConsultaAtual === "chefe") html += `<span class="info-item">👨💼 Chefe: <strong>${f.chefe}</strong></span>`;
+            else if (tipoConsultaAtual === "chefe") html += `<span class="info-item">👨‍💼 Chefe: <strong>${f.chefe}</strong></span>`;
             else {
                 html += `<span class="info-item">🏢 Setor: ${f.setor}</span>
                         <span class="info-item">💼 Cargo: ${f.cargo}</span>
-                        <span class="info-item">👨💼 Chefe: ${f.chefe}</span>
+                        <span class="info-item">👨‍💼 Chefe: ${f.chefe}</span>
                         <span class="info-item">🏬 Empresa: ${f.empresa}</span>
                         <span class="info-item">📊 Status: ${f.status}</span>`;
             }
@@ -414,8 +406,12 @@ document.addEventListener("DOMContentLoaded", function() {
         const user = usuariosDB.find(u => u.usuario === usuarioInput.value.trim() && u.senha === senhaInput.value.trim());
         if (user) {
             localStorage.setItem("userLogando", user.usuario);
-            if (user.primeiroAcesso) { loginArea.classList.add("hidden"); trocaSenhaArea.classList.remove("hidden"); } 
-            else { confirmarEntrada(); }
+            if (user.primeiroAcesso) { 
+                loginArea.classList.add("hidden"); 
+                trocaSenhaArea.classList.remove("hidden"); 
+            } else { 
+                confirmarEntrada(); 
+            }
         } else alert("Usuário ou senha inválidos.");
     }
 
@@ -425,12 +421,20 @@ document.addEventListener("DOMContentLoaded", function() {
         if (n.length < 4) return alert("A senha deve ter no mínimo 4 caracteres.");
         if (n !== c) return alert("As senhas não coincidem.");
         const loginUser = localStorage.getItem("userLogando");
-        usuariosDB = usuariosDB.map(u => u.usuario === loginUser ? {...u, senha: n, primeiroAcesso: false} : u);
-        localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
+        
+        // Atualiza a senha na lista
+        const index = usuariosDB.findIndex(u => u.usuario === loginUser);
+        if(index !== -1) {
+            usuariosDB[index].senha = n;
+            usuariosDB[index].primeiroAcesso = false;
+        }
         confirmarEntrada();
     }
 
     function confirmarEntrada() {
+        const loginUser = localStorage.getItem("userLogando");
+        const userObj = usuariosDB.find(u => u.usuario === loginUser);
+
         localStorage.setItem("logado", "true");
         localStorage.setItem("tempoLogin", Date.now());
         
@@ -440,8 +444,20 @@ document.addEventListener("DOMContentLoaded", function() {
         sistemaArea.classList.remove("hidden");
         dashLateral.classList.remove("hidden");
         perguntaInput.focus();
+
+        // --- ATUALIZAÇÃO DA SAUDAÇÃO NO LUGAR DO RELÓGIO ---
+        const displayUser = document.getElementById("relogio");
+        if (displayUser && userObj) {
+            displayUser.innerHTML = `
+                <div style="text-align: right; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                    <span style="font-size: 11px; color: var(--text-small);">Bem-vindo(a),</span><br>
+                    <span style="font-weight: bold; font-size: 15px; color: #002b5c;">👤 ${userObj.usuario.toUpperCase()}</span><br>
+                    <span style="font-size: 10px; color: #64748b; font-weight: 500;">${userObj.cargo}</span>
+                </div>
+            `;
+        }
+
         carregarLogs();
-        setInterval(carregarLogs, 60000); 
     }
 
     window.logout = function() { 
