@@ -29,7 +29,7 @@
     --topbar: #020617;
 }
 
-/* --- ESTILOS ORIGINAIS --- */
+/* --- ESTILOS RESPONSIVOS E GERAIS --- */
 @media screen and (max-width: 600px) {
     .container.modo-sistema {
         display: block !important;
@@ -134,6 +134,23 @@ body::before {
 .sanfona-header { background: #002b5c; padding: 12px; font-weight: bold; color: white; font-size: 10px; text-transform: uppercase; text-align: center; cursor: pointer; }
 .sanfona-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: var(--bg-container); }
 .sanfona-content.open { max-height: 400px; border-top: 1px solid #eee; overflow-y: auto; padding: 15px; }
+
+/* Estilo para links dos sistemas */
+.link-externo {
+    text-decoration: none; 
+    color: #002b5c; 
+    font-size: 11px; 
+    font-weight: 700; 
+    display: block; 
+    padding: 10px; 
+    background: #f8fafc; 
+    border: 1px solid #e2e8f0; 
+    border-radius: 6px; 
+    margin-bottom: 6px; 
+    text-align: center;
+    transition: background 0.2s;
+}
+.link-externo:hover { background: #f1f5f9; }
 
 .response { 
     margin-top: 20px; background: var(--bg-card); padding: 20px; border-radius: 12px; 
@@ -257,9 +274,10 @@ button { width: 100%; padding: 14px; border-radius: 8px; border: none; backgroun
             <div class="sanfona-item">
                 <div class="sanfona-header" onclick="tglS('accLinks')">Sistemas Integrados</div>
                 <div id="accLinks" class="sanfona-content">
-                    <a href="https://share.google/hQLWcsVQCgSu0bL1C" target="_blank" style="text-decoration:none; color:#002b5c; font-size:11px; font-weight:700; display:block; padding: 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:5px; text-align:center;">Portal do Servidor</a>
-                    <a href="https://efisco.sefaz.pe.gov.br/" target="_blank" style="text-decoration:none; color:#002b5c; font-size:11px; font-weight:700; display:block; padding: 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:5px; text-align:center;">E-Fisco</a>
-                    <a href="https://www.sefaz.pe.gov.br/" target="_blank" style="text-decoration:none; color:#002b5c; font-size:11px; font-weight:700; display:block; padding: 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; text-align:center;">SEFAZ-PE</a>
+                    <a href="https://share.google/hQLWcsVQCgSu0bL1C" target="_blank" class="link-externo">Portal do Servidor</a>
+                    <a href="https://efisco.sefaz.pe.gov.br/" target="_blank" class="link-externo">E-Fisco</a>
+                    <a href="https://www.scge.pe.gov.br/" target="_blank" class="link-externo">SCGE-PE</a>
+                    <a href="https://www.sefaz.pe.gov.br/" target="_blank" class="link-externo">SEFAZ-PE</a>
                 </div>
             </div>
         </div>
@@ -274,10 +292,10 @@ const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby_2RVDaGqMWGs_Ybd2
 const TEMPO_EXPIRACAO = 30 * 60 * 1000;
 let cacheLogs = []; 
 
-// LISTA DE USUÁRIOS ATUALIZADA
 const usuariosDB = [
     { usuario: "admin", senha: "1234", primeiroAcesso: true, cargo: "Administrador" },
     { usuario: "mauroataide", senha: "1234", primeiroAcesso: true, cargo: "Diretor Geral de Finanças" },
+    { usuario: "anapaula", senha: "1234", primeiroAcesso: true, cargo: "Assessor Técnico" },
     { usuario: "gabrielcosta", senha: "1234", primeiroAcesso: true, cargo: "Coordenador de Análise de Prestação de Contas - UPAE" }
 ];
 
@@ -422,7 +440,6 @@ document.addEventListener("DOMContentLoaded", function() {
         if (n !== c) return alert("As senhas não coincidem.");
         const loginUser = localStorage.getItem("userLogando");
         
-        // Atualiza a senha na lista
         const index = usuariosDB.findIndex(u => u.usuario === loginUser);
         if(index !== -1) {
             usuariosDB[index].senha = n;
@@ -445,7 +462,6 @@ document.addEventListener("DOMContentLoaded", function() {
         dashLateral.classList.remove("hidden");
         perguntaInput.focus();
 
-        // --- ATUALIZAÇÃO DA SAUDAÇÃO EXPANDIDA (ALINHADA À ESQUERDA) ---
         const displayUser = document.getElementById("relogio");
         if (displayUser && userObj) {
             displayUser.innerHTML = `
