@@ -70,6 +70,10 @@ body::before {
     z-index: 0;
 }
 
+/* Ajuste de visibilidade para o modo escuro */
+[data-theme="dark"] body::before { opacity: 0.04; }
+[data-theme="dark"] .info-item strong { text-shadow: 1px 1px 2px rgba(0,0,0,0.8); color: #fff; }
+
 .topbar { background: var(--topbar); color: white; padding: 12px 30px; font-size: 15px; font-weight: 600; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
 .topbar .titulo-repo { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; }
 .topbar small { display: inline; font-size: 11px; opacity: 0.7; margin-left: 8px; font-weight: 400; }
@@ -421,30 +425,38 @@ document.addEventListener("DOMContentLoaded", function() {
     window.paginaAnterior = function() { paginaAtual--; renderizarPagina(); }
 
     window.login = function() {
-        const user = usuariosDB.find(u => u.usuario === usuarioInput.value.trim() && u.senha === senhaInput.value.trim());
-        if (user) {
-            localStorage.setItem("userLogando", user.usuario);
-            if (user.primeiroAcesso) { 
+        const userDigitado = usuarioInput.value.trim().toLowerCase();
+        const senhaDigitada = senhaInput.value.trim();
+        const storageKey = `user_auth_${userDigitado}`;
+        const dadosSalvos = JSON.parse(localStorage.getItem(storageKey));
+        const userObj = usuariosDB.find(u => u.usuario === userDigitado);
+
+        if (!userObj) return alert("Usuário não encontrado.");
+
+        if (dadosSalvos) {
+            if (senhaDigitada === dadosSalvos.senha) {
+                localStorage.setItem("userLogando", userDigitado);
+                confirmarEntrada();
+            } else alert("Senha incorreta.");
+        } else {
+            if (senhaDigitada === userObj.senha) {
+                localStorage.setItem("userLogando", userDigitado);
                 loginArea.classList.add("hidden"); 
                 trocaSenhaArea.classList.remove("hidden"); 
-            } else { 
-                confirmarEntrada(); 
-            }
-        } else alert("Usuário ou senha inválidos.");
+            } else alert("Senha inicial incorreta.");
+        }
     }
 
     window.salvarNovaSenha = function() {
         const n = document.getElementById("novaSenha").value;
         const c = document.getElementById("confirmaSenha").value;
+        const loginUser = localStorage.getItem("userLogando");
+
         if (n.length < 4) return alert("A senha deve ter no mínimo 4 caracteres.");
         if (n !== c) return alert("As senhas não coincidem.");
-        const loginUser = localStorage.getItem("userLogando");
-        
-        const index = usuariosDB.findIndex(u => u.usuario === loginUser);
-        if(index !== -1) {
-            usuariosDB[index].senha = n;
-            usuariosDB[index].primeiroAcesso = false;
-        }
+
+        localStorage.setItem(`user_auth_${loginUser}`, JSON.stringify({ senha: n }));
+        alert("Senha atualizada com sucesso!");
         confirmarEntrada();
     }
 
@@ -472,7 +484,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 </div>
             `;
         }
-
         carregarLogs();
     }
 
