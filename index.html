@@ -325,9 +325,12 @@ function renderizarInterfaceLogs(mostrarTudo) {
 
 document.addEventListener("DOMContentLoaded", function() {
     const usuariosPadrao = [
-        { usuario: "admin", senha: "1234", primeiroAcesso: true },
-        { usuario: "gabrielcosta", senha: "1234", primeiroAcesso: true },
-        { usuario: "mauro", senha: "1234", primeiroAcesso: true }
+const usuariosDB = [
+    { usuario: "admin", senha: "1234", primeiroAcesso: true, cargo: "Administrador" },
+    { usuario: "mauro", senha: "1234", primeiroAcesso: true, cargo: "Diretor Geral de Finanças" },
+    { usuario: "gabrielcosta", senha: "1234", primeiroAcesso: true, cargo: "Coordenador de Análise de Prestação de Contas - UPAE" }
+];
+        {
     ];
     let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf")) || usuariosPadrao;
     if (!localStorage.getItem("usuarios_dgf")) localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
