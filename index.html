@@ -326,7 +326,8 @@ function renderizarInterfaceLogs(mostrarTudo) {
 document.addEventListener("DOMContentLoaded", function() {
     const usuariosPadrao = [
         { usuario: "admin", senha: "1234", primeiroAcesso: true },
-        { usuario: "mauro", senha: "0000", primeiroAcesso: true }
+        { usuario: "gabriel", senha: "1234", primeiroAcesso: true },
+        { usuario: "mauro", senha: "1234", primeiroAcesso: true }
     ];
     let usuariosDB = JSON.parse(localStorage.getItem("usuarios_dgf")) || usuariosPadrao;
     if (!localStorage.getItem("usuarios_dgf")) localStorage.setItem("usuarios_dgf", JSON.stringify(usuariosDB));
