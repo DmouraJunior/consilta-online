@@ -231,7 +231,7 @@ button { width: 100%; padding: 14px; border-radius: 8px; border: none; backgroun
         <div id="dashboardDireito" class="col-dashboard-lateral hidden">
             <div class="status-box">
                 <div id="relogio"></div>
-                <p style="font-size: 10px; color: #c9a227; font-weight: 800; margin-top: 10px;">● Sessão Ativa</p>
+                <p style="font-size: 10px; color: #c9a227; font-weight: 800; margin-top: 10px; text-align: left;">● Sessão Ativa</p>
             </div>
 
             <div class="sanfona-item">
@@ -277,7 +277,7 @@ let cacheLogs = [];
 // LISTA DE USUÁRIOS ATUALIZADA
 const usuariosDB = [
     { usuario: "admin", senha: "1234", primeiroAcesso: true, cargo: "Administrador" },
-    { usuario: "mauro", senha: "1234", primeiroAcesso: true, cargo: "Diretor Geral de Finanças" },
+    { usuario: "mauroataide", senha: "1234", primeiroAcesso: true, cargo: "Diretor Geral de Finanças" },
     { usuario: "gabrielcosta", senha: "1234", primeiroAcesso: true, cargo: "Coordenador de Análise de Prestação de Contas - UPAE" }
 ];
 
@@ -445,14 +445,14 @@ document.addEventListener("DOMContentLoaded", function() {
         dashLateral.classList.remove("hidden");
         perguntaInput.focus();
 
-        // --- ATUALIZAÇÃO DA SAUDAÇÃO NO LUGAR DO RELÓGIO ---
+        // --- ATUALIZAÇÃO DA SAUDAÇÃO EXPANDIDA (ALINHADA À ESQUERDA) ---
         const displayUser = document.getElementById("relogio");
         if (displayUser && userObj) {
             displayUser.innerHTML = `
-                <div style="text-align: right; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                <div style="text-align: left; border-bottom: 1px solid var(--border); padding-bottom: 12px; width: 100%;">
                     <span style="font-size: 11px; color: var(--text-small);">Bem-vindo(a),</span><br>
-                    <span style="font-weight: bold; font-size: 15px; color: #002b5c;">👤 ${userObj.usuario.toUpperCase()}</span><br>
-                    <span style="font-size: 10px; color: #64748b; font-weight: 500;">${userObj.cargo}</span>
+                    <span style="font-weight: bold; font-size: 16px; color: #002b5c; display: block; margin-top: 2px;">👤 ${userObj.usuario.toUpperCase()}</span>
+                    <span style="font-size: 11px; color: #64748b; font-weight: 500; display: block; margin-top: 4px; line-height: 1.4;">${userObj.cargo}</span>
                 </div>
             `;
         }
